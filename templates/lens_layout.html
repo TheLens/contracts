@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+	<title>{{title}}</title>
+	<meta name="viewport" content="width=device-width">
+
+	<!--dependencies-->
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.4.1/js/foundation.min.js"></script>
+	<script type="text/javascript" src="https://s3-us-west-2.amazonaws.com/lensnola/lens.js"></script>
+	<script type="text/javascript" src="https://s3-us-west-2.amazonaws.com/lensnola/vault_analytics.js"></script>
+	<!--should not depend on lens.css-->
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.4.5/css/foundation.min.css">
+	<link rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/lens-app-template/css/template.min.css">
+	<!-- production <link rel="stylesheet" type="text/css" href='{{ url_for('static', filename='css/template.css') }}'/> -->
+	<link rel='stylesheet' id='open-sans-css'  href='//fonts.googleapis.com/css?family=Open+Sans%3A300italic%2C400italic%2C600italic%2C300%2C400%2C600&#038;subset=latin%2Clatin-ext&#038;ver=3.8.3' type='text/css' media='all' />
+	<link rel='stylesheet' id='largo-stylesheet-css'  href='http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/style.css?ver=3.8.3' type='text/css' media='all' />
+	<link rel="apple-touch-icon" href="http://lensnola.wpengine.netdna-cdn.com/wp-content/uploads/2013/01/TheLens-400x400_icon.png"/>
+	<link rel="shortcut icon" href="http://lensnola.wpengine.netdna-cdn.com/wp-content/uploads/2013/01/favicon.png" />
+	<link rel="canonical" href="http://thelensnola.org/" />
+	<link ="shortcut icon" href="https://s3-us-west-2.amazonaws.com/lensnola/land-records/css/images/favicon.ico">
+
+	<!--end dependencies-->
+
+	<script type="text/javascript" src="//use.typekit.net/oct0mkd.js"></script>
+	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@thelensnola">
+	<meta property="og:title" content="The Lens - In-depth news and investigations for New Orleans" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="http://thelensnola.org"/>
+	<meta property="og:description" content="In-depth news and investigations for New Orleans" />
+	<meta property="og:site_name" content="The Lens" />
+	<meta property="og:image" content="http://thelensnola.org/wp-content/uploads/2013/01/TheLens-400x400_icon.png" />
+
+</head>
+<body>
+	<script type="text/javascript">
+(function() {
+var ARTICLE_URL = window.location.href;
+var CONTENT_ID = 'everything';
+document.write(
+'<scr'+'ipt '+
+'src="//survey.g.doubleclick.net/survey?site=_bvzix2qkk23edilpb2expinpbi'+
+'&amp;url='+encodeURIComponent(ARTICLE_URL)+
+(CONTENT_ID ? '&amp;cid='+encodeURIComponent(CONTENT_ID) : '')+
+'&amp;random='+(new Date).getTime()+
+'" type="text/javascript">'+'\x3C/scr'+'ipt>');
+})();
+</script>
+
+<!--MOBILE BANNER -->
+<div id="{% block url %}{% endblock %}"> </div>
+
+<div id="header-container">
+	<div id="banner" class="show-for-small-only">
+		<a href="http://thelensnola.org/" target="_blank" id="banner-logo">
+			<img src="https://s3-us-west-2.amazonaws.com/lensnola/land-records/css/images/lens-logo.png">
+		</a>
+		<a href="#" id="banner-title" class="small-centered">{% block title %}{% endblock %}</a>
+		<a href="http://thelensnola.org/support-us/" target="_blank" id="banner-support" class="hide-for-small-only">Support<br>The Lens</a>
+		<a href="mailto:?subject={{ self.title()}}&body={{ self.url()}}" target="_blank" id="banner-social-email"><i class="fa fa-envelope hide-for-small-only"></i></a>
+		<a href="http://twitter.com/" target="_blank" id="banner-social-twitter"><i class="fa fa-twitter"></i></a>
+		<a href="http://facebook.com/" target="_blank" id="banner-social-facebook"><i class="fa fa-facebook"></i></a>
+	</div>
+	<header id="site-header" class="row-fluid clearfix hide-for-small-only">
+		<h1 class="visuallyhidden"><a href="http://thelensnola.org/">The Lens - <span class="tagline">In-depth news and investigations for New Orleans</span></a></h1><a href="http://thelensnola.org/"><img id="lens_logo" src="http://thelensnola.org/wp-content/uploads/2013/01/TheLens-585x174.png" alt="" /></a>
+		<div id="top_about_section">
+			<div class="textwidget"><a href="/about-us/">About the Lens</a></div>
+
+			<div class="textwidget"><div id="social_media">
+				<a href="http://www.twitter.com/thelensnola" target="_blank"><img src="http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/images/twitter_red_icon.png"></a>
+				<a href="http://www.facebook.com/thelensnola" target="_blank"><img src="http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/images/fb_red_icon.png"></a>
+				<a href="http://thelensnola.org/feed/">
+					<img src="http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/images/rss_red_icon.png">
+				</a>
+			</div></div>
+
+			<div class="textwidget"><div id="call_to_action">
+				<a href="/about-us/contact-us/"><img src="http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/images/send_tip_btn.png" />
+				</a>
+				<a href="/get-involved">
+					<img src="http://lensnola.wpengine.netdna-cdn.com/wp-content/themes/largo-child/images/get_involved_btn.png" />
+				</a>
+			</div></div>
+
+			<div class="clearfix"></div>
+		</div>
+		<div class="clearfix"></div>
+	</header>
+
+	<div id="main-nav-container hide-for-small-only">
+		<nav id="main-nav" class="navbar clearfix hide-for-small-only">
+			<div class="navbar-inner hide-for-small-only">
+				<div class="container">
+
+					<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<div class="label">More</div>
+						<div class="bars">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</div>
+					</a>
+
+					<ul class="nav hidden-phone">
+						<li id="menu-item-25124" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25124"><a href="http://thelensnola.org/category/criminal_justice/">Criminal Justice</a></li>
+						<li id="menu-item-26075" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26075"><a href="http://thelensnola.org/category/schools/">Schools</a></li>
+						<li id="menu-item-25123" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25123"><a href="http://thelensnola.org/category/government-and-politics/">Government &#038; Politics</a></li>
+						<li id="menu-item-25126" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25126"><a href="http://thelensnola.org/category/land-use/">Land Use</a></li>
+						<li id="menu-item-25254" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25254"><a href="http://thelensnola.org/category/environment/">Environment</a></li>
+					</ul>
+					<ul class="nav">
+						<li class="dropdown visible-phone" id="category-list">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#category-list">
+								Categories
+								<b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25124"><a href="http://thelensnola.org/category/criminal_justice/">Criminal Justice</a></li>
+								<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-26075"><a href="http://thelensnola.org/category/schools/">Schools</a></li>
+								<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25123"><a href="http://thelensnola.org/category/government-and-politics/">Government &#038; Politics</a></li>
+								<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25126"><a href="http://thelensnola.org/category/land-use/">Land Use</a></li>
+								<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-25254"><a href="http://thelensnola.org/category/environment/">Environment</a></li>
+							</ul>
+						</li>
+					</ul>
+
+					<!-- Everything you want hidden at 940px or less, place within here -->
+					<div class="nav-collapse">
+						<ul class="nav">
+							<li id="menu-item-51179" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-51179"><a href="http://thelensnola.org/thevault/">The Vault</a></li>
+							<li id="menu-item-49789" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-49789"><a href="http://thelensnola.org/documents/">Documents</a></li>
+							<li id="menu-item-49788" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-49788"><a href="http://thelensnola.org/category/events/">Events</a></li>
+							<li id="menu-item-50175" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-50175"><a href="http://thelensnola.org/sponsorships/">Sponsor The Lens</a></li>
+						</ul>
+						<ul class="nav visible-phone">
+							<li class="divider"></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<div id="secondary-nav-centered" class="hide-for-small-only">
+			<nav id="secondary-nav" class="clearfix">
+				<div id="topics-bar" class="span12 hidden-phone">
+					<ul id="menu-dont-miss" class="menu"><li><h4>Focused on:</h4></li><li id="menu-item-51019" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-51019"><a href="http://thelensnola.org/tag/mental-health-services/">Mental health services</a></li>
+						<li id="menu-item-51192" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-51192"><a href="http://thelensnola.org/city-of-new-orleans-employee-salary-lookup/">City salaries</a></li>
+						<li id="menu-item-51193" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-51193"><a href="http://thelensnola.org/search-new-orleans-government-contracts/">City contracts</a></li>
+						<li id="menu-item-51070" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-51070"><a href="http://thelensnola.org/tag/blight/">Blight</a></li>
+						<li id="menu-item-36212" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-36212"><a href="http://thelensnola.org/charterschools/">Charter Schools</a></li>
+						<li id="menu-item-41588" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-41588"><a href="http://thelensnola.org/tag/coastal-loss-lawsuit/">Coastal loss lawsuit</a></li>
+						<li id="menu-item-37181" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-37181"><a href="http://thelensnola.org/tag/coastal-restoration/">Coastal restoration</a></li>
+					</ul>     </div>
+				</nav>
+			</div>
+		</div>
+	</div>
+
+	<div id="app_area" class="row">
+		<div class="row hide-for-small-only">
+
+			<div id="app_title" class="small-6 medium-12 large-12 columns centered">
+				<h3 class="subheader centered">{{ self.title()}}</h3>
+			</div>
+
+			<div id="vaultlogo" class="small-6 medium-12 large-12 centered">
+				<a href="http://www.thelensnola.org/thevault"><img src="https://s3-us-west-2.amazonaws.com/lensnola/rsz_2vault.png"></a>
+			</div>
+
+		</div>
+
+		<div class="row container hide-for-small-only">
+			<nav id="sharebuttons" class="top-bar centered" data-topbar="">  
+				<ul class="centered share">
+					<li class="button radius facebook">
+						<a class="facebook greybutton" href="https://www.facebook.com/sharer/sharer.php?u=http://vault.thelensnola.org/{{ self.url()}}" target="_blank"><i class="fa fa-facebook-square fa-2x"></i></a>
+					</li>
+					<li class="button radius twitter">
+						<a class="twitter greybutton" href="https://twitter.com/intent/tweet?url=http://vault.thelensnola.org/{{ self.url()}}&text=I just used The Vault from @thelensnola" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
+					</li>
+					<li class="button small heavytext">
+						<a class="greybutton" href="http://thelensnola.org/support-us/"><strong>Support The Vault</strong></a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+
+
+		<div id="content"> 
+			{% block content %}{% endblock %}
+		</div>
+
+	</div>
+
+	<script type="text/javascript">
+	try { _402_Show(); } catch(e) {}
+	$(document).foundation();
+	</script>
+
+	<script type="text/javascript" src="https://s3-us-west-2.amazonaws.com/lensnola/chartbeat.js"></script> <!--needs to be here, says chartbeat instructions-->
+</body>
+</html>

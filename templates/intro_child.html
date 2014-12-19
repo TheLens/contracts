@@ -1,0 +1,136 @@
+{% extends "lens_layout.html" %}
+
+<!--child block contains the premium tag, not parent block -->
+
+{% block url %}
+{{url}}
+{% endblock %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/lensnola/contracts/lens.css" media="screen" charset="utf-8">
+<link rel="stylesheet" href='https://s3-us-west-2.amazonaws.com/lensnola/lensfoundationoverides.css'media="screen" charset="utf-8">
+<link rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/lensnola/contracts/contracts.css" media="screen" charset="utf-8">
+<!--todo refactor and consolidate css-->
+
+<script id="blockOfStuff" language="text"> 
+<div id="top_row" class="row">
+<div id="components" class="large-8 medium-8 small-8 small-centered medium-centered large-centered columns"> 
+<input id='textbox' type="text" placeholder="Keyword (example: uniforms)" class="lensinput"/>
+<div id="advanced_search" class="minortext right">Advanced Search
+</div>
+<div class="row advancedsearch">
+<div class="small-centered medium-centered large-centered columns">
+<select id="vendors" onchange="resetOfficers();" data-placeholder="Vendor (example: Three fold Consultants)" >
+{% for v in vendors %}
+	<option value="{{v}}">{{v}}</option>
+{% endfor %}
+</select>
+</div>
+</div>
+
+<div class="row advancedsearch">
+<div class="small-centered medium-centered large-centered columns">
+<select  id="departments" data-placeholder="Department (example: Information Technology)">
+{% for d in departments %}
+	<option value="{{d}}">{{d}}</option>
+{% endfor %}
+</select>
+</div>
+</div>
+
+<div class="row advancedsearch">
+<div class="small-centered medium-centered large-centered columns">
+<select id="officers" onchange="resetVendor();" data-placeholder="Company officer (example: Joe Smith)  - New feature in progress">
+{% for o in officers %}
+	<option value="{{o}}">{{o}}</option>
+{% endfor %}
+</select>
+</div>
+</div> 
+</div>
+
+</div>
+
+<div class="row">
+<div class="large-8 large-centered medium-8 medium-centered small-8 small-centered columns">
+<div class="centered">
+<div class="p402_premium">
+<div id="search_button" class="small button search_button">
+Search
+</div> 
+</div>
+</div>
+</div>
+</div>
+</script>
+
+
+<div class="container">
+	<div id="post_gcs">
+	</div>
+
+	<div id="contract_results" class="row">
+		<div class="row">
+			<div id="results_status" class="large-9 medium-9 small-9 columns large-centered medium-centered small-centered">
+				Newest city contracts ... </div>
+			</div>
+			<div class="row">
+				<div class="large-9 medium-9 small-9 columns large-centered medium-centered small-centered">
+					<div id="doclist">
+						{% for doc in docs %}
+						<div id="{{doc.id}}" class="row contractpreview">
+							<div class="left large-7 medium-7 small-12 columns">
+								<div class="contract-title contract">{{ doc.title }}</div>
+								<div class="contract-description contract">{{ doc.description }}</div>
+								<div class="contract-date contract">{{ doc.dateadded }}</div>
+							</div>
+							<div class="button-group large-4 medium-4 small-12 columns right">
+								<ul>
+									<li class="button tiny cropped subduedbutton open_button">Open</li>
+									<li class="button tiny cropped subduedbutton download_button">Download</li>
+								</ul>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div id="nav_context" class="large-2 medium-2 small-2 columns large-centered medium-centered small-centered">
+					<div id="pages">Page {{page}} of {{pages}}</div>
+					<div id="pagination" data-offset="{{offset}}" data-total="{{totaldocs}}" data-pages="{{pages}}" data-query="{{query}}">
+						<span id="previous" class="page">Back</span>
+						<span id="next" class="page">More</span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+
+				<div class="row">
+					<div class="large-8 medium-8 small-8 columns large-centered medium-centered small-centered">
+						<div class="left large-5 medium-5 small-12">
+							<div>Source: <a href="http://www.purchasing.cityofno.com/bso/external/advsearch/advancedSearch.sdo" class="lenstext">City of New Orleans</a></div>
+							<div>Last updated: {{updated}}</div>
+						</div>
+						<div class="right large-5 medium-5 small-12">
+							<div id="produced_by" class="right nomargin">Produced by <a href="https://twitter.com/AbeHandler" class="lenstext">Abe Handler </a></div>
+							<div id="read_more" class="right nomargin">Read more about <a href="http://thelensnola.org/search-new-orleans-government-contracts/" class="lenstext">this project</a></div>
+							<div id="learn_how" class="right nomargin">Learn how to <a href="http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/" class="lenstext">read a contract</a></div>
+						</div>
+					</div>
+					<div class="large-12 medium-12 small-12 columns centered">
+						<a href="http://www.thelensnola.org/thevault"><img src='https://s3-us-west-2.amazonaws.com/lensnola/rsz_2vault.png'></img></a>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="https://s3-us-west-2.amazonaws.com/lensnola/contracts/contracts.js"></script>
+
+{% endblock %}

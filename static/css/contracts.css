@@ -1,0 +1,205 @@
+
+#panel,#flip
+{
+text-align:center;
+background-color:white;
+}
+
+#back_arrow
+{
+	height: 5%;
+	font-family:sans-serif;
+}
+
+.left{
+	float: left;
+	padding-left: 5px;
+}
+
+i.fa.fa-arrow-left {
+	float: left;
+}
+
+body{
+	height: 100%;
+}
+
+
+/*#officers_chosen{
+	width: 100% !important;
+}
+
+.search-field{
+	width:100%;
+}
+
+input[value="Officer (example: Joe Smith)"]{
+	width:50%;
+}
+*/
+
+div#officers {
+margin: 5px;
+padding: 5px;
+border: 1px solid grey;
+margin-left: 0px; 
+}
+
+.page {
+color: black;
+font-style: normal;
+display: inline-block;
+padding-top: 3px;
+}
+
+#officers_chosen{
+	display:none;
+}
+
+#panel
+{
+display:none;
+}
+
+.minortext{
+	color:#B43018;
+	float: right;
+	padding-top: 3px;
+}
+
+input[type="input"]:active
+{
+	border: 1px solid #5897fb;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.footnote{
+	padding: 4px;
+}
+
+#pagination{
+	height: 20px;
+	font-size: .9em;
+}
+
+div#position_chosen {
+text-transform: uppercase;
+}
+
+.right{
+	float: right;
+}
+
+div.display{
+	height: 100%;
+}
+
+.tablerow {
+border-bottom: 1px solid gray;
+padding-top: 7px;
+padding-bottom: 7px;
+}
+.contract-date {
+font-size: .8em;
+}
+
+.contractpreview{
+  padding: 3px;
+}
+
+.full{
+	height:100%;
+}
+
+.selected{
+  border:3px solid #B43018;
+  font-weight:bold;
+}
+
+
+.selected-viewer{
+  border:1.5px solid #B43018;
+  font-weight:bold;
+}
+
+.row{
+  min-height:60px;
+}
+
+div#results_status {
+font-style: italic;
+}
+
+div.detailsrow {
+font-size: .8em;
+}
+
+.namerow{
+font-weight: bold;
+}
+
+.header{
+font-weight: bold;
+}
+
+div#department_chosen {
+width: 100% !important;
+}
+
+input{
+text-transform: uppercase; 
+}
+
+div#ui_components {
+	float: right;
+}
+
+input[type="search"]{
+border: 1px solid #aaa!important;
+}
+
+::-webkit-input-placeholder {
+   color: rgba(0, 0, 0, 0.75);
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: rgba(0, 0, 0, 0.75);
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: rgba(0, 0, 0, 0.75);
+}
+
+:-ms-input-placeholder {  
+   color: rgba(0, 0, 0, 0.75);
+}
+
+div#position_chosen {
+width: 100% !important;
+}
+
+input[type="text"]{
+border: 1px solid #aaa !important;
+}
+
+div#position{
+width: 100% !important;
+}
+
+ul.chosen-choices {
+min-height: 36px;
+}
+
+input.default {
+min-height: 36px;
+}
+
+.lensinput{
+/* all */
+-webkit-input-placeholder { color:#f00; }
+-moz-placeholder { color:#f00; } /* firefox 19+ */
+-ms-input-placeholder { color:#f00; } /* ie */
+input:-moz-placeholder { color:#f00; }
+
+}
+
