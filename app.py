@@ -14,7 +14,7 @@ from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
 
 
-CONFIG_LOCATION = 'app.cfg'
+CONFIG_LOCATION = '/apps/contracts/app.cfg'
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
