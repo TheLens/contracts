@@ -60,12 +60,12 @@ $(window).load(function() {
     setupDocList();
     $(".hide").removeClass("hide");
     $("#advanced_search").click(function(){
-        var display = $(".advanced_search").css("display");
+        var display = $(".advancedsearch").css("display");
         if (display==="none"){
-            $(".advanced_search").fadeIn(200);
-            $(".advanced_search").css("display", "block");
+            $(".advancedsearch").fadeIn(200);
+            $(".advancedsearch").css("display", "block");
         }else{
-            $(".advanced_search").css("display", "none");
+            $(".advancedsearch").css("display", "none");
         }
     });
     $("#vendors").children().first().attr("value", "");
