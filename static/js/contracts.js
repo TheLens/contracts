@@ -67,6 +67,7 @@ $(window).load(function() {
         }else{
             $(".advancedsearch").css("display", "none");
         }
+        $("#advanced_search").remove();
     });
     $("#vendors").children().first().attr("value", "");
     $("#departments").children().first().attr("value", "");
