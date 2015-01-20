@@ -1,8 +1,16 @@
 #At end of this, DB will be synched with DC. All will be backed up. Ready for new stuff. 
+import ConfigParser
 from sqlalchemy import create_engine
 from documentcloud import DocumentCloud
 from sqlalchemy.orm import sessionmaker
 from vaultclasses import Vendor, Department, Contract
+import argparse
+
+parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
+parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
+parser.set_defaults(feature=False)
+args = parser.parse_args()
+force = args.keep_synching
 
 CONFIG_LOCATION = '/apps/contracts/app.cfg'
 
@@ -43,7 +51,11 @@ def addDepartment(department):
 def match_contract(doc):
 	keep_synching = True; 
 	print "adding {}".format(doc.id)
-	purchaseno = doc.data["purchase order"]
+
+	try:
+		purchaseno = doc.data["purchase order"]
+	except:
+		purchaseno = "unknown"
 
 	try:
 		contractno = doc.data["contract number"]
@@ -96,10 +108,11 @@ def match_contract(doc):
 def matchLensDBtoDocumentCloud():
 
 	docs = client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
+	keep_synching = True
 
 	for i in range(0,len(docs)):   #loop thru docs. assumption is document cloud returns newist first (it does)
-		if keep_synching:          #if newest is not in the db, keep looking
-			keep_synching = match_contract(docs[i])  
+		if keep_synching or force:          #if newest is not in the db, keep looking
+			keep_synching = match_contract(docs[i])
 		else:
 			break   #else end the loop
 
