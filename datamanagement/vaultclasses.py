@@ -27,7 +27,7 @@ class Vendor(Base):
 		self.name = name
 
 	def __repr__(self):
-		return "<Contract(Vendor='%s')>" % (self.name)
+		return "<Vendor(Vendor='%s')>" % (self.name)
 
 class Department(Base):
 	__tablename__ = 'departments'

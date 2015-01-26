@@ -84,7 +84,7 @@ def match_contract(doc):
 	addVendor(vendor)
 
 	department = session.query(Department).filter(Department.name==department).first().id
-	vendor = session.query(Vendor).filter(Vendor.name==vendor).first().id
+	vendorid = session.query(Vendor).filter(Vendor.name==vendor).first().id
 
 	if session.query(Contract).filter(Contract.purchaseordernumber==purchaseno).count() == 0:
 		contract = Contract(purchaseno)
@@ -95,7 +95,7 @@ def match_contract(doc):
 
 	contract.contractno=contractno
 	contract.doc_cloud_id = doc.id
-	contract.vendor = vendor
+	contract.vendorid = vendorid
 	contract.department = department
 	contract.dateadded = dateadded
 	contract.title = title

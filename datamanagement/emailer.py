@@ -27,6 +27,7 @@ import re
 from bs4 import BeautifulSoup
 import ConfigParser
 import traceback
+import time
 import smtplib
 from documentcloud import DocumentCloud
 
@@ -62,4 +63,4 @@ def sendEmail(title, message):
     smtpserver.sendmail(gmail_user, to, msg)
     smtpserver.close()
 
-sendEmail('hiyo silver', 'send via automagicx')
+sendEmail('Custom #branded content from The Vault: ' + time.strftime("%x"), 'send via automagicx')
