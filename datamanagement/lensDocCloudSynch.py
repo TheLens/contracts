@@ -93,14 +93,15 @@ def match_contract(doc):
 		contract = session.query(Contract).filter(Contract.purchaseordernumber==purchaseno).first()
 		keep_synching = False
 
-	contract.contractno=contractno
+	contract.contractnumber=contractno
 	contract.doc_cloud_id = doc.id
 	contract.vendorid = vendorid
-	contract.department = department
+	contract.departmentid = department
 	contract.dateadded = dateadded
 	contract.title = title
 	contract.description = description
 	session.add(contract)
+	session.flush()
 	session.commit()
 	return keep_synching
 
