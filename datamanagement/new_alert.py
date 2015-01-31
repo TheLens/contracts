@@ -41,10 +41,4 @@ today_string = datetime.datetime.now().strftime('%Y-%m-%d')
 contracts = session.query(Contract).filter(Contract.dateadded==today_string).all()
 print contracts
 
-contracts = session.query(Contract).first()
-print contracts.dateadded
-
-contracts = session.query(Contract).order_by(desc(Contract.dateadded)).first()
-print contracts.dateadded
-
 session.close()
