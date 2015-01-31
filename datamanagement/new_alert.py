@@ -2,13 +2,14 @@ import sys
 import math
 import pprint
 import re
-import time
+import datetime
 import ConfigParser
 sys.path.append('datamanagement')
 from flask import Flask
 from flask import render_template, make_response, send_from_directory
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import desc
 from flask.ext.cache import Cache
 from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
@@ -20,8 +21,6 @@ def get_from_config(field):
     config = ConfigParser.RawConfigParser()
     config.read(CONFIG_LOCATION)
     return config.get('Section1', field)
-
-PAGELENGTH = 8
 
 app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -36,6 +35,16 @@ engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + '
 Session = sessionmaker(bind=engine)
 Session.configure(bind=engine)
 session = Session()
-contracts = session.query(Contract).order_by(Contract.dateadded.desc()).first()
+
+today_string = datetime.datetime.now().strftime('%Y-%m-%d')
+
+contracts = session.query(Contract).filter(Contract.dateadded==today_string).all()
 print contracts
+
+contracts = session.query(Contract).first()
+print contracts.dateadded
+
+contracts = session.query(Contract).order_by(desc(Contract.dateadded)).first()
+print contracts.dateadded
+
 session.close()
