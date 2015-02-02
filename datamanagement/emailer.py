@@ -63,4 +63,21 @@ def sendEmail(title, message):
     smtpserver.sendmail(gmail_user, to, msg)
     smtpserver.close()
 
-sendEmail('Custom #branded content from The Vault: ' + time.strftime("%x"), 'send via automagicx')
+def get_todays_contracts():
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    Session = sessionmaker(bind=engine)
+    Session.configure(bind=engine)
+    session = Session()
+    today_string = datetime.datetime.now().strftime('%Y-%m-%d')
+    contracts = session.query(Contract).filter(Contract.dateadded==today_string).all()
+    session.close()
+    return contracts
+
+def get_message():
+    contracts = get_todays_contracts()
+    output = ""
+    for c in contracts:
+        output = output + "\n" + c.doc_cloud_id
+    return output
+
+sendEmail('Custom #branded content from The Vault: ' + time.strftime("%x"), get_message())
