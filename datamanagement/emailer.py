@@ -47,6 +47,8 @@ sender = getFromFile('sender')
 pw = getFromFile('email_pw')
 gmail_user = getFromFile('gmail_user')
 to_list =  getFromFile('to_list').split()
+engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+
 
 def sendEmail(title, message):
     to = to_list.pop()
@@ -63,18 +65,19 @@ def sendEmail(title, message):
     smtpserver.sendmail(gmail_user, to, msg)
     smtpserver.close()
 
-def get_todays_contracts():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+
+def get_daily_contracts(today_string = datetime.datetime.now().strftime('%Y-%m-%d')):  #defaults to today
+    print today_string
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
-    today_string = datetime.datetime.now().strftime('%Y-%m-%d')
     contracts = session.query(Contract).filter(Contract.dateadded==today_string).all()
     session.close()
     return contracts
 
+
 def get_message():
-    contracts = get_todays_contracts()
+    contracts = get_daily_contracts('2015-01-31') #no parameter means that it gets today's contracts
     output = ""
     for c in contracts:
         output = output + "\n" + c.doc_cloud_id
