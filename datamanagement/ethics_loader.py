@@ -32,8 +32,10 @@ session = Session()
 with open('20150209AllEfiledCFContributions.tab', 'rU') as csvfile:
 	spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
 	for items in spamreader:
-		r = EthicsRecord([i.strip().decode('ascii', 'ignore').encode('ascii', 'ignore') for i in items])
-		session.add(r)
-		session.flush()
-
+		try:
+			r = EthicsRecord([i.strip().decode('ascii', 'ignore').encode('ascii', 'ignore') for i in items])
+			session.add(r)
+			session.flush()
+		except:
+			pass
 session.commit()
