@@ -66,7 +66,7 @@ def sendEmail(title, message):
     smtpserver.close()
 
 
-def get_daily_contracts(today_string = datetime.datetime.now().strftime('%Y-%m-%d')):  #defaults to today
+def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
     print today_string
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
@@ -77,10 +77,10 @@ def get_daily_contracts(today_string = datetime.datetime.now().strftime('%Y-%m-%
 
 
 def get_message():
-    contracts = get_daily_contracts('2015-01-31') #no parameter means that it gets today's contracts
-    output = ""
+    contracts = get_daily_contracts() #no parameter means that it gets today's contracts
+    output = "Contract report" + "\n" + "Total of " + str(len(contracts)) + " contracts today"
     for c in contracts:
-        output = output + "\n" + c.doc_cloud_id
+        output = output + "\n" + "https://www.documentcloud.org/documents/" + c.doc_cloud_id
     return output
 
-sendEmail('Custom #branded content from The Vault: ' + time.strftime("%x"), get_message())
+sendEmail('Contracts from The Vault: ' + time.strftime("%x"), get_message())
