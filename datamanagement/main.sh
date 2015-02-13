@@ -6,5 +6,6 @@ sleep 3h  #give document cloud 3 hours to process the new files. if by some chan
 
 python lensDocCloudSynch.py
 
-#python emailer.py
-#python backup.py
+python emailer.py
+
+python backup.py
