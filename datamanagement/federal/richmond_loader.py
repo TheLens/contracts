@@ -2,7 +2,7 @@ import datetime as dt
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from ethics_classes import EthicsRecord
+from federal_classes import RichmondRecord
 import ConfigParser
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -29,11 +29,11 @@ Session = sessionmaker(bind=engine)
 Session.configure(bind=engine)
 session = Session()
 
-with open('20150209AllEfiledCFContributions.tab', 'rU') as csvfile:
-	spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+with open('richmond.csv', 'rU') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
 	for items in spamreader:
 		try:
-			r = EthicsRecord([i.strip().decode('ascii', 'ignore').encode('ascii', 'ignore') for i in items])
+			r = RichmondRecord([i.strip().decode('ascii', 'ignore').encode('ascii', 'ignore') for i in items])
 			session.add(r)
 			session.flush()
 		except:
