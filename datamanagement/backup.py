@@ -12,6 +12,14 @@ from datetime import datetime
 from dateutil import parser
 import csv
 
+import argparse
+
+parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
+parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
+parser.set_defaults(feature=False)
+args = parser.parse_args()
+force = args.keep_synching
+
 
 Base = declarative_base()
 
@@ -77,7 +85,7 @@ def needs_to_be_backed_up(doc_cloud_id):
 	return False
 
 def backup(doc_cloud_id):
-	if needs_to_be_backed_up(doc_cloud_id):
+	if needs_to_be_backed_up(doc_cloud_id) or force:
 		print "{} needs to be backed up".format(doc_cloud_id)
 		doc = client.documents.get(doc_cloud_id)
 		pdf = doc.pdf
