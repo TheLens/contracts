@@ -545,7 +545,7 @@ def addEmpty(purchaseordernumber):
 		counter = 1
 		for a in attachmentQueue:
 			if counter > 1:
-				e.purchaseordernumber = e.purchaseordernumber + "_" + counter
+				e.purchaseordernumber = e.purchaseordernumber + "_" + str(counter)
 			title = getTitle(vendor, description)
 			counter += 1 
 			bidno = re.findall("[0-9]+", a.attrs['href']).pop()
