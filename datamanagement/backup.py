@@ -4,8 +4,8 @@ from documentcloud import DocumentCloud
 client = DocumentCloud()
 docs = client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
 
-BASEBACKUP = "/backups/contracts"
-LOGFILE = "/backups/contracts"
+BASEBACKUP = "/Volumes/usb/"
+LOGFILE = "/Volumes/usb/log.txt"
 
 with open(LOGFILE, "a") as f:
 	f.writelines(",".join((time.strftime("%H:%M:%S"),"BACKUP", "START")))
@@ -35,13 +35,14 @@ def backup(doc):
 		pdf = doc.pdf
 		with open(BASEBACKUP + "/" +doc.id.replace("/","") + ".pdf", "wb") as f:
 			f.write(pdf)
-			with open(LOGFILE, "a") as f:
-				f.writelines(",".join((time.strftime("%H:%M:%S"),"BACKUP","Saving PDF:" + BASEBACKUP + "/" +doc.id.replace("/","") + ".pdf")))
 
 	if not os.path.exists(BASEBACKUP + "/" +doc.id.replace("/","") + ".txt"):
 		with open(BASEBACKUP + "/" +doc.id.replace("/","") + ".txt", "wb") as f:
 			f.write(json.dumps(metadata))
 
+	if not os.path.exists(BASEBACKUP + "/" +doc.id.replace("/","") + "_text" + ".txt"):
+		with open(BASEBACKUP + "/" +doc.id.replace("/","") + ".txt", "wb") as f:
+			f.write(json.dumps(metadata))
 
 for doc in docs:
 	try:
