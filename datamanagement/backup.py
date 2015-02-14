@@ -48,7 +48,7 @@ doc_cloud_ids = get_all_contract_ids()
 
 client = DocumentCloud()
 
-BASEBACKUP = "/Volumes/usb/"
+BASEBACKUP = "/Volumes/usb"  #leave off the trailing slash!!
 LOGFILE = "/Volumes/usb/log.txt"
 
 with open(LOGFILE, "a") as f:
@@ -74,12 +74,15 @@ def getMetaData(doc):
 
 def needs_to_be_backed_up(doc_cloud_id):
 	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf"):
+		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf" + " does not exist"
 		return True
 
 	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt"):
+		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt" + " does not exist"
 		return True
 
-	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text" + ".txt"):
+	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt"):
+		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt" + " does not exist"
 		return True
 
 	return False
@@ -90,18 +93,20 @@ def backup(doc_cloud_id):
 		doc = client.documents.get(doc_cloud_id)
 		pdf = doc.pdf
 		metadata = getMetaData(doc)
-		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf"):
+		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf") or force:
 			pdf = doc.pdf
 			with open(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf", "wb") as f:
 				f.write(pdf)
 
-		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt"):
+		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt") or force:
 			with open(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt", "wb") as f:
 				f.write(json.dumps(metadata))
 
-		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text" + ".txt"):
-			with open(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text", "wb") as f:
+		if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt") or force:
+			with open(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt", "wb") as f:
 				f.write(json.dumps(doc.full_text))
+	else: 
+		print "{} is backed up!".format(doc_cloud_id)
 
 for doc_cloud_id in doc_cloud_ids:
 	print "checking {}".format(doc_cloud_id)
