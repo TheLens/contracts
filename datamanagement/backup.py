@@ -1,6 +1,6 @@
 import os, time, json
 from documentcloud import DocumentCloud
-
+from documentcloud import DoesNotExistError
 import datetime as dt
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -65,8 +65,14 @@ def getMetaData(doc):
 		metadata['department'] = doc.data['department']
 	except:
 		metadata['department'] = "unknown"
-	metadata['contract number'] = doc.data['contract number']
-	metadata['purchase order'] = doc.data['purchase order']
+	try:
+		metadata['contract number'] = doc.data['contract number']
+	except:
+		metadata['contract number'] = ""
+	try:
+		metadata['purchase order'] = doc.data['purchase order']
+	except:
+		metadata['purchase order'] = ""
 	metadata['title'] = doc.title
 	metadata['description'] = doc.description
 	return metadata
@@ -74,15 +80,12 @@ def getMetaData(doc):
 
 def needs_to_be_backed_up(doc_cloud_id):
 	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf"):
-		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".pdf" + " does not exist"
 		return True
 
 	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt"):
-		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + ".txt" + " does not exist"
 		return True
 
 	if not os.path.exists(BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt"):
-		print BASEBACKUP + "/" + doc_cloud_id.replace("/","") + "_text.txt" + " does not exist"
 		return True
 
 	return False
@@ -109,7 +112,12 @@ def backup(doc_cloud_id):
 		print "{} is backed up!".format(doc_cloud_id)
 
 for doc_cloud_id in doc_cloud_ids:
-	print "checking {}".format(doc_cloud_id)
-	backup(doc_cloud_id)
+	try:
+		backup(doc_cloud_id)
+	except NotImplementedError:
+		pass
+	except DoesNotExistError:
+		pass
+
 
 session.close()
