@@ -110,31 +110,6 @@ class Contract(Base):
 
 	def __repr__(self):
 		return "contractnumber{} purchaseordernumber{} vendorid{} departmentid{}".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
-
-class PersonAddress(Base):
-	__tablename__ = 'peopleaddresses'
-
-	id = Column(Integer, primary_key=True)
-	personID = Column(Integer, ForeignKey("people.id"), nullable=False)
-	companyID = Column(Integer, ForeignKey("addresses.id"), nullable=False)
-	primaryaddress = Column(Boolean)
-
-	def __init__(self, name):
-		self.name = name
-
-	def __repr__(self):
-		return "<Department(Department='%s')>" % (self.department)
-
-class VendorOfficer(Base):
-	__tablename__ = 'vendorsofficers'
-
-	id = Column(Integer, primary_key=True)
-	vendorid = Column(Integer, ForeignKey("vendors.id"), nullable=False)
-	personid = Column(Integer, ForeignKey("people.id"), nullable=False)
-
-	def __init__(self, vendorID, personID):
-		self.vendorid = vendorID
-		self.personid = personID
 		
 
 class CompanyAddress(Base):
@@ -150,6 +125,52 @@ class CompanyAddress(Base):
 
 	def __repr__(self):
 		return "<Department(Department='%s')>" % (self.department)
+
+
+class PersonAddress(Base):
+	__tablename__ = 'peopleaddresses'
+
+	id = Column(Integer, primary_key=True)
+	personID = Column(Integer, ForeignKey("people.id"), nullable=False)
+	companyID = Column(Integer, ForeignKey("addresses.id"), nullable=False)
+	primaryaddress = Column(Boolean)
+
+	def __init__(self, name):
+		self.name = name
+
+	def __repr__(self):
+		return "<Department(Department='%s')>" % (self.department)
+
+
+class VendorOfficer(Base):
+	__tablename__ = 'vendorsofficers'
+
+	id = Column(Integer, primary_key=True)
+	vendorid = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+	personid = Column(Integer, ForeignKey("people.id"), nullable=False)
+
+	def __init__(self, vendorID, personID):
+		self.vendorid = vendorID
+		self.personid = personID
+
+	def __repr__(self):
+		return "<VendorOfficer(Department='%s')>" % (self.vendorid)
+
+class VendorOfficerCompany(Base):
+	__tablename__ = 'vendorsofficerscompanies'
+
+	id = Column(Integer, primary_key=True)
+	vendorid = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+	companiesid = Column(Integer, ForeignKey("companies.id"), nullable=False)
+	primaryaddress = Column(Boolean)
+
+	def __init__(self, vendor_id, company_id):
+		self.vendorid = vendor_id
+		self.companiesid = company_id
+
+	def __repr__(self):
+		return "<VendorOfficerCompany(Department='%s')>" % (self.vendorid)
+
 
 def remakeDB():
 	engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
