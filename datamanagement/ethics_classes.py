@@ -57,8 +57,7 @@ class EthicsRecord(Base):
 
 
 	def __repr__(self):
-		return "<Department(Department='%s')>" % (self.department)
-
+		return "<Record {} {}>".format(self.first, self.last)
 def remakeDB():
 	engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
 	Base.metadata.create_all(engine)
