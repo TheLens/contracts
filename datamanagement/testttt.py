@@ -13,8 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from flask.ext.cache import Cache
 from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
-
-from nameparser import HumanName
+from sqlalchemy import func
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -43,8 +42,9 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-name = HumanName("Dr. Juan Q. Xavier de la Vega III (Doc Vega)")
+def get_records(name):
+	recccs = session.query(EthicsRecord).filter(EthicsRecord.contributorname==name).all()
+	recccs.sort(key = lambda x: x.receiptdate)
+	return recccs
 
-recccs = session.query(EthicsRecord).filter(EthicsRecord.first=="George").filter(EthicsRecord.last=="Branigan").all()
-
-print recccs
+print get_records('BURCH & ASSOCIATES HENRY J.')
