@@ -27,7 +27,7 @@ class Vendor(Base):
 		self.name = name
 
 	def __repr__(self):
-		return "<Vendor(Vendor='%s')>" % (self.name)
+		return "<Vendor: {}>".format(self.name)
 
 class Department(Base):
 	__tablename__ = 'departments'
@@ -109,7 +109,7 @@ class Contract(Base):
 		self.dateadded = added
 
 	def __repr__(self):
-		return "<Contract | contractnumber {} purchaseordernumber {} vendorid {} departmentid {}>".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
+		return "<Contract: contractnumber {} purchaseordernumber {} vendorid {} departmentid {}>".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
 		
 
 class CompanyAddress(Base):

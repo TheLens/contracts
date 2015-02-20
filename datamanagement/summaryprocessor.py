@@ -477,7 +477,7 @@ def getVendor(soup):
 	vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
 	vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'
 			])[0].contents.pop().strip()
-	vendor = vendorlinktext.split('-')[1].strip()
+	vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
 	return vendor
 
 def getDepartment(soup):
@@ -485,6 +485,7 @@ def getDepartment(soup):
 	metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
 	department = metadatarow[5].findChildren(['td'])[1].contents.pop().strip()
 	return department
+
 
 def getKnumber(soup):
 	mainTable = soup.select('.table-01').pop()
@@ -494,6 +495,7 @@ def getKnumber(soup):
 	except:
 		knumber = "unknown"
 	return knumber
+
 
 def getAttachmentQueue(soup):
 	try:

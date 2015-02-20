@@ -1,4 +1,6 @@
 import datetime
+import re
+import dateutil.parser
 from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer, VendorOfficerCompany, Company
 from documentcloud import DocumentCloud
 from address import AddressParser, Address
@@ -11,6 +13,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 import ConfigParser
+from ethics_classes import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -364,18 +367,31 @@ user = get_from_config('user')
 
 engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
 
+Session = sessionmaker(bind=engine)
+Session.configure(bind=engine)
+session = Session()
+
+
 def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
-    Session = sessionmaker(bind=engine)
-    Session.configure(bind=engine)
-    session = Session()
     contracts = session.query(Contract.doc_cloud_id, Vendor.name).filter(Contract.dateadded==today_string).filter(Contract.vendorid==Vendor.id).all()
     session.close()
     return contracts
 
+
+def get_state_contributions(name):
+    recccs = session.query(EthicsRecord).filter(EthicsRecord.contributorname==name).all()
+    recccs.sort(key = lambda x: dateutil.parser.parse(x.receiptdate))
+    return recccs
+
+
+def get_names_from_vendor(name):
+    recccs = session.query(Person.name).filter(Vendor.id==VendorOfficer.vendorid).filter(Person.id==VendorOfficer.personid).filter(Vendor.name==name).all()
+    return [str(i[0]) for i in recccs]
+
+
 contracts = get_daily_contracts()
 
 for c in contracts:
-	cid = c[0]
-	vendor = c[1]
-	print c[0]
-	print c[1]
+    try_to_link(vendor)
+
+session.close()

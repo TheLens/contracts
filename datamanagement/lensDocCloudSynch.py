@@ -32,7 +32,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 def addVendor(vendor):
-
 	c = session.query(Vendor).filter(Vendor.name==vendor).count()
 	if len(vendor)>0 and c==0:
 		x = Vendor(vendor)
@@ -63,7 +62,7 @@ def match_contract(doc):
 		contractno = "unknown"
 
 	try:
-		vendor = doc.data["vendor"]
+		vendor = doc.data["vendor"].replace(".", "")
 		if len(vendor)==0:
 			vendor="unknown"
 	except:
@@ -81,7 +80,7 @@ def match_contract(doc):
 	description = doc.description
 
 	addDepartment(department)
-	addVendor(vendor)
+	addVendor(vendor.replace(".", ""))
 
 	department = session.query(Department).filter(Department.name==department).first().id
 	vendorid = session.query(Vendor).filter(Vendor.name==vendor).first().id

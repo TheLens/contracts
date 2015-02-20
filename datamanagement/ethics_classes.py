@@ -56,8 +56,12 @@ class EthicsRecord(Base):
 		self.description = description
 
 
+	def __str__(self):
+		return "${} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
+
+
 	def __repr__(self):
-		return "Record: {} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
+		return "${} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
 
 def remakeDB():
 	engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
