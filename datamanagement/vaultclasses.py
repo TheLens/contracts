@@ -109,7 +109,7 @@ class Contract(Base):
 		self.dateadded = added
 
 	def __repr__(self):
-		return "contractnumber{} purchaseordernumber{} vendorid{} departmentid{}".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
+		return "<Contract | contractnumber {} purchaseordernumber {} vendorid {} departmentid {}>".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
 		
 
 class CompanyAddress(Base):

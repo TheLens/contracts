@@ -4,3 +4,4 @@ venv
 *pyc
 *pdf
 datamanagement/pdfs
+datamanagement/ghostdriver.log
