@@ -51,7 +51,7 @@ database = getFromFile('database')
 sender = getFromFile('sender')
 pw = getFromFile('email_pw')
 gmail_user = getFromFile('gmail_user')
-to_list =  getFromFile('to_list').split()
+to_list =  getFromFile('to_list').split(",")
 engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
 
 
@@ -61,31 +61,32 @@ session = Session()
 
 
 def sendEmail(title, message):
-    to = to_list.pop()
-    gmail_user = sender
-    smtpserver = smtplib.SMTP('smtp.gmail.com', 587)
-    smtpserver.ehlo()
-    smtpserver.starttls()
-    smtpserver.ehlo
-    smtpserver.login(gmail_user, pw)
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = title
-    msg['From'] = gmail_user
-    msg['To'] = to
-    text = "Seems to be a problem with the html for you" + message
-    html = '<html><head></head><body>' + message + '</body></html>'
+    for to in to_list:
+        print to
+        gmail_user = sender
+        smtpserver = smtplib.SMTP('smtp.gmail.com', 587)
+        smtpserver.ehlo()
+        smtpserver.starttls()
+        smtpserver.ehlo
+        smtpserver.login(gmail_user, pw)
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = title
+        msg['From'] = gmail_user
+        msg['To'] = to
+        text = "Seems to be a problem with the html for you" + message
+        html = '<html><head></head><body>' + message + '</body></html>'
 
-    part1 = MIMEText(text, 'plain')
-    part2 = MIMEText(html, 'html')
+        part1 = MIMEText(text, 'plain')
+        part2 = MIMEText(html, 'html')
 
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
-    msg.attach(part1)
-    msg.attach(part2)
+        # Attach parts into message container.
+        # According to RFC 2046, the last part of a multipart message, in this case
+        # the HTML message, is best and preferred.
+        msg.attach(part1)
+        msg.attach(part2)
 
-    smtpserver.sendmail(gmail_user, to, msg.as_string())
-    smtpserver.close()
+        smtpserver.sendmail(gmail_user, to, msg.as_string())
+        smtpserver.close()
 
 
 def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
