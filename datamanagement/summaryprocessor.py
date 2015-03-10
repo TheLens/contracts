@@ -111,6 +111,9 @@ def getVendor(soup):
     vendor = vendorlinktext.split('-')[1].strip()
     return vendor
 
+def getVendorId(soup):
+
+
 def getDepartment(soup):
     mainTable = soup.select('.table-01').pop()
     metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
@@ -531,12 +534,21 @@ def getTitle(vendor, description):
 	return title
 
 
+def getVendorID(html):
+    p = "(?<=ExternalVendorProfile\(')\d+"
+    vendorids = re.findall(p,lines)
+    if len(vendorids) == 0:
+        return ""
+    else:
+        return vendorids.pop()
+
 def addEmpty(purchaseordernumber):
 	if not hasPurchaseOrder(purchaseordernumber):
 		e = Contract(purchaseordernumber)
 		response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId='+ e.purchaseordernumber + '&releaseNbr=0&parentUrl=contract')
 		html = response.read()
 		soup = BeautifulSoup(html)
+        vendorid = getVendorID(html)
 		knumber = getKnumber(soup).replace("M", "")
 		department = getDepartment(soup)
 		vendor = getVendor(soup)
@@ -553,7 +565,7 @@ def addEmpty(purchaseordernumber):
 			bidno = re.findall("[0-9]+", a.attrs['href']).pop()
 			downloadFile(bidno)
 			data = getMetaData(knumber, e.purchaseordernumber, vendor,department)
-			doc_cloud_id = uploadContract(bidno, data, description, title)
+            doc_cloud_id = uploadContract(bidno, data, description, title)
 			e.doc_cloud_id = doc_cloud_id
 			os.rename(bidno, str(e.doc_cloud_id) + ".pdf")
 			e.vendorid = getVendorID(vendor)
