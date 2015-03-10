@@ -22,3 +22,7 @@ do
 	   sleep "$rand"
 	fi
 done
+
+cat html/* | grep -o '\bdocId=[A-Z][A-Z][0-9]*&\b' | python /apps/contracts/datamanagement/summaryprocessor.py
+
+rm /apps/contracts/datamanagement/html/*  #clean out the html

@@ -392,6 +392,8 @@ def get_names_from_vendor(name):
 contracts = get_daily_contracts()
 
 for c in contracts:
+    cid = c[0]
+    vendor = c[1]
     try_to_link(vendor)
 
 session.close()

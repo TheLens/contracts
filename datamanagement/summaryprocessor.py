@@ -111,8 +111,6 @@ def getVendor(soup):
     vendor = vendorlinktext.split('-')[1].strip()
     return vendor
 
-def getVendorId(soup):
-
 
 def getDepartment(soup):
     mainTable = soup.select('.table-01').pop()
@@ -318,38 +316,38 @@ def hasPurchaseOrder(purchaseOrder):
 
 
 def uploadContract(file, data, description, title):
-	if len(data['contract number'])<1:
-		return #do not upload. There is a problem
-	newid = documentCloudClient.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
-	return newid
+     if len(data['contract number'])<1:
+        return #do not upload. There is a problem
+     newid = documentCloudClient.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
+     return newid
 
 
 #refactor to take a type
 def addVendor(vendor):
-	indb = session.query(Vendor).filter(Vendor.name==vendor).count()
-	if indb==0:
-		vendor = Vendor(vendor)
-		session.add(vendor)
-		session.commit()
+     indb = session.query(Vendor).filter(Vendor.name==vendor).count()
+     if indb==0:
+        vendor = Vendor(vendor)
+        session.add(vendor)
+        session.commit()
 
 
 def addDepartment(department):
-	indb = session.query(Department).filter(Department.name==department).count()
-	if indb==0:
-		department = Department(department)
-		session.add(department)
-		session.commit()
-		
+     indb = session.query(Department).filter(Department.name==department).count()
+     if indb==0:
+        department = Department(department)
+        session.add(department)
+        session.commit()
+        
 
 #refactor to take a type
-def getVendorID(vendor):
-	session.flush()
-	vendors = session.query(Vendor).filter(Vendor.name==vendor).all()
-	vendor = vendors.pop()
+def getVendorID_Lens(vendor):
+     session.flush()
+     vendors = session.query(Vendor).filter(Vendor.name==vendor).all()
+     vendor = vendors.pop()
 
 
 def getDepartmentID(department):
-	return session.query(Department).filter(Department.name==department).first().id
+     return session.query(Department).filter(Department.name==department).first().id
 
 
 def downloadFile(bidno):
@@ -477,104 +475,105 @@ Grainger Inc. Februaryl 2008.pdf\r
 
 
 def getVendor(soup):
-	vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
-	vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'
-			])[0].contents.pop().strip()
-	vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
-	return vendor
+     vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
+     vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'
+             ])[0].contents.pop().strip()
+     vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
+     return vendor
 
 def getDepartment(soup):
-	mainTable = soup.select('.table-01').pop()
-	metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
-	department = metadatarow[5].findChildren(['td'])[1].contents.pop().strip()
-	return department
+     mainTable = soup.select('.table-01').pop()
+     metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+     department = metadatarow[5].findChildren(['td'])[1].contents.pop().strip()
+     return department
 
 
 def getKnumber(soup):
-	mainTable = soup.select('.table-01').pop()
-	metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
-	try:
-		knumber = metadatarow[6].findChildren(['td'])[1].contents.pop().replace('k', '').replace("m", '').strip()
-	except:
-		knumber = "unknown"
-	return knumber
+     mainTable = soup.select('.table-01').pop()
+     metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+     try:
+        knumber = metadatarow[6].findChildren(['td'])[1].contents.pop().replace('k', '').replace("m", '').strip()
+     except:
+        knumber = "unknown"
+     return knumber
 
 
 def getAttachmentQueue(soup):
-	try:
-		mainTable = soup.select('.table-01').pop()
-		metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
-		todownload = metadatarow[16].findChildren(['td'])[1].findChildren(['a'])
-	except IndexError:
-		return []
-	return todownload
+     try:
+        mainTable = soup.select('.table-01').pop()
+        metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+        todownload = metadatarow[16].findChildren(['td'])[1].findChildren(['a'])
+     except IndexError:
+        return []
+     return todownload
 
 #python lensDocCloudSych; #if it runs, good to go
 
-def getMetaData(knumber, purchaseorder, vendor,department):
-	data = {}
-	data['contract number'] = knumber.strip()
-	data['vendor'] = vendor.strip()
-	data['department'] = department.strip()
-	data['purchase order'] = purchaseorder.strip()
-	return data
+def getMetaData(knumber, purchaseorder, vendor,department, vendorid):
+     data = {}
+     data['contract number'] = knumber.strip()
+     data['vendor'] = vendor.strip()
+     data['department'] = department.strip()
+     data['purchase order'] = purchaseorder.strip()
+     data['vendor_id'] = vendorid.strip()
+     return data
 
 def getDescription(soup):
-	try:
-		mainTable = soup.select('.table-01').pop()
-		metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
-		description = metadatarow[1].findChildren(['td'])[5].contents.pop().strip()
-		return description
-	except:
-		return ""
+     try:
+        mainTable = soup.select('.table-01').pop()
+        metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+        description = metadatarow[1].findChildren(['td'])[5].contents.pop().strip()
+        return description
+     except:
+        return ""
 
 def getTitle(vendor, description):
-	title = ""
-	title = vendor + " : " + description
-	return title
+     title = ""
+     title = vendor + " : " + description
+     return title
 
 
 def getVendorID(html):
     p = "(?<=ExternalVendorProfile\(')\d+"
-    vendorids = re.findall(p,lines)
+    vendorids = re.findall(p,html)
     if len(vendorids) == 0:
         return ""
     else:
         return vendorids.pop()
 
 def addEmpty(purchaseordernumber):
-	if not hasPurchaseOrder(purchaseordernumber):
-		e = Contract(purchaseordernumber)
-		response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId='+ e.purchaseordernumber + '&releaseNbr=0&parentUrl=contract')
-		html = response.read()
-		soup = BeautifulSoup(html)
+    if not hasPurchaseOrder(purchaseordernumber):
+        e = Contract(purchaseordernumber)
+        response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId='+ e.purchaseordernumber + '&releaseNbr=0&parentUrl=contract')
+        html = response.read()
+        soup = BeautifulSoup(html)
         vendorid = getVendorID(html)
-		knumber = getKnumber(soup).replace("M", "")
-		department = getDepartment(soup)
-		vendor = getVendor(soup)
-		addVendor(vendor)
-		addDepartment(department)
-		description = getDescription(soup)
-		attachmentQueue = getAttachmentQueue(soup)
-		counter = 1
-		for a in attachmentQueue:
-			if counter > 1:
-				e.purchaseordernumber = e.purchaseordernumber + "_" + str(counter)
-			title = getTitle(vendor, description)
-			counter += 1 
-			bidno = re.findall("[0-9]+", a.attrs['href']).pop()
-			downloadFile(bidno)
-			data = getMetaData(knumber, e.purchaseordernumber, vendor,department)
+        knumber = getKnumber(soup).replace("M", "")
+        department = getDepartment(soup)
+        vendor = getVendor(soup)
+        addVendor(vendor)
+        addDepartment(department)
+        description = getDescription(soup)
+        attachmentQueue = getAttachmentQueue(soup)
+        counter = 1
+        for a in attachmentQueue:
+            if counter > 1:
+                e.purchaseordernumber = e.purchaseordernumber + "_" + str(counter)
+            title = getTitle(vendor, description)
+            counter += 1 
+            bidno = re.findall("[0-9]+", a.attrs['href']).pop()
+            downloadFile(bidno)
+            data = getMetaData(knumber, e.purchaseordernumber, vendor,department, vendorid)
             doc_cloud_id = uploadContract(bidno, data, description, title)
-			e.doc_cloud_id = doc_cloud_id
-			os.rename(bidno, str(e.doc_cloud_id) + ".pdf")
-			e.vendorid = getVendorID(vendor)
-			e.departmentid = getDepartmentID(department)
-			e.title = title
-			e.description = description
-			e.contractnumber = knumber
-			e.dateadded = datetime.datetime.now()
-			session.commit()
+            e.doc_cloud_id = doc_cloud_id
+            os.rename(bidno, str(e.doc_cloud_id) + ".pdf")
+            e.vendorid = getVendorID_Lens(vendor)
+            e.departmentid = getDepartmentID(department)
+            e.title = title
+            e.description = description
+            e.contractnumber = knumber
+            e.dateadded = datetime.datetime.now()
+            session.commit()
 
 def uploadMetadata(metadata):
     data = dict()
@@ -582,6 +581,7 @@ def uploadMetadata(metadata):
     data['vendor'] = metadata['vendor'].strip()
     data['department'] = metadata['department'].strip()
     data['purchase order'] = metadata['purchaseOrder'].strip()
+    data['vendor_id'] = metadata['vendor_id'].strip()
     searchterm = '\'contract number\':' + "'" + data['contract number'] + "'"
     doc = documentCloudClient.documents.search(searchterm).pop()
     doc.data=data
@@ -623,8 +623,8 @@ def getMissingPurchaseOrders(purchaseOrders):
     return output
 
 if __name__ == "__main__":
-	for line in sys.stdin:
-		purchaseorder = line.replace("\n", "").split("=")[1].replace("&","")
-		if session.query(Contract).filter(Contract.purchaseordernumber==purchaseorder).count()==0:
-			#print "need to add {}".format(purchaseorder)
-			addEmpty(purchaseorder)
+     for line in sys.stdin:
+        purchaseorder = line.replace("\n", "").split("=")[1].replace("&","")
+        if session.query(Contract).filter(Contract.purchaseordernumber==purchaseorder).count()==0:
+             #print "need to add {}".format(purchaseorder)
+             addEmpty(purchaseorder)
