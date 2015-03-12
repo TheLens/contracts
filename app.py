@@ -14,7 +14,7 @@ from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
 
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
+CONFIG_LOCATION = 'app.cfg'
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
@@ -27,20 +27,19 @@ app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 documentCloudClient = DocumentCloud()
 
+print 'aqui'
+
 server = get_from_config('server')
 databasepassword = get_from_config('databasepassword')
+database = get_from_config('database')
 user = get_from_config('user')
 dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
+
 
 
 @cache.memoize(timeout=900)
 def queryDocumentCloud(searchterm):
     return documentCloudClient.documents.search(searchterm)
-
-'''
-Note: d.id should be an INT but I am translating it to a
-string to match doc.id from python document cloud in the template engine.
-'''
 
 
 def translateToDocCloudForm(docs):
@@ -51,7 +50,7 @@ def translateToDocCloudForm(docs):
 
 @cache.memoize(timeout=900)
 def getContracts(offset, limit):
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -65,7 +64,7 @@ def getContracts(offset, limit):
 
 @cache.memoize(timeout=100000)
 def getContracts_Count():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -76,7 +75,7 @@ def getContracts_Count():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getVendors():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -89,7 +88,7 @@ def getVendors():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getDepartments():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -103,7 +102,7 @@ def getDepartments():
 
 @cache.memoize(timeout=100000) #cache good for a day or so
 def getOfficers(vendor=None):
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -147,7 +146,7 @@ def translateToVendor(officerterm):
     return results.pop()[2].name
 
 
-@app.route('/download/<string:docid>', methods=['POST', 'GET'])
+@app.route('/contracts/download/<string:docid>', methods=['POST', 'GET'])
 def download(docid):
     docs = queryDocumentCloud("document:" + '"' + docid + '"')
     response = make_response(docs.pop().pdf)
@@ -189,7 +188,7 @@ def getStatus(page, total, searchterm):
         return "Page " + str(page) + " of " + str(total)
 
 
-@app.route('/vendors/<string:q>', methods=['POST'])
+@app.route('/contracts/vendors/<string:q>', methods=['POST'])
 def vendors(q=None):
     if q == "all":
         vendors = getVendors()
@@ -201,14 +200,19 @@ def vendors(q=None):
     return render_template('select.html', options=vendors)
 
 
-@app.route('/officers/<string:q>', methods=['POST'])
+@app.route('/contracts/officers/<string:q>', methods=['POST'])
 def officers(q=None):
     if q == "all":
         officers = getOfficers()
     return render_template('select.html', options=officers)
 
 
-@app.route('/departments/<string:q>', methods=['POST'])
+@app.route('/hello/')
+def hello():
+    return "hello"
+
+
+@app.route('/contracts/departments/<string:q>', methods=['POST'])
 def departments(q=None):
     if q == "all":
         departments = getDepartments()
@@ -217,7 +221,7 @@ def departments(q=None):
     return render_template('select.html', options=departments)
 
 
-@app.route('/')
+@app.route('/contracts/')
 def intro(name=None):
     offset = 0
     docs = getContracts(0, PAGELENGTH)
@@ -231,7 +235,7 @@ def intro(name=None):
     return render_template('intro_child.html', vendors=vendors, departments=departments, offset=0, totaldocs=totaldocs, pages=pages, page=1, docs=docs, officers=officers, query=dc_query, title="New Orleans city contracts", updated=updateddate, url="contracts")
 
 
-@app.route('/advanced')
+@app.route('/contracts/advanced')
 def advanced(name=None):
     offset = 0
     docs = getContracts(0, PAGELENGTH)
@@ -243,7 +247,7 @@ def advanced(name=None):
     officers = getOfficers()
     return render_template('advanced.html', vendors=vendors, departments=departments, offset=0, totaldocs=totaldocs, pages=pages, page=1, docs=docs, officers=officers, query=dc_query)
 
-@app.route('/next/<string:q>', methods=['POST'])
+@app.route('/contracts/next/<string:q>', methods=['POST'])
 def next(q):
     print "next"
     searchterm = str(q).split("&&")[0].strip()
@@ -269,7 +273,7 @@ def next(q):
     return render_template('documentcloud.html', docs=docs, status=status, offset=offset, totaldocs=totaldocs, page=page, pages=pages, officers=officers, vendor=vendor, query=searchterm)
 
 
-@app.route('/previous/<string:q>', methods=['POST'])
+@app.route('/contracts/previous/<string:q>', methods=['POST'])
 def previous(q):
     searchterm = str(q).split("&&")[0]
     offset = getOffSet(q)
@@ -293,13 +297,13 @@ def previous(q):
     return render_template('documentcloud.html', docs=docs, offset=offset, status=status, totaldocs=totaldocs, page=page, pages=pages, officers=officers, vendor=vendor, query=searchterm)
 
 
-@app.route('/contract/<string:doc_cloud_id>', methods=['GET'])
+@app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
     doc_cloud_id = re.sub(".html$", "", doc_cloud_id)
     return render_template('contract_child.html', doc_cloud_id=doc_cloud_id, title="New Orleans city contracts")
 
 
-@app.route('/search/<string:q>', methods=['POST'])
+@app.route('/contracts/search/<string:q>', methods=['POST'])
 def query_docs(q):
     q = q.replace("offset:undefined", "offset:0")  # if something goes wrong, just set offset to 0
     searchterm = str('projectid: "1542-city-of-new-orleans-contracts"' + " " + q).split("&&")[0].strip()
