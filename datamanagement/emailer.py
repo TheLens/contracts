@@ -73,7 +73,7 @@ def sendEmail(title, message):
         msg['Subject'] = title
         msg['From'] = gmail_user
         msg['To'] = to
-        text = "Seems to be a problem with the html for you" + message
+        text = "Alert from The Lens"
         html = '<html><head></head><body>' + message + '</body></html>'
 
         part1 = MIMEText(text, 'plain')
