@@ -6,16 +6,18 @@ import ConfigParser
 
 Base = declarative_base()
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
+CONFIG_LOCATION = '../app.cfg'
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
     config.read(CONFIG_LOCATION)
     return config.get('Section1', field)
 
+
 server = get_from_config('server')
 databasepassword = get_from_config('databasepassword')
 user = get_from_config('user')
+
 
 class Vendor(Base):
 	__tablename__ = 'vendors'
