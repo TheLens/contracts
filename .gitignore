@@ -1,3 +1,6 @@
+app.ini
+charlie.conf
+app.conf
 biz.py
 app.cfg
 venv
@@ -5,3 +8,4 @@ venv
 *pdf
 datamanagement/pdfs
 datamanagement/ghostdriver.log
+app.ini

@@ -1,6 +1,7 @@
 import os
 import re
 from bs4 import BeautifulSoup
+from utilities import get_from_config
 
 class PurchaseOrder(object):
 
@@ -50,3 +51,11 @@ class PurchaseOrder(object):
 
     def __str__(self):
         return "<PurchaseOrder {}>".format(self.vendor_id_city)
+
+
+class DocumentCloud(object):
+
+
+    def __init__(self):
+        self.user = get_from_config("doc_cloud_user")
+        self.password = get_from_config("doc_cloud_password")

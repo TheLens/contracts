@@ -153,7 +153,7 @@ function resetUI(){
 }
 
 function openDetail(id){
-    var win = window.open('http://vault.thelensnola.org/contract/' + id, '_blank');
+    var win = window.open('http://' + window.location.host +  '/contracts/contract/' + id, '_blank');
     if(win){
         win.focus();
     }else{
@@ -194,7 +194,7 @@ function setHandlers(){
 
     $(".download_button").on("click", function(event) {
         event.stopPropagation();
-        downloadFile("http://vault.thelensnola.org/download/" + $(this).parents(".contractpreview").attr("id"));
+        downloadFile("http://" + window.location.host + "/contracts/download/" + $(this).parents(".contractpreview").attr("id"));
     });
 
 }
