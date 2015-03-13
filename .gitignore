@@ -9,4 +9,5 @@ venv
 datamanagement/pdfs
 datamanagement/ghostdriver.log
 app.ini
+datamanagement/__init__.pyc
 datamanagement/html*
