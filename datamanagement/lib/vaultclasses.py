@@ -6,18 +6,7 @@ import ConfigParser
 
 Base = declarative_base()
 
-CONFIG_LOCATION = 'app.cfg'
-
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
-
-
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-user = get_from_config('user')
-
+from ... settings import Settings
 
 class Vendor(Base):
 	__tablename__ = 'vendors'
@@ -178,5 +167,5 @@ def remakeDB():
 	engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
 	Base.metadata.create_all(engine)
 
-remakeDB()
-#CREATE UNIQUE INDEX uniquename ON basics (first, last);
+if __name__ == "__main__":
+    remakeDB()

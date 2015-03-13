@@ -3,8 +3,9 @@ import ConfigParser
 from sqlalchemy import create_engine
 from documentcloud import DocumentCloud
 from sqlalchemy.orm import sessionmaker
-from vaultclasses import Vendor, Department, Contract
 import argparse
+
+from contracts.datamanagement.lib.vaultclasses import Vendor, Department, Contract
 
 parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
 parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
@@ -12,24 +13,21 @@ parser.set_defaults(feature=False)
 args = parser.parse_args()
 force = args.keep_synching
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
+from ... settings import Settings
 
-client = DocumentCloud()
+s = Settings()
+
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
     config.read(CONFIG_LOCATION)
     return config.get('Section1', field)
 
-databasepassword = get_from_config('databasepassword')
-server = get_from_config('server')
-database = get_from_config('database')
-user = get_from_config('user')
 
-server = "projects.thelensnola.org"
 engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
 Session = sessionmaker(bind=engine)
 session = Session()
+
 
 def addVendor(vendor):
 	c = session.query(Vendor).filter(Vendor.name==vendor).count()
@@ -39,6 +37,7 @@ def addVendor(vendor):
 		session.commit()
 	session.close()
 
+
 def addDepartment(department):
 	c = session.query(Department).filter(Department.name==department).count()
 	if len(department)>0 and c==0:
@@ -46,6 +45,7 @@ def addDepartment(department):
 		session.add(x)
 		session.commit()
 	session.close()
+
 
 def match_contract(doc):
 	keep_synching = True; 
@@ -116,4 +116,6 @@ def matchLensDBtoDocumentCloud():
 		else:
 			break   #else end the loop
 
-matchLensDBtoDocumentCloud()
+
+if __name__ == "__main__":
+    matchLensDBtoDocumentCloud()

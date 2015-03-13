@@ -35,23 +35,7 @@ import smtplib
 from documentcloud import DocumentCloud
 
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
 
-
-def getFromFile(field):
-    config = ConfigParser.RawConfigParser()
-    #print config_location
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
-
-
-databasepassword = getFromFile('databasepassword')
-server = getFromFile('server')
-database = getFromFile('database')
-sender = getFromFile('sender')
-pw = getFromFile('email_pw')
-gmail_user = getFromFile('gmail_user')
-to_list =  getFromFile('to_list').split(",")
 engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
 
 
@@ -130,8 +114,8 @@ def get_message():
     output += '</table>'
     return output
 
-
-sendEmail('Contracts from The Vault: ' + time.strftime("%x"), get_message())
+if __name__ == "__main__":
+    sendEmail('Contracts from The Vault: ' + time.strftime("%x"), get_message())
 
 
 session.close()

@@ -14,7 +14,8 @@ from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
 
 
-CONFIG_LOCATION = 'app.cfg'
+from settings import Settings
+settings = Settings()
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
@@ -324,8 +325,6 @@ def query_docs(q):
         officers = [officers]
         vendor = translateToVendor(officers[0])
         searchterm = searchterm.replace("officers:", "").replace('"' + officers[0] + '"', "") + ' vendor:"' + vendor + '"'
-
-    print "vendor {}".format(vendor)
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)

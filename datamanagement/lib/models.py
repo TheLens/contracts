@@ -1,7 +1,21 @@
 import os
 import re
+import datetime
+import ConfigParser
+
+from documentcloud import DocumentCloud
+
 from bs4 import BeautifulSoup
 from utilities import get_from_config
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+
+
+Base = declarative_base()
+
+from ... settings import Settings
+
 
 class PurchaseOrder(object):
 
@@ -13,6 +27,19 @@ class PurchaseOrder(object):
         self.description = self.get_description(self.soup)
         self.vendor_name = self.get_vendor_name(self.soup)
         self.department = self.get_department(self.soup)
+        self.k_number = self.getKnumber(self.soup)
+        self.purchaseorder = self.get_purchase_order(self.soup)
+        self.attachments = self.get_attachments(self.soup)
+
+
+    def get_attachments(soup):
+        try:
+            mainTable = soup.select('.table-01').pop()
+            metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+            todownload = metadatarow[16].findChildren(['td'])[1].findChildren(['a'])
+        except IndexError:
+            return []      
+        return todownload
 
 
     def get_vendor_id(self, html):
@@ -36,12 +63,27 @@ class PurchaseOrder(object):
 
     def get_vendor_name(self, soup):
      vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
-     vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'
-             ])[0].contents.pop().strip()
+     vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
      vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
      return vendor
 
     
+    def getKnumber(self, soup):
+        mainTable = soup.select('.table-01').pop()
+        metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+        try:
+            knumber = metadatarow[6].findChildren(['td'])[1].contents.pop().replace('k', '').replace("m", '').strip().replace("M", "")
+        except:
+           knumber = "unknown"
+        return knumber
+
+
+    def get_purchase_order(self, soup):
+        mainTable = soup.select('.table-01').pop()
+        po = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])[1].findChildren(['td'])[1].contents.pop().strip()
+        return po
+
+
     def get_department(self, soup):
         mainTable = soup.select('.table-01').pop()
         metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
@@ -49,36 +91,17 @@ class PurchaseOrder(object):
         return department
 
 
+    def getMetaData(knumber, purchaseorder, vendor,department, vendorid):
+        data = {}
+        data['contract number'] = self.k_number
+        data['vendor'] = self.vendor_name
+        data['department'] = self.department
+        data['purchase order'] = purchaseorder.strip()
+        data['vendor_id'] = self.vendor_id_city
+        return data
+
     def __str__(self):
         return "<PurchaseOrder {}>".format(self.vendor_id_city)
-
-
-class DocumentCloud(object):
-
-
-    def __init__(self):
-        self.user = get_from_config("doc_cloud_user")
-        self.password = get_from_config("doc_cloud_password")
-
-
-import datetime
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-import ConfigParser
-
-Base = declarative_base()
-
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
-
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
-
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-user = get_from_config('user')
 
 
 class EthicsRecord(Base):
@@ -126,9 +149,89 @@ class EthicsRecord(Base):
     def __repr__(self):
         return "${} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
 
+
+'''
+Abstracts from Lens contracts project
+'''
+class DocumentCloudProject():
+   
+
+    def __init__(self):
+        doc_cloud_user = get_from_config('doc_cloud_user')
+        doc_cloud_password = get_from_config('doc_cloud_password')
+        self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
+        self.docs = None #sometimes won't need all the docs, so dont do the search on init
+
+
+    def get_contract(self, field, value):
+        searchterm = '\'' + field + '\':' + "'" + value + "'"
+        doc = self.client.documents.search(searchterm).pop()
+        return doc
+
+
+    def has_contract_with_purchase_order(self = None, po = None):
+        searchterm = '\'purchase order\':' + "'" + po + "'"
+        docs = self.client.documents.search(searchterm)
+        if len(docs) > 0:
+            return True
+        else:
+            return False
+
+
+    def get_all_docs(self):
+        if self.docs is None:
+            self.docs = self.client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
+        else:
+            return self.docs
+
+
+    def has_contract_with_k_no(k_no):
+        searchterm = '\'contract number\':' + "'" + k_no + "'"
+        if len(documentCloudClient.documents.search(searchterm))<1:
+            return False; #it is a new contract
+        return True; #it is an existing contract. We know the k-number
+
+
+    def uploadContract(file, data, description, title):
+        if len(data['contract number'])<1:
+            return #do not upload. There is a problem
+        newid = documentCloudClient.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
+        return newid
+
+
+class LensDatabase():
+
+    #refactor to take a type
+    def addVendor(vendor):
+        indb = session.query(Vendor).filter(Vendor.name==vendor).count()
+        if indb==0:
+            vendor = Vendor(vendor)
+            session.add(vendor)
+            session.commit()
+
+
+    def addDepartment(department):
+        indb = session.query(Department).filter(Department.name==department).count()
+        if indb==0:
+            department = Department(department)
+            session.add(department)
+            session.commit()
+        
+
+    #refactor to take a type
+    def getVendorID_Lens(vendor):
+        session.flush()
+        vendors = session.query(Vendor).filter(Vendor.name==vendor).all()
+        vendor = vendors.pop()
+
+
+def getDepartmentID(department):
+     return session.query(Department).filter(Department.name==department).first().id
+
 def remakeDB():
-    engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
     Base.metadata.create_all(engine)
+
 
 if __name__ == "__main__":
     remakeDB()
