@@ -38,3 +38,11 @@ class TestDocumentCloudProject(TestCase):
         lines = "".join([l.replace("\n", "") for l in open(lines)])
         po = PurchaseOrder(lines)
         self.assertEquals(po.purchaseorder, "HS486912")
+
+
+    def test_vendor_id(self):
+        corpus_loc = s.corpus_loc
+        lines = corpus_loc + "/purchaseorders/" + "HS486912"
+        lines = "".join([l.replace("\n", "") for l in open(lines)])
+        po = PurchaseOrder(lines)
+        self.assertEquals(po.vendor_id_city, "00000843")

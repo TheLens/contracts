@@ -6,7 +6,7 @@ import ConfigParser
 from documentcloud import DocumentCloud
 
 from bs4 import BeautifulSoup
-from utilities import get_from_config
+
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -32,7 +32,7 @@ class PurchaseOrder(object):
         self.attachments = self.get_attachments(self.soup)
 
 
-    def get_attachments(soup):
+    def get_attachments(self, soup):
         try:
             mainTable = soup.select('.table-01').pop()
             metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
@@ -155,10 +155,11 @@ Abstracts from Lens contracts project
 '''
 class DocumentCloudProject():
    
-
+ 
     def __init__(self):
-        doc_cloud_user = get_from_config('doc_cloud_user')
-        doc_cloud_password = get_from_config('doc_cloud_password')
+        settings = Settings()
+        doc_cloud_user = settings.doc_cloud_user
+        doc_cloud_password = settings.doc_cloud_password
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
 
