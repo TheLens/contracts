@@ -9,6 +9,8 @@ class Settings():
         self.user = self.get_from_config('user')
         self.corpus_loc = self.get_from_config('corpus_loc')
         self.database = self.get_from_config('database')
+        self.doc_cloud_user = self.get_from_config('doc_cloud_user')
+        self.doc_cloud_password = self.get_from_config('doc_cloud_password')
 
     def get_from_config(self, field):
         config = ConfigParser.RawConfigParser()
