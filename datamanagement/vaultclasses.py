@@ -6,7 +6,7 @@ import ConfigParser
 
 Base = declarative_base()
 
-CONFIG_LOCATION = '../app.cfg'
+CONFIG_LOCATION = 'app.cfg'
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
