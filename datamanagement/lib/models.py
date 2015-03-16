@@ -6,7 +6,10 @@ import ConfigParser
 from documentcloud import DocumentCloud
 
 from bs4 import BeautifulSoup
+<<<<<<< HEAD
 
+=======
+>>>>>>> cc7f20ee5d9e379d12a74b642e15acc92b853855
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -157,9 +160,15 @@ class DocumentCloudProject():
    
  
     def __init__(self):
+<<<<<<< HEAD
         settings = Settings()
         doc_cloud_user = settings.doc_cloud_user
         doc_cloud_password = settings.doc_cloud_password
+=======
+        s = Settings()
+        doc_cloud_user = s.doc_cloud_user
+        doc_cloud_password = s.doc_cloud_password
+>>>>>>> cc7f20ee5d9e379d12a74b642e15acc92b853855
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
 
