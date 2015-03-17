@@ -11,6 +11,8 @@ class Settings():
         self.database = self.get_from_config('database')
         self.doc_cloud_user = self.get_from_config('doc_cloud_user')
         self.doc_cloud_password = self.get_from_config('doc_cloud_password')
+        self.root_folder = self.get_from_config('root_folder')
+        self.log = self.root_folder + "/contracts.log" 
 
     def get_from_config(self, field):
         config = ConfigParser.RawConfigParser()

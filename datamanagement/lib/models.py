@@ -1,10 +1,13 @@
 import os
 import re
+import urllib2
 import datetime
 import ConfigParser
+import logging
+import sys
 
 from documentcloud import DocumentCloud
-
+from contracts.settings import Settings
 from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,7 +16,24 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
-from contracts.settings import Settings
+settings = Settings()
+
+LEVELS = { 'debug':logging.DEBUG,
+            'info':logging.INFO,
+            'warning':logging.WARNING,
+            'error':logging.ERROR,
+            'critical':logging.CRITICAL
+            }
+
+if len(sys.argv) > 1:
+    level_name = sys.argv[1]
+    level = LEVELS.get(level_name, logging.NOTSET)
+    logging.basicConfig(level=level, filename=settings.log)
+else:
+    logging.basicConfig(level=logging.DEBUG, filename=settings.log)
+
+
+logging.warning('This message should go to the log file')
 
 
 class PurchaseOrder(object):
@@ -162,7 +182,7 @@ class LensRepository():
 
 
     def download_purchaseorder(self, purchaseorderno):
-        if s in self.skiplist:
+        if purchaseorderno in self.skiplist:
             raise PermissionError("Contract not posted to public website")
         if not self.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
@@ -178,6 +198,11 @@ class LensRepository():
         f.write(html) # python will convert \n to os.linesep
         f.close() # you can omit in most cases as the destructor will call if
 
+
+    def sync(self, purchaseorderno):
+        if not self.has_pos(purchaseorderno):
+            self.download_purchaseorder(purchaseorderno)
+
     
     def has_pos(self, purchaseorderno):
         file_loc = self.purchaseorders_location + purchaseorderno
@@ -187,9 +212,16 @@ class LensRepository():
             return False
 
 
+    def get_skip_list(self):
+        skiplist_loc = Settings().root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
+        skiplist = open(skiplist_loc)
+        skiplist = [l.replace("\n", "") for l in skiplist]
+        return skiplist
+
+
     def __init__(self):
         #do not include these aviation contracts. They are not posted on the city's public purchasing site (but are included in the city's contract logs.)
-        self.skiplist = ["AV157123", "AV260408", "AV265701", "AV368931", "AV370951", "AV484558", "AV485159", "AV485392", "AV485393", "AV485394", "AV486592", "AV486594", "AV487176", "AV488387", "AV488631", "AV488632", "AV489081", "AV489714", "AV489803", "AV490794", "AV491382"]
+        self.skiplist = self.get_skip_list()
         self.purchaseorders_location = Settings().corpus_loc + "/purchaseorders/" 
 
 
@@ -275,8 +307,21 @@ class LensDatabase():
         vendor = vendors.pop()
 
 
-def getDepartmentID(department):
-     return session.query(Department).filter(Department.name==department).first().id
+    def getDepartmentID(department):
+        return session.query(Department).filter(Department.name==department).first().id
+
+
+class SummaryProcessor():
+
+
+    #refactor to take a type
+    def process(self, purchaseorderno):
+        doc_cloud_project = DocumentCloudProject()
+        lens_repo = LensRepository()
+        if not doc_cloud_project.has_contract("purchase order", purchaseorderno): #if Document cloud does not have this already
+            lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
+        else:
+            print "Document cloud aready has {}".format(purchaseorderno)
 
 
 def remakeDB():
