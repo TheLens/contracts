@@ -1,5 +1,5 @@
 from unittest import TestCase
-from contracts.datamanagement.lib.models import DocumentCloudProject, PurchaseOrder
+from contracts.datamanagement.lib.models import DocumentCloudProject, PurchaseOrder, LensRepository
 from contracts.settings import Settings
 
 s = Settings()
@@ -8,12 +8,12 @@ class TestDocumentCloudProject(TestCase):
 
     def test_DocumentCloudProject_has_purchase_order(self):
         d = DocumentCloudProject()
-        self.assertEquals(d.has_contract_with_purchase_order('HL592896'), True)
+        self.assertEquals(d.has_contract('purchase order', 'HL592896'), True)
 
 
     def test_DocumentCloudProject_has_purchase_order2(self):
         d = DocumentCloudProject()
-        self.assertEquals(d.has_contract_with_purchase_order('somerandomstuff'), False)
+        self.assertEquals(d.has_contract('purchase order', 'somerandomstuff'), False)
 
 
     def test_DocumentCloudProject_get_all_docs(self):
@@ -58,3 +58,12 @@ class TestDocumentCloudProject(TestCase):
         d.update_metadata(doc_cloud_id , "vendor_id", po.vendor_id_city)
         contract = d.client.documents.get(doc_cloud_id)
         self.assertEquals(contract.data["vendor_id"], po.vendor_id_city)
+
+    def test_repository_has_pos(self):
+        repo = LensRepository()
+        self.assertEquals(repo.has_pos("YH380294"), True)
+
+
+    def test_valid_po(self):
+        repo = LensRepository()
+        self.assertEquals(repo.has_pos("noates3p4"), False)

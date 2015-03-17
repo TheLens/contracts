@@ -6,10 +6,6 @@ import ConfigParser
 from documentcloud import DocumentCloud
 
 from bs4 import BeautifulSoup
-<<<<<<< HEAD
-
-=======
->>>>>>> cc7f20ee5d9e379d12a74b642e15acc92b853855
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -153,6 +149,50 @@ class EthicsRecord(Base):
         return "${} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
 
 
+class LensRepository():
+
+
+    def valid_po(self, purchaseorderno):
+        po_re = '[A-Z]{2}\d+'
+        po_regex = re.compile(po_re)
+        if po_regex.match(purchaseorderno):
+            return True
+        else:
+            return False
+
+
+    def download_purchaseorder(self, purchaseorderno):
+        if s in self.skiplist:
+            raise PermissionError("Contract not posted to public website")
+        if not self.valid_po(purchaseorderno):
+            raise ValueError("not a valid po")
+        if not self.has_pos(purchaseorderno):
+            response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
+            html = response.read()
+            self.write_pos(html)
+
+
+    def write_pos(self, html):
+        file_loc = self.purchaseorders_location + purchaseorderno
+        f = open(file_loc,'w')
+        f.write(html) # python will convert \n to os.linesep
+        f.close() # you can omit in most cases as the destructor will call if
+
+    
+    def has_pos(self, purchaseorderno):
+        file_loc = self.purchaseorders_location + purchaseorderno
+        if os.path.isfile(file_loc):
+            return True
+        else:
+            return False
+
+
+    def __init__(self):
+        #do not include these aviation contracts. They are not posted on the city's public purchasing site (but are included in the city's contract logs.)
+        self.skiplist = ["AV157123", "AV260408", "AV265701", "AV368931", "AV370951", "AV484558", "AV485159", "AV485392", "AV485393", "AV485394", "AV486592", "AV486594", "AV487176", "AV488387", "AV488631", "AV488632", "AV489081", "AV489714", "AV489803", "AV490794", "AV491382"]
+        self.purchaseorders_location = Settings().corpus_loc + "/purchaseorders/" 
+
+
 '''
 Abstracts from Lens contracts project
 '''
@@ -160,15 +200,9 @@ class DocumentCloudProject():
    
  
     def __init__(self):
-<<<<<<< HEAD
         settings = Settings()
         doc_cloud_user = settings.doc_cloud_user
         doc_cloud_password = settings.doc_cloud_password
-=======
-        s = Settings()
-        doc_cloud_user = s.doc_cloud_user
-        doc_cloud_password = s.doc_cloud_password
->>>>>>> cc7f20ee5d9e379d12a74b642e15acc92b853855
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
 
@@ -188,6 +222,13 @@ class DocumentCloudProject():
         return True; #it is an existing contract. We know the k-number
 
 
+    def add_contract(self, ponumber):
+        po_re = '[A-Z]{2}\d+'
+        po_regex = re.compile(po_re)
+        if not po_regex.match(ponumber):
+            raise ValueError("{} doesn't look like a valid purchase order").format(ponumber)
+        #TODO
+
     def get_all_docs(self):
         if self.docs is None:
             self.docs = self.client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
@@ -206,6 +247,7 @@ class DocumentCloudProject():
         contract = self.client.documents.get(doc_cloud_id)
         contract.data[meta_field] = new_meta_data_value
         contract.put()
+
 
 class LensDatabase():
 
@@ -235,6 +277,7 @@ class LensDatabase():
 
 def getDepartmentID(department):
      return session.query(Department).filter(Department.name==department).first().id
+
 
 def remakeDB():
     engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
