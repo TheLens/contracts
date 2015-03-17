@@ -46,3 +46,15 @@ class TestDocumentCloudProject(TestCase):
         lines = "".join([l.replace("\n", "") for l in open(lines)])
         po = PurchaseOrder(lines)
         self.assertEquals(po.vendor_id_city, "00000843")
+
+
+    def test_update_metadata(self):
+        corpus_loc = s.corpus_loc
+        lines = corpus_loc + "/purchaseorders/" + "ED263245"
+        lines = "".join([l.replace("\n", "") for l in open(lines)])
+        po = PurchaseOrder(lines)
+        d = DocumentCloudProject()
+        doc_cloud_id = d.get_contract("purchase order", "ED263245").id
+        d.update_metadata(doc_cloud_id , "vendor_id", po.vendor_id_city)
+        contract = d.client.documents.get(doc_cloud_id)
+        self.assertEquals(contract.data["vendor_id"], po.vendor_id_city)

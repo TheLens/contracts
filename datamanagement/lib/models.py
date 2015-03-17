@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
-from ... settings import Settings
+from contracts.settings import Settings
 
 
 class PurchaseOrder(object):
@@ -173,19 +173,19 @@ class DocumentCloudProject():
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
 
 
+    #searchterm = '\'purchase order\':' + "'" + po + "'"
+    #searchterm = '\'contract number\':' + "'" + k_no + "'"
     def get_contract(self, field, value):
         searchterm = '\'' + field + '\':' + "'" + value + "'"
         doc = self.client.documents.search(searchterm).pop()
         return doc
 
 
-    def has_contract_with_purchase_order(self = None, po = None):
-        searchterm = '\'purchase order\':' + "'" + po + "'"
-        docs = self.client.documents.search(searchterm)
-        if len(docs) > 0:
-            return True
-        else:
-            return False
+    def has_contract(self, field, value):
+        searchterm = '\'' + field + '\':' + "'" + value + "'"
+        if len(self.client.documents.search(searchterm))<1:
+            return False; #it is a new contract
+        return True; #it is an existing contract. We know the k-number
 
 
     def get_all_docs(self):
@@ -195,19 +195,17 @@ class DocumentCloudProject():
             return self.docs
 
 
-    def has_contract_with_k_no(k_no):
-        searchterm = '\'contract number\':' + "'" + k_no + "'"
-        if len(documentCloudClient.documents.search(searchterm))<1:
-            return False; #it is a new contract
-        return True; #it is an existing contract. We know the k-number
-
-
-    def uploadContract(file, data, description, title):
+    def uploadContract(self, file, data, description, title):
         if len(data['contract number'])<1:
             return #do not upload. There is a problem
         newid = documentCloudClient.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
         return newid
 
+
+    def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
+        contract = self.client.documents.get(doc_cloud_id)
+        contract.data[meta_field] = new_meta_data_value
+        contract.put()
 
 class LensDatabase():
 
