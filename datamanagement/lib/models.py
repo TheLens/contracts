@@ -5,7 +5,10 @@ import datetime
 import ConfigParser
 import logging
 import sys
+import datetime
 
+
+from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
 from bs4 import BeautifulSoup
@@ -33,22 +36,78 @@ else:
     logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
 
-logging.warning('This message should go to the log file')
-
 
 class PurchaseOrder(object):
 
 
-    def __init__(self, html):
-        self.html = html
+    def __init__(self, purchaseorderno):
+        if not self.valid_po(purchaseorderno):
+            raise ValueError("not a valid po")
+        html = self.get_html(purchaseorderno)
         self.soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
+        self.download_vendor_profile(self.vendor_id_city)
         self.description = self.get_description(self.soup)
         self.vendor_name = self.get_vendor_name(self.soup)
         self.department = self.get_department(self.soup)
         self.k_number = self.getKnumber(self.soup)
         self.purchaseorder = self.get_purchase_order(self.soup)
         self.attachments = self.get_attachments(self.soup)
+        for a in self.attachments:
+            self.download_attachment(a)
+
+
+    def download_attachment(self, attachment):
+        bidnumber = re.search('[0-9]+', attachment.get('href')).group()
+        bidfilelocation = settings.bids_location + bidnumber + ".pdf"
+        if not os.path.isfile(bidfilelocation):
+            download_attachment_file(bidnumber, bidfilelocation)
+            logging.info('| {} | Downloaded bid {} associated with purchase order {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
+        else:
+            logging.info('| {} | Already have bid {} for purchase order {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
+
+
+    def valid_po(self, purchaseorderno):
+        po_re = '[A-Z]{2}\d+'
+        po_regex = re.compile(po_re)
+        if po_regex.match(purchaseorderno):
+            return True
+        else:
+            return False
+
+
+    def get_html(self, purchaseorderno):
+        if os.path.isfile(settings.purchase_order_location + purchaseorderno):
+            logging.info('| {} | Already have purchase order | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            return "".join([i.replace("\n", "") for i in open(settings.purchase_order_location + purchaseorderno)])
+        else:
+            download_purchaseorder(purchaseorderno)
+
+
+    def download_purchaseorder(self, purchaseorderno):
+        if purchaseorderno in self.skiplist:
+            logging.warning('| {} | Contract is in the skiplist | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            return  
+        if not self.valid_po(purchaseorderno):
+            raise ValueError("not a valid po")
+        if not self.has_pos(purchaseorderno):
+            response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
+            html = response.read()
+            with open(self.purchaseorders_location + purchaseorderno) as f:
+                f.write(html)
+                logging.info('| {} | Downloaded purchase order | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+   
+
+    def download_vendor_profile(self, vendor_id_city):
+        vendor_file_location = settings.vendors_location + vendor_id_city
+        if not os.path.isfile(vendor_file_location):
+            response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/vendor/vendorProfileOrgInfo.sdo?external=true&vendorId=' + vendor_id_city)
+            html = response.read()
+            with open(vendor_file_location,'w') as f:
+                f.write(html)
+            logging.info('| {} | Downloaded vendor file | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
+        else:
+            logging.info('| {} | Skipped vendor file. Already present | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
 
 
     def get_attachments(self, soup):
@@ -71,22 +130,22 @@ class PurchaseOrder(object):
 
 
     def get_description(self, soup):
-     try:
-        mainTable = soup.select('.table-01').pop()
-        metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
-        description = metadatarow[1].findChildren(['td'])[5].contents.pop().strip()
-        return description
-     except:
-        return ""
+        try:
+            mainTable = soup.select('.table-01').pop()
+            metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
+            description = metadatarow[1].findChildren(['td'])[5].contents.pop().strip()
+            return description
+        except:
+            return ""
 
 
     def get_vendor_name(self, soup):
-     vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
-     vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
-     vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
-     return vendor
+        vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
+        vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
+        vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
+        return vendor
 
-    
+
     def getKnumber(self, soup):
         mainTable = soup.select('.table-01').pop()
         metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
@@ -183,16 +242,17 @@ class LensRepository():
 
     def download_purchaseorder(self, purchaseorderno):
         if purchaseorderno in self.skiplist:
-            raise PermissionError("Contract not posted to public website")
+            logging.warning('| {} | Contract is in the skiplist | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            return  
         if not self.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
         if not self.has_pos(purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
             html = response.read()
-            self.write_pos(html)
+            self.write_pos(html, purchaseorderno)
 
 
-    def write_pos(self, html):
+    def write_pos(self, html, purchaseorderno):
         file_loc = self.purchaseorders_location + purchaseorderno
         f = open(file_loc,'w')
         f.write(html) # python will convert \n to os.linesep
@@ -313,16 +373,19 @@ class LensDatabase():
 
 class SummaryProcessor():
 
-
     #refactor to take a type
     def process(self, purchaseorderno):
+        logging.warning('| {} | Processing | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
         doc_cloud_project = DocumentCloudProject()
         lens_repo = LensRepository()
-        if not doc_cloud_project.has_contract("purchase order", purchaseorderno): #if Document cloud does not have this already
-            lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
-        else:
-            print "Document cloud aready has {}".format(purchaseorderno)
-
+        try:
+            if not doc_cloud_project.has_contract("purchase order", purchaseorderno): #if Document cloud does not have this already
+                lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
+                logging.info('| {} | Synched | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            else:
+                logging.info('| {} | DocumentCloud already has this one | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+        except urllib2.HTTPError:
+            logging.warning('| {} | Contract not posted publically | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
 def remakeDB():
     engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)

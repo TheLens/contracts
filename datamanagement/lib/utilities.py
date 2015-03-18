@@ -1,13 +1,15 @@
 import os
 import subprocess
+from contracts.settings import Settings
 
+settings = Settings()
 
-def downloadFile(bidno):
+def download_attachment_file(bidno, bidfilelocation):
         if not os.path.exists(bidno):
             p = subprocess.Popen([
                 'curl',
                 '-o',
-                bidno,
+                bidfilelocation,
                 'http://www.purchasing.cityofno.com/bso/external/document/attachments/attachmentFileDetail.sdo'
                     ,
                 '-H',
