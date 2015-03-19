@@ -53,8 +53,20 @@ class PurchaseOrder(object):
         self.k_number = self.getKnumber(self.soup)
         self.purchaseorder = self.get_purchase_order(self.soup)
         self.attachments = self.get_attachments(self.soup)
+        self.data = self.get_data()
+        self.title = self.vendor_name + " : " + self.description
         for a in self.attachments:
             self.download_attachment(a)
+
+   
+    def get_data(self):
+        output = {}
+        output['vendor_id'] = self.vendor_id_city
+        output['purchase order'] = self.purchaseorder
+        output['contract number'] = self.k_number
+        output['department'] = self.department
+        output['vendor'] = self.vendor_name
+        return output
 
 
     def download_attachment(self, attachment):
@@ -152,7 +164,9 @@ class PurchaseOrder(object):
         try:
             knumber = metadatarow[6].findChildren(['td'])[1].contents.pop().replace('k', '').replace("m", '').strip().replace("M", "")
         except:
-           knumber = "unknown"
+            knumber = "unknown"
+        if len(knumber) == 0:
+            knumber = "unknown"
         return knumber
 
 
@@ -177,6 +191,7 @@ class PurchaseOrder(object):
         data['purchase order'] = purchaseorder.strip()
         data['vendor_id'] = self.vendor_id_city
         return data
+
 
     def __str__(self):
         return "<PurchaseOrder {}>".format(self.vendor_id_city)
@@ -319,7 +334,16 @@ class DocumentCloudProject():
         po_regex = re.compile(po_re)
         if not po_regex.match(ponumber):
             raise ValueError("{} doesn't look like a valid purchase order").format(ponumber)
-        #TODO
+        if not self.has_contract("purchase order", ponumber):
+            po = PurchaseOrder(ponumber)
+            logging.info('| {} | Adding {} to DocumentCloud | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+            if len(po.attachments) == 1:
+                bidnumber = re.search('[0-9]+', po.attachments[0].get('href')).group()
+                bidfilelocation = settings.bids_location + bidnumber + ".pdf"
+                self.uploadContract(bidfilelocation, po.data, po.description, po.title)
+        else:
+            logging.info('| {} | Not adding {} to DocumentCloud. Already up there | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+
 
     def get_all_docs(self):
         if self.docs is None:
@@ -330,9 +354,10 @@ class DocumentCloudProject():
 
     def uploadContract(self, file, data, description, title):
         if len(data['contract number'])<1:
+            logging.info('| {} | Not adding {} to DocumentCloud. Contract number {} is null | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], data['contract number'], data['purchase order']))
             return #do not upload. There is a problem
-        newid = documentCloudClient.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
-        return newid
+        newcontract = self.client.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
+        logging.info('| {} | {} has doc_cloud_id {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], newcontract.id, data['purchase order']))
 
 
     def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
