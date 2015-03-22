@@ -6,7 +6,7 @@ import ConfigParser
 import logging
 import sys
 import datetime
-
+import uuid
 
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
@@ -37,13 +37,20 @@ else:
 
 
 
+run_id = " " + str(uuid.uuid1())  #this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
+
+
 class PurchaseOrder(object):
 
 
-    def __init__(self, purchaseorderno):
+    def __init__(self, purchaseorderno, download_attachments=True):
         if not self.valid_po(purchaseorderno):
-            raise ValueError("not a valid po")
+            logging.info('{} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno, purchaseorderno))
+            return
         html = self.get_html(purchaseorderno)
+        if self.check_invalid(html):
+            logging.info('{} | Skipping. No associated vendor info | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno, purchaseorderno))
+            return
         self.soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
         self.download_vendor_profile(self.vendor_id_city)
@@ -55,10 +62,18 @@ class PurchaseOrder(object):
         self.attachments = self.get_attachments(self.soup)
         self.data = self.get_data()
         self.title = self.vendor_name + " : " + self.description
-        for a in self.attachments:
-            self.download_attachment(a)
+        if download_attachments:
+            for a in self.attachments:
+                self.download_attachment(a)
 
-   
+
+    def check_invalid(self, html):
+        if "There are no vendor distributors found for this master blanket/contract" in html:
+            return True
+        else:
+            return False
+
+
     def get_data(self):
         output = {}
         output['vendor_id'] = self.vendor_id_city
@@ -74,9 +89,9 @@ class PurchaseOrder(object):
         bidfilelocation = settings.bids_location + bidnumber + ".pdf"
         if not os.path.isfile(bidfilelocation):
             download_attachment_file(bidnumber, bidfilelocation)
-            logging.info('| {} | Downloaded bid {} associated with purchase order {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
+            logging.info('{} | {} | Downloaded bid {} associated with purchase order {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
         else:
-            logging.info('| {} | Already have bid {} for purchase order {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
+            logging.info('{} | {} | Already have bid {} for purchase order {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
 
 
     def valid_po(self, purchaseorderno):
@@ -90,7 +105,7 @@ class PurchaseOrder(object):
 
     def get_html(self, purchaseorderno):
         if os.path.isfile(settings.purchase_order_location + purchaseorderno):
-            logging.info('| {} | Already have purchase order | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            logging.info('{} | {} | Already have purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return "".join([i.replace("\n", "") for i in open(settings.purchase_order_location + purchaseorderno)])
         else:
             download_purchaseorder(purchaseorderno)
@@ -98,7 +113,7 @@ class PurchaseOrder(object):
 
     def download_purchaseorder(self, purchaseorderno):
         if purchaseorderno in self.skiplist:
-            logging.warning('| {} | Contract is in the skiplist | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
         if not self.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
@@ -107,19 +122,22 @@ class PurchaseOrder(object):
             html = response.read()
             with open(self.purchaseorders_location + purchaseorderno) as f:
                 f.write(html)
-                logging.info('| {} | Downloaded purchase order | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+                logging.info('{} | {} | Downloaded purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
    
 
     def download_vendor_profile(self, vendor_id_city):
         vendor_file_location = settings.vendors_location + vendor_id_city
         if not os.path.isfile(vendor_file_location):
-            response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/vendor/vendorProfileOrgInfo.sdo?external=true&vendorId=' + vendor_id_city)
-            html = response.read()
-            with open(vendor_file_location,'w') as f:
-                f.write(html)
-            logging.info('| {} | Downloaded vendor file | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
+            try:
+                response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/vendor/vendorProfileOrgInfo.sdo?external=true&vendorId=' + vendor_id_city)
+                html = response.read()
+                with open(vendor_file_location,'w') as f:
+                    f.write(html)
+                logging.info('{} | {} | Downloaded vendor file | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
+            except urllib2.HTTPError:
+                logging.info('{} | {} | Could not download vendor file | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
         else:
-            logging.info('| {} | Skipped vendor file. Already present | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
+            logging.info('{} | {} | Skipped vendor file. Already present | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), vendor_id_city))
 
 
     def get_attachments(self, soup):
@@ -138,8 +156,8 @@ class PurchaseOrder(object):
         if len(vendorids) == 0:
             return ""
         else:
-            return vendorids.pop()
-
+            return vendorids[0]   #you need to take the first one for this list or you'll sometimes end up w/ the vendor_id for a subcontractor, which will sometimes wash up on the vendor page
+                                  #view-source:http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=FC154683&releaseNbr=0&parentUrl=contract 
 
     def get_description(self, soup):
         try:
@@ -152,11 +170,18 @@ class PurchaseOrder(object):
 
 
     def get_vendor_name(self, soup):
-        vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
-        vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
-        vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
-        return vendor
-
+        try:
+            vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
+            vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
+            vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
+            return vendor
+        except IndexError:      #in cases of index error, go ahead and downlaod the vendor page
+            vendor_file_location = settings.vendors_location + self.vendor_id_city
+            html = "".join([l.replace("\n", "") for l in open(vendor_file_location)])
+            new_soup = BeautifulSoup(html)
+            header = new_soup.select(".sectionheader-01")[0]
+            vendor_name = str(header).replace("Vendor Profile - ", "")
+            return vendor_name
 
     def getKnumber(self, soup):
         mainTable = soup.select('.table-01').pop()
@@ -257,7 +282,7 @@ class LensRepository():
 
     def download_purchaseorder(self, purchaseorderno):
         if purchaseorderno in self.skiplist:
-            logging.warning('| {} | Contract is in the skiplist | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
         if not self.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
@@ -275,6 +300,9 @@ class LensRepository():
 
 
     def sync(self, purchaseorderno):
+        if purchaseorderno in self.skiplist:
+            logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            return
         if not self.has_pos(purchaseorderno):
             self.download_purchaseorder(purchaseorderno)
 
@@ -312,6 +340,7 @@ class DocumentCloudProject():
         doc_cloud_password = settings.doc_cloud_password
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
+        self.skiplist = self.get_skip_list()
 
 
     #searchterm = '\'purchase order\':' + "'" + po + "'"
@@ -332,17 +361,32 @@ class DocumentCloudProject():
     def add_contract(self, ponumber):
         po_re = '[A-Z]{2}\d+'
         po_regex = re.compile(po_re)
+        logging.info('{} | {} | Attempting to add {} to DocumentCloud | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
         if not po_regex.match(ponumber):
-            raise ValueError("{} doesn't look like a valid purchase order").format(ponumber)
+            logging.info("{} doesn't look like a valid purchase order. Skipping for now".format(ponumber))
+            return
+        if ponumber in self.skiplist:
+            logging.info('{} | {} | Not adding {} to DocumentCloud. In the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+            return
         if not self.has_contract("purchase order", ponumber):
-            po = PurchaseOrder(ponumber)
-            logging.info('| {} | Adding {} to DocumentCloud | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
-            if len(po.attachments) == 1:
-                bidnumber = re.search('[0-9]+', po.attachments[0].get('href')).group()
-                bidfilelocation = settings.bids_location + bidnumber + ".pdf"
-                self.uploadContract(bidfilelocation, po.data, po.description, po.title)
+            try:
+                po = PurchaseOrder(ponumber)
+            except IndexError:
+                logging.info('{} | {} | Something looks wrong with the format on this one. Skipping for now | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+                return
+            logging.info('{} | {} | Adding {} to DocumentCloud | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+            if len(po.attachments) > 0:
+                counter = 1
+                for a in po.attachments:
+                    bidnumber = re.search('[0-9]+', a.get('href')).group()
+                    bidfilelocation = settings.bids_location + bidnumber + ".pdf"
+                    extra_string = ""
+                    if counter > 1:
+                        extra_string = str(counter) + " of " + str(len(po.attachments))
+                    self.uploadContract(bidfilelocation, po.data, po.description + extra_string, po.title + extra_string)
+                    counter += 1             
         else:
-            logging.info('| {} | Not adding {} to DocumentCloud. Already up there | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
+            logging.info('{} | {} | Not adding {} to DocumentCloud. Already up there | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
 
 
     def get_all_docs(self):
@@ -354,16 +398,23 @@ class DocumentCloudProject():
 
     def uploadContract(self, file, data, description, title):
         if len(data['contract number'])<1:
-            logging.info('| {} | Not adding {} to DocumentCloud. Contract number {} is null | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], data['contract number'], data['purchase order']))
+            logging.info('{} | {} | Not adding {} to DocumentCloud. Contract number {} is null | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], data['contract number'], data['purchase order']))
             return #do not upload. There is a problem
         newcontract = self.client.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
-        logging.info('| {} | {} has doc_cloud_id {} | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], newcontract.id, data['purchase order']))
+        logging.info('{} | {} | {} has doc_cloud_id {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], newcontract.id, data['purchase order']))
 
 
     def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
         contract = self.client.documents.get(doc_cloud_id)
         contract.data[meta_field] = new_meta_data_value
         contract.put()
+
+
+    def get_skip_list(self):
+        skiplist_loc = Settings().root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
+        skiplist = open(skiplist_loc)
+        skiplist = [l.replace("\n", "") for l in skiplist]
+        return skiplist
 
 
 class LensDatabase():
@@ -398,19 +449,17 @@ class LensDatabase():
 
 class SummaryProcessor():
 
+
     #refactor to take a type
     def process(self, purchaseorderno):
-        logging.warning('| {} | Processing | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+        logging.warning('{} | {} | Processing | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
         doc_cloud_project = DocumentCloudProject()
         lens_repo = LensRepository()
         try:
-            if not doc_cloud_project.has_contract("purchase order", purchaseorderno): #if Document cloud does not have this already
-                lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
-                logging.info('| {} | Synched | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
-            else:
-                logging.info('| {} | DocumentCloud already has this one | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
+            logging.info('{} | {} | Synched | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
         except urllib2.HTTPError:
-            logging.warning('| {} | Contract not posted publically | {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
 def remakeDB():
     engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
