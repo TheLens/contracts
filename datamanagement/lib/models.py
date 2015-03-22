@@ -8,6 +8,7 @@ import sys
 import datetime
 import uuid
 
+from contracts.lib.models import Utilities
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
@@ -15,11 +16,12 @@ from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-
+from contracts.lib.models import Utilities
 
 Base = declarative_base()
 
 settings = Settings()
+utils = Utilities()
 
 LEVELS = { 'debug':logging.DEBUG,
             'info':logging.INFO,
@@ -43,19 +45,23 @@ run_id = " " + str(uuid.uuid1())  #this is a uuid that is unique to a given run 
 class PurchaseOrder(object):
 
 
-    def __init__(self, purchaseorderno, download_attachments=True):
-        if not self.valid_po(purchaseorderno):
-            logging.info('{} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno, purchaseorderno))
+    def __init__(self, tt, download_attachments=True):
+        purchaseorderno = tt
+        if not utils.valid_po(purchaseorderno):
+            print "invalssss"
+            logging.info('{} | {} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return
         html = self.get_html(purchaseorderno)
-        if self.check_invalid(html):
-            logging.info('{} | Skipping. No associated vendor info | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno, purchaseorderno))
-            return
         self.soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
         self.download_vendor_profile(self.vendor_id_city)
         self.description = self.get_description(self.soup)
-        self.vendor_name = self.get_vendor_name(self.soup)
+        try:
+            self.vendor_name = self.get_vendor_name(self.soup)
+        except IOError:
+            self.vendor_name = "unknown"
+            logging.info('{} | Skipping. No associated vendor info | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno, purchaseorderno))
+            return
         self.department = self.get_department(self.soup)
         self.k_number = self.getKnumber(self.soup)
         self.purchaseorder = self.get_purchase_order(self.soup)
@@ -65,6 +71,10 @@ class PurchaseOrder(object):
         if download_attachments:
             for a in self.attachments:
                 self.download_attachment(a)
+
+
+    def get_vendor_id_city(self):
+        return self.vendor_id_city
 
 
     def check_invalid(self, html):
@@ -94,15 +104,6 @@ class PurchaseOrder(object):
             logging.info('{} | {} | Already have bid {} for purchase order {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
 
 
-    def valid_po(self, purchaseorderno):
-        po_re = '[A-Z]{2}\d+'
-        po_regex = re.compile(po_re)
-        if po_regex.match(purchaseorderno):
-            return True
-        else:
-            return False
-
-
     def get_html(self, purchaseorderno):
         if os.path.isfile(settings.purchase_order_location + purchaseorderno):
             logging.info('{} | {} | Already have purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
@@ -115,7 +116,7 @@ class PurchaseOrder(object):
         if purchaseorderno in self.skiplist:
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
-        if not self.valid_po(purchaseorderno):
+        if not utils.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
         if not self.has_pos(purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
@@ -271,20 +272,11 @@ class EthicsRecord(Base):
 class LensRepository():
 
 
-    def valid_po(self, purchaseorderno):
-        po_re = '[A-Z]{2}\d+'
-        po_regex = re.compile(po_re)
-        if po_regex.match(purchaseorderno):
-            return True
-        else:
-            return False
-
-
     def download_purchaseorder(self, purchaseorderno):
         if purchaseorderno in self.skiplist:
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
-        if not self.valid_po(purchaseorderno):
+        if not utils.valid_po(purchaseorderno):
             raise ValueError("not a valid po")
         if not self.has_pos(purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
