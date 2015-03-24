@@ -374,7 +374,7 @@ class DocumentCloudProject():
                     extra_string = ""
                     if counter > 1:
                         extra_string = str(counter) + " of " + str(len(po.attachments))
-                    self.uploadContract(bidfilelocation, po.data, po.description + extra_string, po.title + extra_string)
+                    self.upload_contract(bidfilelocation, po.data, po.description + extra_string, po.title + extra_string)
                     counter += 1             
         else:
             logging.info('{} | {} | Not adding {} to DocumentCloud. Already up there | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ponumber, ponumber))
