@@ -3,38 +3,44 @@ import math
 import pprint
 import re
 import time
+import logging
 import ConfigParser
-sys.path.append('datamanagement')
 from flask import Flask
 from flask import render_template, make_response, send_from_directory
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask.ext.cache import Cache
-from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
+from contracts.lib.vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
 from documentcloud import DocumentCloud
+from contracts.settings import Settings
 
-
-from settings import Settings
 settings = Settings()
-
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
 
 PAGELENGTH = 8
 
-app = Flask(__name__)
+app = Flask(__name__ , template_folder=settings.templates)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 documentCloudClient = DocumentCloud()
 
+engine = create_engine(settings.connection_string)
 
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-database = get_from_config('database')
-user = get_from_config('user')
 dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
 
+logging.basicConfig(level=logging.DEBUG, filename=settings.log)
+
+LEVELS = { 'debug':logging.DEBUG,
+            'info':logging.INFO,
+            'warning':logging.WARNING,
+            'error':logging.ERROR,
+            'critical':logging.CRITICAL
+            }
+
+if len(sys.argv) > 1:
+    level_name = sys.argv[1]
+    level = LEVELS.get(level_name, logging.NOTSET)
+    logging.basicConfig(level=level, filename=settings.log)
+else:
+    logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
 
 @cache.memoize(timeout=900)
@@ -50,7 +56,6 @@ def translateToDocCloudForm(docs):
 
 @cache.memoize(timeout=900)
 def getContracts(offset, limit):
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -64,7 +69,6 @@ def getContracts(offset, limit):
 
 @cache.memoize(timeout=100000)
 def getContracts_Count():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -75,7 +79,6 @@ def getContracts_Count():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getVendors():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -88,7 +91,6 @@ def getVendors():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getDepartments():
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -102,7 +104,6 @@ def getDepartments():
 
 @cache.memoize(timeout=100000) #cache good for a day or so
 def getOfficers(vendor=None):
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -137,7 +138,6 @@ def getOffSet(q):
 
 @cache.memoize(timeout=100000)
 def translateToVendor(officerterm):
-    engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -316,10 +316,6 @@ def query_docs(q):
 
     if offset is None:
         return "Server error. Please contact The Lens"
-
-    # print '**vendor**' + vendor + '****'
-    # print '**officers**'  + officers + '****'
-    # print '**department**'  + department + '****'
 
     if len(officers) > 0:
         officers = [officers]
