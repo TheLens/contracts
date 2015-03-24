@@ -65,12 +65,13 @@ class PurchaseOrder(object):
         self.department = self.get_department(self.soup)
         self.k_number = self.getKnumber(self.soup)
         self.purchaseorder = self.get_purchase_order(self.soup)
+        
         self.attachments = self.get_attachments(self.soup)
-        self.data = self.get_data()
-        self.title = self.vendor_name + " : " + self.description
         if download_attachments:
             for a in self.attachments:
                 self.download_attachment(a)
+        self.data = self.get_data()
+        self.title = self.vendor_name + " : " + self.description
 
 
     def get_vendor_id_city(self):
@@ -109,16 +110,14 @@ class PurchaseOrder(object):
             logging.info('{} | {} | Already have purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return "".join([i.replace("\n", "") for i in open(settings.purchase_order_location + purchaseorderno)])
         else:
-            download_purchaseorder(purchaseorderno)
+            self.download_purchaseorder(purchaseorderno)
 
 
     def download_purchaseorder(self, purchaseorderno):
-        if purchaseorderno in self.skiplist:
-            logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
-            return  
         if not utils.valid_po(purchaseorderno):
-            raise ValueError("not a valid po")
-        if not self.has_pos(purchaseorderno):
+            logging.info("not a valid po {}".format(purchaseorderno))
+            return
+        if not os.path.exists(settings.purchase_order_location + purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
             html = response.read()
             with open(self.purchaseorders_location + purchaseorderno) as f:
@@ -220,7 +219,7 @@ class PurchaseOrder(object):
 
 
     def __str__(self):
-        return "<PurchaseOrder {}>".format(self.vendor_id_city)
+        return "<PurchaseOrder {}>".format(self.purchaseorder)
 
 
 class EthicsRecord(Base):
@@ -388,7 +387,7 @@ class DocumentCloudProject():
             return self.docs
 
 
-    def uploadContract(self, file, data, description, title):
+    def upload_contract(self, file, data, description, title):
         if len(data['contract number'])<1:
             logging.info('{} | {} | Not adding {} to DocumentCloud. Contract number {} is null | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], data['contract number'], data['purchase order']))
             return #do not upload. There is a problem
