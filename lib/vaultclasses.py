@@ -13,6 +13,7 @@ class Vendor(Base):
 
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
+	vendor_id_city = Column(String)
 
 	def __init__(self, name):
 		self.name = name
