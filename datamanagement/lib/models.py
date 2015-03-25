@@ -17,6 +17,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from contracts.lib.models import Utilities
+import subprocess
 
 Base = declarative_base()
 
@@ -48,7 +49,6 @@ class PurchaseOrder(object):
     def __init__(self, tt, download_attachments=True):
         purchaseorderno = tt
         if not utils.valid_po(purchaseorderno):
-            print "invalssss"
             logging.info('{} | {} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return
         html = self.get_html(purchaseorderno)
@@ -120,7 +120,7 @@ class PurchaseOrder(object):
         if not os.path.exists(settings.purchase_order_location + purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
             html = response.read()
-            with open(self.purchaseorders_location + purchaseorderno) as f:
+            with open(settings.purchase_order_location + purchaseorderno, 'w') as f:
                 f.write(html)
                 logging.info('{} | {} | Downloaded purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
    
@@ -276,7 +276,8 @@ class LensRepository():
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
         if not utils.valid_po(purchaseorderno):
-            raise ValueError("not a valid po")
+            logging.warning('{} | {} | Invalid purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
+            return  
         if not self.has_pos(purchaseorderno):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
             html = response.read()
@@ -396,6 +397,7 @@ class DocumentCloudProject():
 
 
     def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
+        logging.info('{} | {} | updating {} on DocumentCloud. Changing {} to {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), doc_cloud_id, meta_field, new_meta_data_value))
         contract = self.client.documents.get(doc_cloud_id)
         contract.data[meta_field] = new_meta_data_value
         contract.put()
@@ -441,7 +443,6 @@ class LensDatabase():
 class SummaryProcessor():
 
 
-    #refactor to take a type
     def process(self, purchaseorderno):
         logging.warning('{} | {} | Processing | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
         doc_cloud_project = DocumentCloudProject()
@@ -452,10 +453,22 @@ class SummaryProcessor():
         except urllib2.HTTPError:
             logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
-def remakeDB():
-    engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
-    Base.metadata.create_all(engine)
 
+class DailyScraper():
 
-if __name__ == "__main__":
-    remakeDB()
+    def run(self):
+        settings = Settings()
+        logging.info('{} | {} | Daily scraper run '.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        proc = subprocess.Popen('/home/abe/lens/contracts/datamanagement/daily.sh', stdout=subprocess.PIPE)  #look for daily contract pos
+        proc.wait()
+        output = proc.stdout.read()
+        doc_cloud_project = DocumentCloudProject()
+        lens_repo = LensRepository()
+        output = [o for o in output.split("\n") if len(o) > 0]
+        for po in output:
+            logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), po))
+            try:
+                lens_repo.sync(po)
+                doc_cloud_project.add_contract(po)
+            except urllib2.HTTPError:
+                logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))

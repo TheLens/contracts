@@ -16,6 +16,11 @@ class TestDocumentCloudProject(TestCase):
         self.assertEquals(utils.valid_po("HS486912"), True)
 
 
+    def test_valid_po():
+        utils = Utilities()
+        self.assertEquals(utils.valid_po("HS4"), False)
+
+
     def test_DocumentCloudProject_has_purchase_order(self):
         d = DocumentCloudProject()
         self.assertEquals(d.has_contract('purchase order', 'HL592896'), True)
