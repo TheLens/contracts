@@ -459,7 +459,7 @@ class DailyScraper():
     def run(self):
         settings = Settings()
         logging.info('{} | {} | Daily scraper run '.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        proc = subprocess.Popen('/home/abe/lens/contracts/datamanagement/daily.sh', stdout=subprocess.PIPE)  #look for daily contract pos
+        proc = subprocess.Popen(settings.root_folder + '/contracts/datamanagement/daily.sh', stdout=subprocess.PIPE)  #look for daily contract pos
         proc.wait()
         output = proc.stdout.read()
         doc_cloud_project = DocumentCloudProject()
