@@ -105,8 +105,9 @@ def getVendors():
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
-    vendors = session.query(Vendor.name).distinct().order_by(Vendor.name)
+    vendors = session.query(Vendor.name).filter(Vendor.id==Contract.vendorid).distinct().order_by(Vendor.name)
     vendors = sorted(list(set([j[0].strip() for j in vendors])))
+    print len(vendors)
     vendors.insert(0, "Vendor (example: Three fold Consultants)".upper())
     session.close()
     return vendors
@@ -173,7 +174,9 @@ def translateToVendor(officerterm):
         filter(Person.id == VendorOfficer.personid).\
         filter(VendorOfficer.vendorid == Vendor.id).all()
     # todo fix to get .first() working
-    return results.pop()[2].name
+    output = results.pop()[2].name
+    logging.info("translating | {} to {}".format(officerterm, output))
+    return output
 
 
 @app.route('/contracts/download/<string:docid>', methods=['POST', 'GET'])
@@ -233,7 +236,6 @@ def vendors(q=None):
         q = q.split("=")[1]
         terms = [t for t in q.split("&") if len(t) > 0]
         vendor = [v.replace("vendor:", "") for v in terms if "vendor:" in v].pop()
-        print vendor
     return render_template('select.html', options=vendors)
 
 
@@ -307,29 +309,42 @@ def query_request(field):
         return field
 
 
-@app.route('/contracts/search', methods=['POST', 'GET'])
-def query_docs():
-    """
-    The main contract search
-    """
-    searchterm = 'projectid: "1542-city-of-new-orleans-contracts" ' + request.args.get('query')
-    offset = query_request('page')
+def get_offset(offset):
+    logging.info("offset | {}".format(offset))
     if offset == "":
         offset = 0
     elif offset < 0:
         offset = 0
     else:
         offset = int(offset) - 1 # a page is one more than an offset
+    return offset
 
+@app.route('/contracts/search', methods=['POST', 'GET'])
+def query_docs():
+    """
+    The main contract search
+    """
+    query = query_request("query")
+    searchterm = 'projectid: "1542-city-of-new-orleans-contracts" ' + query
+    offset = query_request('page')
+    logging.info("offset | {}".format(offset))
+    offset = get_offset(offset)
     logging.info("offset | {}".format(offset))
     vendor = query_request('vendor')
     officers = query_request('officer')
     department = query_request('officer')
 
+    #to do: create a class that translates a URL into a document cloud query
+
     if len(officers) > 0:
         officers = [officers]
         vendor = translateToVendor(officers[0])
+        logging.info("vendor | {}".format(vendor))
 
+    if vendor !="":
+        searchterm = searchterm + " vendor: '" + vendor + "'"
+
+    logging.info("search term | {}".format(searchterm))
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)
         docs = translateToDocCloudForm(docs)
@@ -345,7 +360,7 @@ def query_docs():
     vendor = vendor.upper()
     pages = pages + 1  # increment 1 to get rid of 0 indexing
     page = offset + 1  # increment 1 to get rid of 0 indexing
-    status = "Query: " + searchterm.replace('projectid: "1542-city-of-new-orleans-contracts"', "")
+    status = str(totaldocs) + " results | Query: " + searchterm.replace('projectid: "1542-city-of-new-orleans-contracts"', "")
     status += " | " + getStatus(page, pages, searchterm)
     updateddate = time.strftime("%m/%d/%Y")
     vendors = getVendors()
