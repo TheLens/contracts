@@ -158,20 +158,6 @@ def getOfficers(vendor=None):
         return sorted(officers)
 
 
-def getOffSet(q):
-    """
-    Parses the offset from the query. 
-    Should be refactored away to use the flask request parsers
-    """
-    try:
-        offsetterm = list([t for t in q.split("&&") if "offset" in t])
-        offsetterm = offsetterm.pop()
-        offset = int(offsetterm.split(":")[1])
-        return offset
-    except:
-        return None
-
-
 @cache.memoize(timeout=100000)
 def translateToVendor(officerterm):
     """
@@ -222,19 +208,6 @@ def getTotalDocs(searchterm):
         return getContracts_Count()
     else:
         return int(len(queryDocumentCloud(searchterm)))
-
-
-@cache.memoize(timeout=100000)
-def getTerm(searchterm, key):
-    """
-    Used to parse a query. Should be replaced by native flask methods
-    """   
-    p = key + ':\"[^\r\n\"]+\"'
-    terms = re.findall(p, searchterm)
-    if len(terms) == 1:
-        return terms.pop().replace(key + ":", "").replace('"', "")
-    else:
-        return ""
 
 
 def getStatus(page, total, searchterm):
@@ -298,36 +271,23 @@ def intro(name=None):
     vendors = getVendors()
     departments = getDepartments()
     officers = getOfficers()
+    status = "Newest city contracts ..."
     updateddate = time.strftime("%m/%d/%Y")
     return render_template('intro_child.html',
-                           vendors=vendors, departments=departments, offset=0,
-                           totaldocs=totaldocs, pages=pages, page=1, docs=docs,
-                           officers=officers, query=dc_query,
-                           title="New Orleans city contracts",
-                           updated=updateddate, url="contracts")
-
-
-@app.route('/contracts/advanced')
-def advanced(name=None):
-    """
-    Intro page for advanced search
-    """
-    offset = 0
-    docs = getContracts(0, PAGELENGTH)
-    totaldocs = getContracts_Count()
-    pages = int(totaldocs/PAGELENGTH) + 1
-    # pages = getPages(docs, offset)
-    vendors = getVendors()
-    departments = getDepartments()
-    officers = getOfficers()
-    return render_template('advanced.html', 
                            vendors=vendors,
                            departments=departments,
                            offset=0,
                            totaldocs=totaldocs,
                            pages=pages,
-                           page=1, docs=docs,
-                           officers=officers, query=dc_query)
+                           page=1,
+                           status = status,
+                           docs=docs,
+                           officers=officers,
+                           query=dc_query,
+                           title="New Orleans city contracts",
+                           updated=updateddate,
+                           url="contracts")
+
 
 
 @app.route('/contracts/next', methods=['POST'])
@@ -380,32 +340,34 @@ def contract(doc_cloud_id):
     return render_template('contract_child.html', doc_cloud_id=doc_cloud_id, title="New Orleans city contracts")
 
 
-@app.route('/contracts/search/<string:q>', methods=['POST'])
-def query_docs(q):
+def query_request(field):
+    field = request.args.get(field)
+    if field is None:
+        return ""
+    else:
+        return field
+
+
+@app.route('/contracts/search', methods=['POST', 'GET'])
+def query_docs():
     """
     The main contract search
     """
-    print q
-    # if something goes wrong, just set offset to 0
-    q = q.replace("offset:undefined", "offset:0")
-
-    searchterm = str('projectid: "1542-city-of-new-orleans-contracts"' + " " + q).split("&&")[0].strip()
-
-    print searchterm
-    vendor = getTerm(searchterm, 'vendor')
-    officers = getTerm(searchterm, 'officers')
-    department = getTerm(searchterm, 'department')
-    offset = getOffSet(q)
-
-    if offset is None:
-        return "Server error. Please contact The Lens"
+    searchterm = 'projectid: "1542-city-of-new-orleans-contracts" ' + request.args.get('query')
+    offset = query_request('page')
+    if offset == "":
+        offset = 0
+    else:
+        offset = int(offset)
+    vendor = query_request('vendor')
+    officers = query_request('officer')
+    department = query_request('officer')
 
     if len(officers) > 0:
         officers = [officers]
         vendor = translateToVendor(officers[0])
-        searchterm = searchterm.replace("officers:", "")
-        searchterm.replace('"' + officers[0] + '"', "")
-        searchterm = searchterm + ' vendor:"' + vendor + '"'
+
+    print searchterm
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)
@@ -423,16 +385,24 @@ def query_docs(q):
     pages = pages + 1  # increment 1 to get rid of 0 indexing
     page = offset + 1  # increment 1 to get rid of 0 indexing
     status = getStatus(page, pages, searchterm)
-    return render_template('documentcloud.html', 
-                           status=status,
-                           docs=docs,
-                           offset=offset,
+    updateddate = time.strftime("%m/%d/%Y")
+    vendors = getVendors()
+    officers = getOfficers()
+    departments = getDepartments()
+    return render_template('intro_child.html',
+                           vendors=vendors,
+                           departments=departments,
+                           offset=0,
                            totaldocs=totaldocs,
-                           page=page,
+                           status = status,
                            pages=pages,
+                           page=1,
+                           docs=docs,
                            officers=officers,
-                           vendor=vendor,
-                           query=searchterm)
+                           query=dc_query,
+                           title="New Orleans city contracts",
+                           updated=updateddate,
+                           url="contracts")
 
 if __name__ == '__main__':
     app.run()

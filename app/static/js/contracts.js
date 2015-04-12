@@ -124,24 +124,24 @@ function buildSearch(){
     var searchQuery = $("#textbox").val();
     var selectedvendor = $('#vendors :selected').first().attr("value")!="" && $('#vendors :selected').first().attr("value") != undefined;
     if (selectedvendor) {
-        searchQuery = searchQuery + " vendor:\"" + $('#vendors :selected').first().text() + "\"";
+        searchQuery = searchQuery + "&vendor=\"" + $('#vendors :selected').first().text() + "\"";
     }
 
     var selecteddeps = $('#departments :selected').first().attr("value")!="" && $('#departments :selected').first().attr("value") != undefined;
     if (selecteddeps) {
-        searchQuery = searchQuery + " department:\"" + $('#departments :selected').first().text() + "\"";
+        searchQuery = searchQuery + "&department=\"" + $('#departments :selected').first().text() + "\"";
     }
 
     var selectedofficers = $('#officers :selected').first().attr("value")!="" && $('#officers :selected').first().attr("value") != undefined;
     if (selectedofficers) {
-        searchQuery = searchQuery + " officers:\"" + $('#officers :selected').first().text() + "\"";
+        searchQuery = searchQuery + "&officer=\"" + $('#officers :selected').first().text() + "\"";
     }
 
     searchQuery = searchQuery.replace(/^and /, ""); //remove and space if it starts the string
 
     offset = $("#pagination").attr("data-offset");
 
-    searchQuery += "&&offset:" + offset;
+    searchQuery += "&offset=" + offset;
 
     return searchQuery;
 }
@@ -239,7 +239,7 @@ function post_search() {
 
     $("#results_status").html("Searching...");
     $("#nav_context").remove();
-    $.post("search/" + searchQuery, function(data, status) {
+    $.post("search?query=" + searchQuery, function(data, status) {
         handlePost(data);
     });
 }
