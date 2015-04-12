@@ -209,20 +209,22 @@ function handlePost(data){
 	setHandlers();
 }
 
-function previous(){
-    searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
-    resetUI();
-    $.post("previous/" + searchQuery, function(data, status) {
-		handlePost(data);
+function post_back(query){
+    $.post("next?" + query, function(data, status) {
+         handlePost(data);
     });
 }
 
-function next(){
-    searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
+function previous(){
+    searchQuery = "query=" + $("#pagination").attr("data-query") + "&offset=" + (parseInt($("#pagination").attr("data-offset")) - 1);
     resetUI();
-    $.post("next/" + searchQuery, function(data, status) {
-         handlePost(data);
-    });
+    post_back(searchQuery);
+}
+
+function next(){
+    searchQuery = "query=" + $("#pagination").attr("data-query") + "&offset=" + (parseInt($("#pagination").attr("data-offset")) + 1);
+    resetUI();
+    post_back(searchQuery);
 }
 
 function post_search() {

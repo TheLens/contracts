@@ -8,6 +8,7 @@ import time
 import logging
 from flask import Flask
 from flask import render_template, make_response
+from flask import request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask.ext.cache import Cache
@@ -329,20 +330,22 @@ def advanced(name=None):
                            officers=officers, query=dc_query)
 
 
-'''
-TO DO: can probably get rid of next and previous by passing a page number in the URL
-'''
-
-@app.route('/contracts/next/<string:q>', methods=['POST'])
-def next(q):
+@app.route('/contracts/next', methods=['POST'])
+def next():
     """
     Respond to the next button
     """
-    searchterm = str(q).split("&&")[0].strip()
-    offset = int(str(q).split("&&")[1].replace("offset:", "").strip())
+
+    searchterm = request.args.get('query')
+    offset = int(request.args.get('offset'))
+
+    if offset < 1:
+        offset = 0
+
     pages = int(getPages(searchterm))
-    if offset < pages:  # dont increment if yer at the end
-            offset = offset+1
+
+    if offset > pages:
+        offset = pages
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(offset, PAGELENGTH)
@@ -368,33 +371,6 @@ def next(q):
                            query=searchterm)
 
 
-@app.route('/contracts/previous/<string:q>', methods=['POST'])
-def previous(q):
-    """
-    Respond to the previous button
-    """
-    searchterm = str(q).split("&&")[0]
-    offset = getOffSet(q)
-
-    if offset > 0:  # dont decrement if yer at zero
-        offset = offset-1
-
-    if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-        docs = getContracts(offset, PAGELENGTH)
-    else:
-        docs = queryDocumentCloud(searchterm)
-        docs = docs[offset*PAGELENGTH:((offset+1)*PAGELENGTH)]
-
-    pages = int(getPages(searchterm))
-    totaldocs = getTotalDocs(searchterm)
-    pages = pages + 1  # increment 1 to get rid of 0 indexing
-    page = offset + 1  # increment 1 to get rid of 0 indexing
-    status = getStatus(page, pages, searchterm)
-    officers = []  # blank on later searches
-    vendor = ""
-    return render_template('documentcloud.html', docs=docs, offset=offset, status=status, totaldocs=totaldocs, page=page, pages=pages, officers=officers, vendor=vendor, query=searchterm)
-
-
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
     """
@@ -409,6 +385,7 @@ def query_docs(q):
     """
     The main contract search
     """
+    print q
     # if something goes wrong, just set offset to 0
     q = q.replace("offset:undefined", "offset:0")
 

@@ -25,7 +25,7 @@ class Settings():
         self.bids_location = self.corpus_loc + "/bids/"
         self.connection_string = 'postgresql://' + \
             self.user + ':' + self.databasepassword + \
-            + '@' + self.server + ':5432/' + self.database
+            '@' + self.server + ':5432/' + self.database
         self.templates = self.root_folder + "/contracts/templates"
 
     def get_from_config(self, field):
