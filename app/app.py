@@ -1,3 +1,7 @@
+#!/usr/bin/python
+"""
+The web app that runs at vault.thelensnola.org/contracts
+"""
 import sys
 import re
 import time
@@ -45,10 +49,19 @@ else:
 
 @cache.memoize(timeout=900)
 def queryDocumentCloud(searchterm):
+    """
+    This is it's own method so that queries can be cached via @memoize to speed things up
+    """
     return documentCloudClient.documents.search(searchterm)
 
 
 def translateToDocCloudForm(docs):
+    """
+    In the database each row for contracts has an ID which is different from the 
+    doc_cloud_id on document cloud. This just translates rows so that their 
+    id is equal to the doc_cloud_id. It's a bit awkward and should probably 
+    be refactored away at some point. 
+    """
     for d in docs:
         d.id = d.doc_cloud_id
     return docs
@@ -56,11 +69,13 @@ def translateToDocCloudForm(docs):
 
 @cache.memoize(timeout=900)
 def getContracts(offset, limit):
+    """
+    Simply query the newest contracts
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
     offset = offset * PAGELENGTH
-    print offset
     contracts = session.query(Contract).\
         order_by(Contract.dateadded.desc()).offset(offset).limit(limit).all()
     session.close()
@@ -70,6 +85,9 @@ def getContracts(offset, limit):
 
 @cache.memoize(timeout=100000)
 def getContracts_Count():
+    """
+    Query the count of all contracts
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -80,6 +98,9 @@ def getContracts_Count():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getVendors():
+    """
+    Query all vendors in the database
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -92,6 +113,9 @@ def getVendors():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getDepartments():
+    """
+    Query all departments in the database
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -106,6 +130,9 @@ def getDepartments():
 
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getOfficers(vendor=None):
+    """
+    Get officers for a given vendor
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -131,6 +158,10 @@ def getOfficers(vendor=None):
 
 
 def getOffSet(q):
+    """
+    Parses the offset from the query. 
+    Should be refactored away to use the flask request parsers
+    """
     try:
         offsetterm = list([t for t in q.split("&&") if "offset" in t])
         offsetterm = offsetterm.pop()
@@ -139,13 +170,13 @@ def getOffSet(q):
     except:
         return None
 
-# document cloud has metadata information.
-# see what vendor is associated with an officer
-# then just search for the vendor
-
 
 @cache.memoize(timeout=100000)
 def translateToVendor(officerterm):
+    """
+    Translates a request for an officer to a request for a vendor
+    associated with a given officer
+    """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
@@ -160,6 +191,9 @@ def translateToVendor(officerterm):
 
 @app.route('/contracts/download/<string:docid>', methods=['POST', 'GET'])
 def download(docid):
+    """
+    Download a requested contract
+    """
     docs = queryDocumentCloud("document:" + '"' + docid + '"')
     response = make_response(docs.pop().pdf)
     disposition_header = "attachment; filename=" + docid + ".pdf"
@@ -169,6 +203,9 @@ def download(docid):
 
 @cache.memoize(timeout=100000)
 def getPages(searchterm):
+    """
+    Get the total number of pages for a given search.
+    """
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         return int(getContracts_Count()/PAGELENGTH)
     else:
@@ -177,6 +214,9 @@ def getPages(searchterm):
 
 @cache.memoize(timeout=100000)
 def getTotalDocs(searchterm):
+    """
+    Get the total number of relevant docs for a given search.
+    """   
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         return getContracts_Count()
     else:
@@ -185,6 +225,9 @@ def getTotalDocs(searchterm):
 
 @cache.memoize(timeout=100000)
 def getTerm(searchterm, key):
+    """
+    Used to parse a query. Should be replaced by native flask methods
+    """   
     p = key + ':\"[^\r\n\"]+\"'
     terms = re.findall(p, searchterm)
     if len(terms) == 1:
@@ -194,6 +237,9 @@ def getTerm(searchterm, key):
 
 
 def getStatus(page, total, searchterm):
+    """
+    Tells the user what search has returned
+    """   
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         return "All city contracts: page " + str(page) + " of " + str(total)
     else:
@@ -202,6 +248,10 @@ def getStatus(page, total, searchterm):
 
 @app.route('/contracts/vendors/<string:q>', methods=['POST'])
 def vendors(q=None):
+    """
+    Get requested vendors from a query string and return a template.
+    Needs to be refactored using the flask query parser
+    """   
     if q == "all":
         vendors = getVendors()
     else:
@@ -215,18 +265,19 @@ def vendors(q=None):
 
 @app.route('/contracts/officers/<string:q>', methods=['POST'])
 def officers(q=None):
+    """
+    Get requested officers. to do: say more.
+    """
     if q == "all":
         officers = getOfficers()
     return render_template('select.html', options=officers)
 
 
-@app.route('/hello/')
-def hello():
-    return "hello"
-
-
 @app.route('/contracts/departments/<string:q>', methods=['POST'])
 def departments(q=None):
+    """
+    Get requested departments
+    """
     if q == "all":
         departments = getDepartments()
     else:
@@ -236,11 +287,13 @@ def departments(q=None):
 
 @app.route('/contracts/')
 def intro(name=None):
+    """
+    Intro page for the web app
+    """
     offset = 0
     docs = getContracts(0, PAGELENGTH)
     totaldocs = getContracts_Count()
     pages = int(totaldocs/PAGELENGTH) + 1
-    # pages = getPages(docs, offset)
     vendors = getVendors()
     departments = getDepartments()
     officers = getOfficers()
@@ -255,6 +308,9 @@ def intro(name=None):
 
 @app.route('/contracts/advanced')
 def advanced(name=None):
+    """
+    Intro page for advanced search
+    """
     offset = 0
     docs = getContracts(0, PAGELENGTH)
     totaldocs = getContracts_Count()
@@ -273,16 +329,20 @@ def advanced(name=None):
                            officers=officers, query=dc_query)
 
 
+'''
+TO DO: can probably get rid of next and previous by passing a page number in the URL
+'''
+
 @app.route('/contracts/next/<string:q>', methods=['POST'])
 def next(q):
-    print "next"
+    """
+    Respond to the next button
+    """
     searchterm = str(q).split("&&")[0].strip()
     offset = int(str(q).split("&&")[1].replace("offset:", "").strip())
     pages = int(getPages(searchterm))
-    print "offset {0}".format(offset)
     if offset < pages:  # dont increment if yer at the end
             offset = offset+1
-    print "offset {0}".format(offset)
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(offset, PAGELENGTH)
@@ -310,6 +370,9 @@ def next(q):
 
 @app.route('/contracts/previous/<string:q>', methods=['POST'])
 def previous(q):
+    """
+    Respond to the previous button
+    """
     searchterm = str(q).split("&&")[0]
     offset = getOffSet(q)
 
@@ -334,14 +397,21 @@ def previous(q):
 
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
+    """
+    Request for a given contract
+    """
     doc_cloud_id = re.sub(".html$", "", doc_cloud_id)
     return render_template('contract_child.html', doc_cloud_id=doc_cloud_id, title="New Orleans city contracts")
 
 
 @app.route('/contracts/search/<string:q>', methods=['POST'])
 def query_docs(q):
+    """
+    The main contract search
+    """
     # if something goes wrong, just set offset to 0
     q = q.replace("offset:undefined", "offset:0")
+
     searchterm = str('projectid: "1542-city-of-new-orleans-contracts"' + " " + q).split("&&")[0].strip()
 
     print searchterm
