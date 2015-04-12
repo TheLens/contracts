@@ -316,11 +316,12 @@ def query_docs():
     offset = query_request('page')
     if offset == "":
         offset = 0
-    if offset < 0:
+    elif offset < 0:
         offset = 0
     else:
         offset = int(offset) - 1 # a page is one more than an offset
 
+    logging.info("offset | {}".format(offset))
     vendor = query_request('vendor')
     officers = query_request('officer')
     department = query_request('officer')
@@ -373,6 +374,7 @@ def query_docs():
                            pages=pages,
                            page=offset + 1,
                            vendor=vendor,
+                           totaldocs=totaldocs,
                            query=searchterm.replace('projectid: "1542-city-of-new-orleans-contracts" ',""))
 
 if __name__ == '__main__':

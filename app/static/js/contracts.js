@@ -141,7 +141,7 @@ function buildSearch(){
 
     offset = $("#pagination").attr("data-offset");
 
-    searchQuery += "&offset=" + offset;
+    searchQuery += "&page=" + offset;
 
     return searchQuery;
 }
@@ -217,13 +217,21 @@ function post_back(query){
 }
 
 function previous(){
-    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + (parseInt($("#pagination").attr("data-offset")) - 1);
+    var page = parseInt($("#pagination").attr("data-offset")) - 1;
+    if (page < 1){
+        page = 1;
+    }
+    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + page; //page can't go below 0
     resetUI();
     post_back(searchQuery);
 }
 
 function next(){
-    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + (parseInt($("#pagination").attr("data-offset")) + 1);
+    var page = parseInt($("#pagination").attr("data-offset")) + 1;
+    if (page > parseInt($("#pagination").attr("data-pages"))){
+        page = $("#pagination").attr("data-pages"); //page cant go over total pages
+    }
+    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + page;
     resetUI();
     post_back(searchQuery);
 }
@@ -234,6 +242,8 @@ function post_search() {
     if (!valid){
         return;
     }
+
+    $("#pagination").attr("data-offset", 1);
 
     searchQuery = buildSearch();
     resetUI();
