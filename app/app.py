@@ -290,47 +290,6 @@ def intro(name=None):
 
 
 
-@app.route('/contracts/next', methods=['POST'])
-def next():
-    """
-    Respond to the next button
-    """
-
-    searchterm = request.args.get('query')
-    offset = int(request.args.get('offset'))
-
-    if offset < 1:
-        offset = 0
-
-    pages = int(getPages(searchterm))
-
-    if offset > pages:
-        offset = pages
-
-    if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-        docs = getContracts(offset, PAGELENGTH)
-    else:
-        docs = queryDocumentCloud(searchterm)
-        docs = docs[offset*PAGELENGTH:((offset+1)*PAGELENGTH)]
-
-    totaldocs = getTotalDocs(getTotalDocs)
-    pages = pages + 1  # increment 1 to get rid of 0 indexing
-    page = offset + 1  # increment 1 to get rid of 0 indexing
-    status = getStatus(page, pages, searchterm)
-    officers = []  # blank on later searches
-    vendor = ""
-    return render_template('documentcloud.html', 
-                           docs=docs,
-                           status=status,
-                           offset=offset,
-                           totaldocs=totaldocs,
-                           page=page,
-                           pages=pages,
-                           officers=officers,
-                           vendor=vendor,
-                           query=searchterm)
-
-
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
     """
@@ -357,8 +316,11 @@ def query_docs():
     offset = query_request('page')
     if offset == "":
         offset = 0
+    if offset < 0:
+        offset = 0
     else:
-        offset = int(offset)
+        offset = int(offset) - 1 # a page is one more than an offset
+
     vendor = query_request('vendor')
     officers = query_request('officer')
     department = query_request('officer')
@@ -366,8 +328,6 @@ def query_docs():
     if len(officers) > 0:
         officers = [officers]
         vendor = translateToVendor(officers[0])
-
-    print searchterm
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)
@@ -384,25 +344,36 @@ def query_docs():
     vendor = vendor.upper()
     pages = pages + 1  # increment 1 to get rid of 0 indexing
     page = offset + 1  # increment 1 to get rid of 0 indexing
-    status = getStatus(page, pages, searchterm)
+    status = "Query: " + searchterm.replace('projectid: "1542-city-of-new-orleans-contracts"', "")
+    status += " | " + getStatus(page, pages, searchterm)
     updateddate = time.strftime("%m/%d/%Y")
     vendors = getVendors()
     officers = getOfficers()
     departments = getDepartments()
-    return render_template('intro_child.html',
-                           vendors=vendors,
-                           departments=departments,
-                           offset=0,
-                           totaldocs=totaldocs,
-                           status = status,
-                           pages=pages,
-                           page=1,
+    logging.info('Pages = {}'.format(pages))
+    if request.method == 'GET':
+        return render_template('intro_child.html',
+                               vendors=vendors,
+                               departments=departments,
+                               offset=offset,
+                               totaldocs=totaldocs,
+                               status = status,
+                               pages=pages,
+                               page=offset + 1,
+                               docs=docs,
+                               officers=officers,
+                               query=searchterm.replace('projectid: "1542-city-of-new-orleans-contracts" ',""),
+                               title="New Orleans city contracts",
+                               updated=updateddate,
+                               url="contracts")
+    if request.method == 'POST':
+        return render_template('documentcloud.html', 
+                           status=status,
                            docs=docs,
-                           officers=officers,
-                           query=dc_query,
-                           title="New Orleans city contracts",
-                           updated=updateddate,
-                           url="contracts")
+                           pages=pages,
+                           page=offset + 1,
+                           vendor=vendor,
+                           query=searchterm.replace('projectid: "1542-city-of-new-orleans-contracts" ',""))
 
 if __name__ == '__main__':
     app.run()

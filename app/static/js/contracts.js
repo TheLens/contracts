@@ -199,7 +199,7 @@ function setHandlers(){
 
 }
 
-function handlePost(data){
+function handlePost(data, new_url){
 	$("#contract_results").html(data);
 	setupDocList();
 	results = $("#pagination").attr("data-total");
@@ -207,22 +207,23 @@ function handlePost(data){
 		id = $(".contractpreview").first().attr("id");
 	}
 	setHandlers();
+    window.history.pushState('page2', 'Title', new_url);
 }
 
 function post_back(query){
-    $.post("next?" + query, function(data, status) {
-         handlePost(data);
+    $.post(query, function(data, status) {
+         handlePost(data, query);
     });
 }
 
 function previous(){
-    searchQuery = "query=" + $("#pagination").attr("data-query") + "&offset=" + (parseInt($("#pagination").attr("data-offset")) - 1);
+    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + (parseInt($("#pagination").attr("data-offset")) - 1);
     resetUI();
     post_back(searchQuery);
 }
 
 function next(){
-    searchQuery = "query=" + $("#pagination").attr("data-query") + "&offset=" + (parseInt($("#pagination").attr("data-offset")) + 1);
+    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + (parseInt($("#pagination").attr("data-offset")) + 1);
     resetUI();
     post_back(searchQuery);
 }
@@ -239,8 +240,11 @@ function post_search() {
 
     $("#results_status").html("Searching...");
     $("#nav_context").remove();
-    $.post("search?query=" + searchQuery, function(data, status) {
-        handlePost(data);
+
+    var new_url = "search?query=" + searchQuery;
+
+    $.post(new_url, function(data, status) {
+        handlePost(data, new_url);
     });
 }
 
