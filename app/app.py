@@ -1,16 +1,17 @@
 import sys
-import math
-import pprint
 import re
 import time
 import logging
-import ConfigParser
 from flask import Flask
-from flask import render_template, make_response, send_from_directory
+from flask import render_template, make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask.ext.cache import Cache
-from contracts.lib.vaultclasses import Vendor, Department, Contract, Person, VendorOfficer
+from contracts.lib.vaultclasses import Vendor
+from contracts.lib.vaultclasses import Department
+from contracts.lib.vaultclasses import Contract
+from contracts.lib.vaultclasses import Person
+from contracts.lib.vaultclasses import VendorOfficer
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
 
@@ -18,7 +19,7 @@ settings = Settings()
 
 PAGELENGTH = 8
 
-app = Flask(__name__ , template_folder=settings.templates)
+app = Flask(__name__, template_folder=settings.templates)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 documentCloudClient = DocumentCloud()
 
@@ -28,12 +29,11 @@ dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
 
 logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
-LEVELS = { 'debug':logging.DEBUG,
-            'info':logging.INFO,
-            'warning':logging.WARNING,
-            'error':logging.ERROR,
-            'critical':logging.CRITICAL
-            }
+LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
 
 if len(sys.argv) > 1:
     level_name = sys.argv[1]
@@ -61,7 +61,8 @@ def getContracts(offset, limit):
     session = Session()
     offset = offset * PAGELENGTH
     print offset
-    contracts = session.query(Contract).order_by(Contract.dateadded.desc()).offset(offset).limit(limit).all()
+    contracts = session.query(Contract).\
+        order_by(Contract.dateadded.desc()).offset(offset).limit(limit).all()
     session.close()
     contracts = translateToDocCloudForm(contracts)
     return contracts
@@ -94,7 +95,8 @@ def getDepartments():
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
-    depts = session.query(Department.name).distinct().order_by(Department.name).all()
+    depts = session.query(Department.name).\
+        distinct().order_by(Department.name).all()
     depts = [j[0].strip() for j in depts]
     depts = sorted(list(set(depts)))
     depts.insert(0, "Department (example: Information Technology)".upper())
@@ -102,20 +104,26 @@ def getDepartments():
     return depts
 
 
-@cache.memoize(timeout=100000) #cache good for a day or so
+@cache.memoize(timeout=100000)  # cache good for a day or so
 def getOfficers(vendor=None):
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
     session = Session()
     if vendor is None:
-        officers = session.query(VendorOfficer, Person).filter(VendorOfficer.personid == Person.id).order_by(Person.name)
+        officers = session.query(VendorOfficer, Person).\
+            filter(VendorOfficer.personid == Person.id).order_by(Person.name)
         session.close
         officers = sorted(list(set([o[1].name for o in officers])))
-        officers.insert(0, "Company officer (example: Joe Smith) - feature in progress".upper())
+        message = "Company officer (example: Joe Smith) - feature in progress"
+        officers.insert(0, message.upper())
         return officers
     else:
         vendor = vendor.replace("vendor:", "")
-        officers = session.query(VendorOfficer, Person, Vendor).filter(VendorOfficer.personid == Person.id).filter(VendorOfficer.vendorid == Vendor.id).filter(Vendor.name==vendor).all()
+        officers = session.\
+            query(VendorOfficer, Person, Vendor).\
+            filter(VendorOfficer.personid == Person.id).\
+            filter(VendorOfficer.vendorid == Vendor.id).\
+            filter(Vendor.name == vendor).all()
         session.close
         officers = list(set([o[1].name for o in officers]))
         print officers
@@ -142,7 +150,11 @@ def translateToVendor(officerterm):
     Session.configure(bind=engine)
     session = Session()
     officerterm = officerterm.replace('"', "").replace("officers:", "").strip()
-    results = session.query(Person, VendorOfficer, Vendor).filter(Person.name == officerterm).filter(Person.id == VendorOfficer.personid).filter(VendorOfficer.vendorid == Vendor.id).all()  # todo fix to get .first() working
+    results = session.query(Person, VendorOfficer, Vendor).\
+        filter(Person.name == officerterm).\
+        filter(Person.id == VendorOfficer.personid).\
+        filter(VendorOfficer.vendorid == Vendor.id).all()
+    # todo fix to get .first() working
     return results.pop()[2].name
 
 
@@ -150,7 +162,8 @@ def translateToVendor(officerterm):
 def download(docid):
     docs = queryDocumentCloud("document:" + '"' + docid + '"')
     response = make_response(docs.pop().pdf)
-    response.headers["Content-Disposition"] = "attachment; filename=" + docid + ".pdf"
+    disposition_header = "attachment; filename=" + docid + ".pdf"
+    response.headers["Content-Disposition"] = disposition_header
     return response
 
 
@@ -181,7 +194,6 @@ def getTerm(searchterm, key):
 
 
 def getStatus(page, total, searchterm):
-    status = ""
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         return "All city contracts: page " + str(page) + " of " + str(total)
     else:
@@ -193,9 +205,10 @@ def vendors(q=None):
     if q == "all":
         vendors = getVendors()
     else:
-        q = q.split("=")[1]   #eventually going to move this to a query-parser class
-        terms = [t for t in q.split("&") if len(t)>0]
-        vendor = [v.replace("vendor:","") for v in terms if "vendor:" in v].pop()
+        # to do: use flasks query parsers
+        q = q.split("=")[1]
+        terms = [t for t in q.split("&") if len(t) > 0]
+        vendor = [v.replace("vendor:", "") for v in terms if "vendor:" in v].pop()
         print vendor
     return render_template('select.html', options=vendors)
 
@@ -232,7 +245,12 @@ def intro(name=None):
     departments = getDepartments()
     officers = getOfficers()
     updateddate = time.strftime("%m/%d/%Y")
-    return render_template('intro_child.html', vendors=vendors, departments=departments, offset=0, totaldocs=totaldocs, pages=pages, page=1, docs=docs, officers=officers, query=dc_query, title="New Orleans city contracts", updated=updateddate, url="contracts")
+    return render_template('intro_child.html',
+                           vendors=vendors, departments=departments, offset=0,
+                           totaldocs=totaldocs, pages=pages, page=1, docs=docs,
+                           officers=officers, query=dc_query,
+                           title="New Orleans city contracts",
+                           updated=updateddate, url="contracts")
 
 
 @app.route('/contracts/advanced')
@@ -245,7 +263,15 @@ def advanced(name=None):
     vendors = getVendors()
     departments = getDepartments()
     officers = getOfficers()
-    return render_template('advanced.html', vendors=vendors, departments=departments, offset=0, totaldocs=totaldocs, pages=pages, page=1, docs=docs, officers=officers, query=dc_query)
+    return render_template('advanced.html', 
+                           vendors=vendors,
+                           departments=departments,
+                           offset=0,
+                           totaldocs=totaldocs,
+                           pages=pages,
+                           page=1, docs=docs,
+                           officers=officers, query=dc_query)
+
 
 @app.route('/contracts/next/<string:q>', methods=['POST'])
 def next(q):
@@ -270,7 +296,16 @@ def next(q):
     status = getStatus(page, pages, searchterm)
     officers = []  # blank on later searches
     vendor = ""
-    return render_template('documentcloud.html', docs=docs, status=status, offset=offset, totaldocs=totaldocs, page=page, pages=pages, officers=officers, vendor=vendor, query=searchterm)
+    return render_template('documentcloud.html', 
+                           docs=docs,
+                           status=status,
+                           offset=offset,
+                           totaldocs=totaldocs,
+                           page=page,
+                           pages=pages,
+                           officers=officers,
+                           vendor=vendor,
+                           query=searchterm)
 
 
 @app.route('/contracts/previous/<string:q>', methods=['POST'])
@@ -305,7 +340,8 @@ def contract(doc_cloud_id):
 
 @app.route('/contracts/search/<string:q>', methods=['POST'])
 def query_docs(q):
-    q = q.replace("offset:undefined", "offset:0")  # if something goes wrong, just set offset to 0
+    # if something goes wrong, just set offset to 0
+    q = q.replace("offset:undefined", "offset:0")
     searchterm = str('projectid: "1542-city-of-new-orleans-contracts"' + " " + q).split("&&")[0].strip()
 
     print searchterm
@@ -320,7 +356,9 @@ def query_docs(q):
     if len(officers) > 0:
         officers = [officers]
         vendor = translateToVendor(officers[0])
-        searchterm = searchterm.replace("officers:", "").replace('"' + officers[0] + '"', "") + ' vendor:"' + vendor + '"'
+        searchterm = searchterm.replace("officers:", "")
+        searchterm.replace('"' + officers[0] + '"', "")
+        searchterm = searchterm + ' vendor:"' + vendor + '"'
 
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)
@@ -338,7 +376,16 @@ def query_docs(q):
     pages = pages + 1  # increment 1 to get rid of 0 indexing
     page = offset + 1  # increment 1 to get rid of 0 indexing
     status = getStatus(page, pages, searchterm)
-    return render_template('documentcloud.html', status=status, docs=docs, offset=offset, totaldocs=totaldocs, page=page, pages=pages, officers=officers, vendor=vendor, query=searchterm)
+    return render_template('documentcloud.html', 
+                           status=status,
+                           docs=docs,
+                           offset=offset,
+                           totaldocs=totaldocs,
+                           page=page,
+                           pages=pages,
+                           officers=officers,
+                           vendor=vendor,
+                           query=searchterm)
 
 if __name__ == '__main__':
     app.run()
