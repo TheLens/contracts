@@ -1,3 +1,8 @@
+#!/usr/bin/python
+"""
+Just a single utility class for now. 
+Add more here later
+"""
 import re 
 
 class Utilities():
