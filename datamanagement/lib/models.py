@@ -1,3 +1,8 @@
+#!/usr/bin/python
+"""
+These models gather and organize 
+published contracts from the city
+"""
 import os
 import re
 import urllib2
@@ -38,14 +43,19 @@ if len(sys.argv) > 1:
 else:
     logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
-
-
-run_id = " " + str(uuid.uuid1())  #this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
+#this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
+run_id = " " + str(uuid.uuid1())
 
 
 class PurchaseOrder(object):
+    """
+    A purchase order has a PO number. A PO number is
+    an authorization to purchase. It gets associated with
+    a city contract once the authorization goes thru. 
 
-
+    A PO number is used to track a contract in the city's
+    purchasing system.
+    """
     def __init__(self, tt, download_attachments=True):
         purchaseorderno = tt
         if not utils.valid_po(purchaseorderno):
@@ -223,6 +233,13 @@ class PurchaseOrder(object):
 
 
 class EthicsRecord(Base):
+    """
+    This class simply represents a single row of 
+    campaign finance contributions (from the Louisiana Ethics Board). 
+
+    It goes in datamanagement instead of lib/models because it doesn't 
+    really concern the public web app
+    """
     __tablename__ = 'ethics_records'
 
     id = Column(Integer, primary_key=True)
@@ -320,12 +337,10 @@ class LensRepository():
         self.purchaseorders_location = Settings().corpus_loc + "/purchaseorders/" 
 
 
-'''
-Abstracts from Lens contracts project
-'''
 class DocumentCloudProject():
-   
- 
+    '''
+    Represents the collection of contracts on DC
+    '''
     def __init__(self):
         settings = Settings()
         doc_cloud_user = settings.doc_cloud_user
@@ -411,7 +426,9 @@ class DocumentCloudProject():
 
 
 class LensDatabase():
-
+    '''
+    Represents the Lens database that tracks contracts
+    '''
     #refactor to take a type
     def addVendor(vendor):
         indb = session.query(Vendor).filter(Vendor.name==vendor).count()
@@ -455,7 +472,9 @@ class SummaryProcessor():
 
 
 class DailyScraper():
-
+    '''
+    Daily job that gets new contracts from the purchasing portal
+    '''
     def run(self):
         settings = Settings()
         logging.info('{} | {} | Daily scraper run '.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
