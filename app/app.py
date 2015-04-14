@@ -257,11 +257,11 @@ def officers(q=None):
 
 
 @app.route('/contracts/departments/<string:q>', methods=['POST'])
-def departments(q=None):
+def departments(query=None):
     """
     Get requested departments
     """
-    if q == "all":
+    if query == "all":
         departments = getDepartments()
     else:
         pass
@@ -269,7 +269,7 @@ def departments(q=None):
 
 
 @app.route('/contracts/')
-def intro(name=None):
+def intro():
     """
     Intro page for the web app
     """
@@ -309,6 +309,10 @@ def contract(doc_cloud_id):
 
 
 def query_request(field):
+    """
+    Pulls the field out from the request,
+    returning "" if field is none
+    """
     field = request.args.get(field)
     if field is None:
         return ""
@@ -317,29 +321,36 @@ def query_request(field):
 
 
 def translate_web_query_to_dc_query():
-    qb = QueryBuilder()
+    """
+    Translates a request URL to a DC query
+    """
+    query_builder = QueryBuilder()
     query = query_request("query")
-    qb.add_text(query)
-    qb.add_term("projectid", "1542-city-of-new-orleans-contracts")
+    query_builder.add_text(query)
+    query_builder.add_term("projectid", "1542-city-of-new-orleans-contracts")
 
     terms = ['vendor', 'department']
 
     for t in terms:
         query_value = query_request(t)
         if query_request(t) != "":
-            qb.add_term(t, query_value)
+            query_builder.add_term(t, query_value)
 
     officers = query_request('officer')
 
     if len(officers) > 0:
         officers = [officers]
         vendor = translateToVendor(officers[0])
-        qb.add_term("vendor", vendor)
+        query_builder.add_term("vendor", vendor)
 
-    return qb.get_query()
+    return query_builder.get_query()
 
 
 def get_offset(offset):
+    """
+    Offsets cant be "" or less than 0.
+    This handles translation
+    """
     logging.info("offset | {}".format(offset))
     if offset == "":
         offset = 0
