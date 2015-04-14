@@ -17,6 +17,7 @@ from contracts.lib.vaultclasses import Department
 from contracts.lib.vaultclasses import Contract
 from contracts.lib.vaultclasses import Person
 from contracts.lib.vaultclasses import VendorOfficer
+from contracts.lib.models import QueryBuilder
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
 
@@ -107,7 +108,6 @@ def getVendors():
     session = Session()
     vendors = session.query(Vendor.name).filter(Vendor.id==Contract.vendorid).distinct().order_by(Vendor.name)
     vendors = sorted(list(set([j[0].strip() for j in vendors])))
-    print len(vendors)
     vendors.insert(0, "Vendor (example: Three fold Consultants)".upper())
     session.close()
     return vendors
@@ -217,10 +217,13 @@ def getStatus(page, total, searchterm):
     """
     Tells the user what search has returned
     """   
+    output = ""
+    output = output + str(total) + " results | Query: " + searchterm.replace('projectid:"1542-city-of-new-orleans-contracts"', "")
+    output = output + " | "
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-        return "All city contracts: page " + str(page) + " of " + str(total)
+        return output + "All city contracts: page " + str(page) + " of " + str(total)
     else:
-        return "Page " + str(page) + " of " + str(total)
+        return output + "Page " + str(page) + " of " + str(total)
 
 
 @app.route('/contracts/vendors/<string:q>', methods=['POST'])
@@ -309,6 +312,28 @@ def query_request(field):
         return field
 
 
+def translate_web_query_to_dc_query():
+    qb = QueryBuilder()
+    query = query_request("query")
+    qb.add_text(query)
+    qb.add_term("projectid", "1542-city-of-new-orleans-contracts")
+
+    terms = ['vendor', 'department']
+
+    for t in terms:
+        query_value = query_request(t)
+        if query_request(t) !="":
+            qb.add_term(t, query_value)
+
+    officers = query_request('officer')
+
+    if len(officers) > 0:
+        officers = [officers]
+        vendor = translateToVendor(officers[0])
+        qb.add_term("vendor", vendor) 
+
+    return qb.get_query()
+
 def get_offset(offset):
     logging.info("offset | {}".format(offset))
     if offset == "":
@@ -324,27 +349,10 @@ def query_docs():
     """
     The main contract search
     """
-    query = query_request("query")
-    searchterm = 'projectid: "1542-city-of-new-orleans-contracts" ' + query
-    offset = query_request('page')
-    logging.info("offset | {}".format(offset))
+    offset = query_request("page")
     offset = get_offset(offset)
-    logging.info("offset | {}".format(offset))
-    vendor = query_request('vendor')
-    officers = query_request('officer')
-    department = query_request('officer')
+    searchterm = translate_web_query_to_dc_query()
 
-    #to do: create a class that translates a URL into a document cloud query
-
-    if len(officers) > 0:
-        officers = [officers]
-        vendor = translateToVendor(officers[0])
-        logging.info("vendor | {}".format(vendor))
-
-    if vendor !="":
-        searchterm = searchterm + " vendor: '" + vendor + "'"
-
-    logging.info("search term | {}".format(searchterm))
     if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
         docs = getContracts(0, PAGELENGTH)
         docs = translateToDocCloudForm(docs)
@@ -356,17 +364,17 @@ def query_docs():
     totaldocs = getTotalDocs(searchterm)
 
     pages = (totaldocs/PAGELENGTH)
-
-    vendor = vendor.upper()
+    vendor = query_request("vendor").upper()
     pages = pages + 1  # increment 1 to get rid of 0 indexing
     page = offset + 1  # increment 1 to get rid of 0 indexing
-    status = str(totaldocs) + " results | Query: " + searchterm.replace('projectid: "1542-city-of-new-orleans-contracts"', "")
-    status += " | " + getStatus(page, pages, searchterm)
+
+    status = getStatus(page, pages, searchterm)
     updateddate = time.strftime("%m/%d/%Y")
     vendors = getVendors()
     officers = getOfficers()
     departments = getDepartments()
     logging.info('Pages = {}'.format(pages))
+
     if request.method == 'GET':
         return render_template('intro_child.html',
                                vendors=vendors,

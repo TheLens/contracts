@@ -1,9 +1,9 @@
 #!/usr/bin/python
 """
-Just a single utility class for now. 
-Add more here later
+Some utility classes
 """
-import re 
+import re
+
 
 class Utilities():
 
@@ -14,3 +14,26 @@ class Utilities():
             return True
         else:
             return False
+
+
+class QueryBuilder():
+    """
+    Build a document cloud query
+    """
+    def __init__(self):
+        self.query = {}
+        self.text = ""
+
+    def add_term(self, term, value):
+        self.query[term] = value
+
+    def add_text(self, text):
+        self.text = text
+
+    def get_query(self):
+        output = ""
+        for k in self.query.keys():
+            # 'projectid: "1542-city-of-new-orleans-contracts"'
+            output += k + ":" + '"' + self.query[k] + '" '
+        output = output + self.text
+        return output.strip()
