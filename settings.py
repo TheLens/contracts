@@ -10,6 +10,9 @@ import ConfigParser
 class Settings():
 
     def __init__(self):
+        """
+        Initialize settings from a config file
+        """
         self.CONFIG_LOCATION = "/configs/contracts.cfg"
         self.server = self.get_from_config('server')
         self.databasepassword = self.get_from_config('databasepassword')

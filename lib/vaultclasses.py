@@ -2,15 +2,15 @@
 """
 These classes that map to tables in the underlying database
 """
-import datetime
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 import ConfigParser
+from contracts.settings import Settings
+
+SETTINGS = Settings()
 
 Base = declarative_base()
-
-from contracts.settings import Settings
 
 class Vendor(Base):
     """
@@ -136,11 +136,11 @@ class Contract(Base):
     title = Column(String)
     dateadded = Column(Date)
 
-    def __init__(self, pn,cn = None, vi= None, di= None, dcid= None, descript= None, name= None, added= None):
+    def __init__(self, pn,cn = None, vendor_id= None, department_id= None, dcid= None, descript= None, name= None, added= None):
         self.purchaseordernumber = pn
         self.contractnumber = cn
-        self.vendorid = vi
-        self.departmentid = di
+        self.vendorid = vendor_id
+        self.departmentid = department_id
         self.doc_cloud_id = dcid
         self.description = descript
         self.title = name
@@ -223,7 +223,7 @@ class VendorOfficerCompany(Base):
 
 
 def remakeDB():
-    engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/thevault')
+    engine = create_engine(SETTINGS.connection_string)
     Base.metadata.create_all(engine)
 
 if __name__ == "__main__":
