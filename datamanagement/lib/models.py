@@ -523,7 +523,7 @@ class DailyScraper(object):
         for purchaseorderno in output:
             logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             try:
-                lens_repo.sync(po)
-                doc_cloud_project.add_contract(po)
+                lens_repo.sync(purchaseorderno)
+                doc_cloud_project.add_contract(purchaseorderno)
             except urllib2.HTTPError:
                 logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
