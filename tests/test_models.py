@@ -3,22 +3,20 @@ from contracts.datamanagement.lib.models import DocumentCloudProject, PurchaseOr
 from contracts.settings import Settings
 
 from contracts.datamanagement.lib.models import PurchaseOrder
-from contracts.lib.models import Utilities
+from contracts.lib.models import valid_po
 
 s = Settings()
-u = Utilities()
 
 class TestDocumentCloudProject(TestCase):
 
 
     def test_valid_po():
-        utils = Utilities()
-        self.assertEquals(utils.valid_po("HS486912"), True)
+        self.assertEquals(valid_po("HS486912"), True)
 
 
     def test_valid_po():
         utils = Utilities()
-        self.assertEquals(utils.valid_po("HS4"), False)
+        self.assertEquals(valid_po("HS4"), False)
 
 
     def test_DocumentCloudProject_has_purchase_order(self):

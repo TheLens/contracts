@@ -13,7 +13,6 @@ import sys
 import datetime
 import uuid
 
-from contracts.lib.models import Utilities
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
