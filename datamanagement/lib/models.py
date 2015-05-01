@@ -129,7 +129,9 @@ class PurchaseOrder(object):
             logging.info("not a valid po {}".format(purchaseorderno))
             return
         if not os.path.exists(settings.purchase_order_location + purchaseorderno):
-            response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
+            logging.info('{} | {} | Attempting to download url | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), url))
+            url = 'http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract'
+            response = urllib2.urlopen(url)
             html = response.read()
             with open(settings.purchase_order_location + purchaseorderno, 'w') as f:
                 f.write(html)
