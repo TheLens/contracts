@@ -103,7 +103,7 @@ def getContracts_Count():
 @cache.memoize(timeout=100000)  # cache good for a day or so
 def getVendors():
     """
-    Query all vendors in the database
+    Query all vendors in the database linked to a contract
     """
     Session = sessionmaker(bind=engine)
     Session.configure(bind=engine)
