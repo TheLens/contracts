@@ -6,7 +6,7 @@ import logging
 from contracts.settings import Settings
 
 SETTINGS = Settings()
-logging.basicConfig(level=logging.DEBUG, filename=settings.log)
+logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
 try:
     from contracts.datamanagement.lib.models import DailyScraper
