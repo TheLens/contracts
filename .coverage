@@ -2,7 +2,7 @@
 include =
     __init__.py
     app/app.py
-    lib/*
+    lib/models.py
     tests/test_misc.py
 
 [report]
