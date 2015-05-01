@@ -2,7 +2,7 @@ charlie.conf
 app.conf
 biz.py
 app.cfg
-venv
+venv/*
 *pyc
 *pdf
 datamanagement/pdfs
