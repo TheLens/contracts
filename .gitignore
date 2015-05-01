@@ -1,6 +1,4 @@
-charlie.conf
 app.conf
-biz.py
 app.cfg
 venv/*
 *pyc
