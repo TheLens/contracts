@@ -339,16 +339,11 @@ class LensRepository(object):
         if purchaseorderno in self.skiplist:
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return
-        if not self.has_pos(purchaseorderno):
-            self.download_purchaseorder(purchaseorderno)
-
-    
-    def has_pos(self, purchaseorderno):
         file_loc = self.purchaseorders_location + purchaseorderno
-        if os.path.isfile(file_loc):
-            return True
+        if not os.path.isfile(file_loc):
+            self.download_purchaseorder(purchaseorderno)
         else:
-            return False
+            logging.warning('{} | {} | The Lens repo already has this purchaseorderno | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
 
     def get_skip_list(self):
