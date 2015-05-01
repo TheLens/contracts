@@ -513,14 +513,11 @@ class DailyScraper(object):
     Daily job that gets new contracts from the purchasing portal
     '''
     def run(self):
-        settings = Settings()
         logging.info('{} | {} | Daily scraper run '.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        proc = subprocess.Popen(settings.root_folder + '/contracts/datamanagement/daily.sh', stdout=subprocess.PIPE)  #look for daily contract pos
-        proc.wait()
-        output = proc.stdout.read()
         doc_cloud_project = DocumentCloudProject()
         lens_repo = LensRepository()
-        output = [o for o in output.split("\n") if len(o) > 0]
+        html = get_contract_index_page(1)
+        output = get_po_numbers_from_index_page(html)
         for po in output:
             logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), po))
             try:
