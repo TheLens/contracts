@@ -10,8 +10,8 @@ logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
 try:
     from contracts.datamanagement.lib.models import DailyScraper
-    ds = DailyScraper()
-    ds.run()
-except Exception, e:
-    print str(e)
+    daily_scraper = DailyScraper()
+    daily_scraper.run()
+except Exception, error:
+    print str(error)
  
