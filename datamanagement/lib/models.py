@@ -21,13 +21,12 @@ from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from contracts.lib.models import Utilities
+from contracts.lib.models import valid_po
 import subprocess
 
 Base = declarative_base()
 
 settings = Settings()
-utils = Utilities()
 
 LEVELS = { 'debug':logging.DEBUG,
             'info':logging.INFO,
@@ -58,7 +57,7 @@ class PurchaseOrder(object):
     """
     def __init__(self, tt, download_attachments=True):
         purchaseorderno = tt
-        if not utils.valid_po(purchaseorderno):
+        if not valid_po(purchaseorderno):
             logging.info('{} | {} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return
         html = self.get_html(purchaseorderno)
@@ -124,7 +123,7 @@ class PurchaseOrder(object):
 
 
     def download_purchaseorder(self, purchaseorderno):
-        if not utils.valid_po(purchaseorderno):
+        if not valid_po(purchaseorderno):
             logging.info("not a valid po {}".format(purchaseorderno))
             return
         if not os.path.exists(settings.purchase_order_location + purchaseorderno):
@@ -292,7 +291,7 @@ class LensRepository():
         if purchaseorderno in self.skiplist:
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
-        if not utils.valid_po(purchaseorderno):
+        if not valid_po(purchaseorderno):
             logging.warning('{} | {} | Invalid purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
         if not self.has_pos(purchaseorderno):
