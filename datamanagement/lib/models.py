@@ -17,7 +17,7 @@ from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
 from bs4 import BeautifulSoup
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from contracts.lib.models import valid_po
@@ -27,19 +27,7 @@ Base = declarative_base()
 
 settings = Settings()
 
-LEVELS = { 'debug':logging.DEBUG,
-            'info':logging.INFO,
-            'warning':logging.WARNING,
-            'error':logging.ERROR,
-            'critical':logging.CRITICAL
-            }
-
-if len(sys.argv) > 1:
-    level_name = sys.argv[1]
-    level = LEVELS.get(level_name, logging.NOTSET)
-    logging.basicConfig(level=level, filename=settings.log)
-else:
-    logging.basicConfig(level=logging.DEBUG, filename=settings.log)
+logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
 #this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
 run_id = " " + str(uuid.uuid1())
@@ -313,7 +301,7 @@ class EthicsRecord(Base):
         return "${} to {} {} on {}".format(self.receiptamount, self.first, self.last, self.receiptdate)
 
 
-class LensRepository():
+class LensRepository(object):
     """
     A purchase order has a PO number. A PO number is
     an authorization to purchase. It gets associated with
@@ -358,6 +346,13 @@ class LensRepository():
 
 
     def get_skip_list(self):
+        """
+        Some contracts are not posted on the city's site 
+        -- even though they are included in the city's
+        contract inventory. We put these contracts on a
+        "skip list" so they are ignored in code
+        """
+        #To Do: skip list should not be hard coded
         skiplist_loc = Settings().root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
@@ -370,7 +365,7 @@ class LensRepository():
         self.purchaseorders_location = Settings().corpus_loc + "/purchaseorders/" 
 
 
-class DocumentCloudProject():
+class DocumentCloudProject(object):
     '''
     Represents the collection of contracts on DC
     '''
@@ -458,7 +453,7 @@ class DocumentCloudProject():
         return skiplist
 
 
-class LensDatabase():
+class LensDatabase(object):
     '''
     Represents the Lens database that tracks contracts
     '''
@@ -497,7 +492,7 @@ class LensDatabase():
         return session.query(Department).filter(Department.name==department).first().id
 
 
-class SummaryProcessor():
+class SummaryProcessor(object):
 
 
     def process(self, purchaseorderno):
@@ -511,7 +506,7 @@ class SummaryProcessor():
             logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
 
-class DailyScraper():
+class DailyScraper(object):
     '''
     Daily job that gets new contracts from the purchasing portal
     '''
