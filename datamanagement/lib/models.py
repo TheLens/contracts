@@ -14,6 +14,8 @@ import subprocess
 
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
+from contracts.lib.models import get_contract_index_page
+from contracts.lib.models import get_po_numbers_from_index_page
 from contracts.settings import Settings
 from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String
