@@ -87,6 +87,9 @@ class PurchaseOrder(object):
 
 
     def check_invalid(self, html):
+        """
+        Sometimes invalid POs are posted
+        """
         if "There are no vendor distributors found for this master blanket/contract" in html:
             return True
         else:
@@ -94,6 +97,9 @@ class PurchaseOrder(object):
 
 
     def get_data(self):
+        """
+        Return metadata as a dictionary (for document cloud)
+        """
         output = {}
         output['vendor_id'] = self.vendor_id_city
         output['purchase order'] = self.purchaseorder
@@ -104,6 +110,9 @@ class PurchaseOrder(object):
 
 
     def download_attachment(self, attachment):
+        """
+        Download an attachemnt associated with a purchase order
+        """
         bidnumber = re.search('[0-9]+', attachment.get('href')).group()
         bidfilelocation = settings.bids_location + bidnumber + ".pdf"
         if not os.path.isfile(bidfilelocation):
@@ -114,6 +123,10 @@ class PurchaseOrder(object):
 
 
     def get_html(self, purchaseorderno):
+        """
+        Check to see if the purchase order should be downloaded.
+        Then download it
+        """
         if os.path.isfile(settings.purchase_order_location + purchaseorderno):
             logging.info('{} | {} | Already have purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return "".join([i.replace("\n", "") for i in open(settings.purchase_order_location + purchaseorderno)])
@@ -122,6 +135,9 @@ class PurchaseOrder(object):
 
 
     def download_purchaseorder(self, purchaseorderno):
+        """
+        Download the html associated with a purchase order
+        """
         if not valid_po(purchaseorderno):
             logging.info("not a valid po {}".format(purchaseorderno))
             return
@@ -134,6 +150,10 @@ class PurchaseOrder(object):
    
 
     def download_vendor_profile(self, vendor_id_city):
+        """
+        Download the vendor page associated with a purchase order
+        (If we don't have the vendor page already)
+        """
         vendor_file_location = settings.vendors_location + vendor_id_city
         if not os.path.isfile(vendor_file_location):
             try:
@@ -149,16 +169,22 @@ class PurchaseOrder(object):
 
 
     def get_attachments(self, soup):
+        """
+        Find the attachements to download from the html
+        """
         try:
             mainTable = soup.select('.table-01').pop()
             metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
             todownload = metadatarow[16].findChildren(['td'])[1].findChildren(['a'])
         except IndexError:
-            return []      
+            return [] # sometimes the city does not include them   
         return todownload
 
 
     def get_vendor_id(self, html):
+        '''
+        Find the vendor id in the HTML
+        '''
         p = "(?<=ExternalVendorProfile\(')\d+"
         vendorids = re.findall(p,html)
         if len(vendorids) == 0:
@@ -168,6 +194,9 @@ class PurchaseOrder(object):
                                   #view-source:http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=FC154683&releaseNbr=0&parentUrl=contract 
 
     def get_description(self, soup):
+        '''
+        Find the description in the html
+        '''
         try:
             mainTable = soup.select('.table-01').pop()
             metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
@@ -178,6 +207,9 @@ class PurchaseOrder(object):
 
 
     def get_vendor_name(self, soup):
+        '''
+        Find the vendor name in the html
+        '''
         try:
             vendorrow = soup(text=re.compile(r'Vendor:'))[0].parent.parent
             vendorlinktext = vendorrow.findChildren(['td'])[1].findChildren(['a'])[0].contents.pop().strip()
@@ -192,6 +224,9 @@ class PurchaseOrder(object):
             return vendor_name
 
     def getKnumber(self, soup):
+        '''
+        Find the k number in the html
+        '''
         mainTable = soup.select('.table-01').pop()
         metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
         try:
@@ -204,27 +239,22 @@ class PurchaseOrder(object):
 
 
     def get_purchase_order(self, soup):
+        '''
+        Find the purchase order in the html
+        '''
         mainTable = soup.select('.table-01').pop()
         po = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])[1].findChildren(['td'])[1].contents.pop().strip()
         return po
 
 
     def get_department(self, soup):
+        '''
+        Find the department in the html
+        '''
         mainTable = soup.select('.table-01').pop()
         metadatarow = mainTable.findChildren(['tr'])[2].findChildren(['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
         department = metadatarow[5].findChildren(['td'])[1].contents.pop().strip()
         return department
-
-
-    def getMetaData(knumber, purchaseorder, vendor,department, vendorid):
-        data = {}
-        data['contract number'] = self.k_number
-        data['vendor'] = self.vendor_name
-        data['department'] = self.department
-        data['purchase order'] = purchaseorder.strip()
-        data['vendor_id'] = self.vendor_id_city
-        return data
-
 
     def __str__(self):
         return "<PurchaseOrder {}>".format(self.purchaseorder)
@@ -284,8 +314,14 @@ class EthicsRecord(Base):
 
 
 class LensRepository():
+    """
+    A purchase order has a PO number. A PO number is
+    an authorization to purchase. It gets associated with
+    a city contract once the authorization goes thru. 
 
-
+    A PO number is used to track a contract in the city's
+    purchasing system.
+    """
     def download_purchaseorder(self, purchaseorderno):
         if purchaseorderno in self.skiplist:
             logging.warning('{} | {} | Contract is in the skiplist | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
@@ -301,9 +337,8 @@ class LensRepository():
 
     def write_pos(self, html, purchaseorderno):
         file_loc = self.purchaseorders_location + purchaseorderno
-        f = open(file_loc,'w')
-        f.write(html) # python will convert \n to os.linesep
-        f.close() # you can omit in most cases as the destructor will call if
+        with open(file_loc,'w') as f:
+            f.write(html) # python will convert \n to os.linesep
 
 
     def sync(self, purchaseorderno):
@@ -435,8 +470,10 @@ class LensDatabase():
             session.add(vendor)
             session.commit()
 
-
     def addDepartment(department):
+        """
+        Add department to the Lens db
+        """
         indb = session.query(Department).filter(Department.name==department).count()
         if indb==0:
             department = Department(department)
@@ -444,14 +481,19 @@ class LensDatabase():
             session.commit()
         
 
-    #refactor to take a type
     def getVendorID_Lens(vendor):
+        """
+        Get a vendor in the db. To do: refactor 
+        """
         session.flush()
         vendors = session.query(Vendor).filter(Vendor.name==vendor).all()
         vendor = vendors.pop()
 
 
     def getDepartmentID(department):
+        """
+        Get a department in the db. To do: refactor 
+        """
         return session.query(Department).filter(Department.name==department).first().id
 
 
