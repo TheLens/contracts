@@ -8,3 +8,4 @@ datamanagement/ghostdriver.log
 datamanagement/__init__.pyc
 datamanagement/html*
 contracts.log
+docs/_build*
