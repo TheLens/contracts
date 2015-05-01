@@ -2,6 +2,7 @@
 """
 This script runs the daily downloader
 """
+import logging
 from contracts.settings import Settings
 
 SETTINGS = Settings()

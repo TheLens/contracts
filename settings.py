@@ -7,7 +7,7 @@ In other words: the actual configurations are not posted to github!
 import ConfigParser
 
 
-class Settings():
+class Settings(object):
 
     def __init__(self):
         """
