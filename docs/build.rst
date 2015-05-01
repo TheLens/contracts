@@ -7,6 +7,15 @@ These scripts are all part of the general process of taking the raw data and pub
 
 Models
 -----
-
 .. automodule:: contracts.lib.models
+    :members:
+
+Datamangement
+-----
+.. automodule:: contracts.datamanagement
+    :members:
+
+Webapp
+-----
+.. automodule:: contracts.app
     :members:
