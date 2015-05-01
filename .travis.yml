@@ -6,4 +6,5 @@ before_script:
 - export PYTHONPATH=$PYTHONPATH:$(pwd)
 - export PYTHONPATH=$PYTHONPATH:../
 script:
-- coverage run contracts/tests/test_misc.py
+- echo $(pwd)
+- coverage run tests/test_misc.py
