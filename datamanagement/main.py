@@ -2,9 +2,15 @@
 """
 This script runs the daily downloader
 """
+from contracts.settings import Settings
 
-from contracts.datamanagement.lib.models import DailyScraper
+SETTINGS = Settings()
+logging.basicConfig(level=logging.DEBUG, filename=settings.log)
 
-ds = DailyScraper()
-
-ds.run()
+try:
+    from contracts.datamanagement.lib.models import DailyScraper
+    ds = DailyScraper()
+    ds.run()
+except Exception, e:
+    print str(e)
+ 
