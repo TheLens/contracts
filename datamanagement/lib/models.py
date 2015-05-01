@@ -7,21 +7,18 @@ import os
 import re
 import urllib2
 import datetime
-import ConfigParser
 import logging
-import sys
 import datetime
 import uuid
+import subprocess
 
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
 from bs4 import BeautifulSoup
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
 from contracts.lib.models import valid_po
-import subprocess
 
 Base = declarative_base()
 
@@ -275,7 +272,12 @@ class EthicsRecord(Base):
     receiptamount = Column(String)
     description = Column(String)
 
-    def __init__(self, name):
+    def __init__(self, 
+                 last, first, reportno,
+                  form, schedule, contributiontype, 
+                  contributorname, address1, 
+                  address2, city, state, zipcode,
+                  receiptdate, receiptamount, description):
         self.last = last
         self.first = first
         self.reportno = reportno
