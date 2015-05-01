@@ -1,0 +1,10 @@
+[run]
+include =
+    __init__.py
+    app/app.py
+    tests/test_misc.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    add_introspection_rules
