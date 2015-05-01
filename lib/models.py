@@ -5,7 +5,7 @@ Some utility classes
 import re
 
 
-def valid_po(self, purchaseorderno):
+def valid_po(purchaseorderno):
     """
     A simple method to determine if this
     is a valid purchase order
