@@ -520,8 +520,8 @@ class DailyScraper(object):
         lens_repo = LensRepository()
         html = get_contract_index_page(1)
         output = get_po_numbers_from_index_page(html)
-        for po in output:
-            logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), po))
+        for purchaseorderno in output:
+            logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             try:
                 lens_repo.sync(po)
                 doc_cloud_project.add_contract(po)

@@ -14,4 +14,3 @@ try:
     daily_scraper.run()
 except Exception, error:
     print str(error)
- 
