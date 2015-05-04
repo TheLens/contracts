@@ -6,6 +6,8 @@ from sqlalchemy.orm import sessionmaker
 import argparse
 
 from contracts.datamanagement.lib.vaultclasses import Vendor, Department, Contract
+from contracts.datamanagement.lib.models import add_vendor
+from contracts.datamanagement.lib.models import add_department
 
 parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
 parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
@@ -27,24 +29,6 @@ def get_from_config(field):
 engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
 Session = sessionmaker(bind=engine)
 session = Session()
-
-
-def addVendor(vendor):
-	c = session.query(Vendor).filter(Vendor.name==vendor).count()
-	if len(vendor)>0 and c==0:
-		x = Vendor(vendor)
-		session.add(x)
-		session.commit()
-	session.close()
-
-
-def addDepartment(department):
-	c = session.query(Department).filter(Department.name==department).count()
-	if len(department)>0 and c==0:
-		x = Department(department)
-		session.add(x)
-		session.commit()
-	session.close()
 
 
 def match_contract(doc):

@@ -1,10 +1,19 @@
-#At end of this, DB will be synched with DC. All will be backed up. Ready for new stuff. 
+'''
+Matches the lens db with document cloud
+'''
 import ConfigParser
-from sqlalchemy import create_engine
-from documentcloud import DocumentCloud
-from sqlalchemy.orm import sessionmaker
-from vaultclasses import Vendor, Department, Contract
+import logging
 import argparse
+import datetime
+
+
+from documentcloud import DocumentCloud
+from contracts.lib.vaultclasses import Vendor, Department, Contract
+from contracts.settings import Settings
+from contracts.datamanagement.lib.models import LensDatabase
+
+SETTINGS = Settings()
+logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
 parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
 parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
@@ -12,108 +21,74 @@ parser.set_defaults(feature=False)
 args = parser.parse_args()
 force = args.keep_synching
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
-
 client = DocumentCloud()
 
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
 
-databasepassword = get_from_config('databasepassword')
-server = get_from_config('server')
-database = get_from_config('database')
-user = get_from_config('user')
+def get_from_metadata(doc, field):
+    try:
+        output = doc.data[field]
+        if len(output)==0:
+        	output = "unknown"
+    except:
+        output = "unknown"
+    return output
 
-server = "projects.thelensnola.org"
-engine = create_engine('postgresql://' + user + ':' + databasepassword + '@' + server + ':5432/' + database)
-Session = sessionmaker(bind=engine)
-session = Session()
-
-def addVendor(vendor):
-	c = session.query(Vendor).filter(Vendor.name==vendor).count()
-	if len(vendor)>0 and c==0:
-		x = Vendor(vendor)
-		session.add(x)
-		session.commit()
-	session.close()
-
-def addDepartment(department):
-	c = session.query(Department).filter(Department.name==department).count()
-	if len(department)>0 and c==0:
-		x = Department(department)
-		session.add(x)
-		session.commit()
-	session.close()
 
 def match_contract(doc):
-	keep_synching = True; 
-	print "adding {}".format(doc.id)
+    '''
+    Match a particular contract
+    '''
+    keep_synching = True 
+    log_string = '{} | Synching {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), doc.id)
+    logging.info(log_string)
+    with LensDatabase() as lens_db: 
+        purchaseno = get_from_metadata(doc, "purchase order")
+        contractno = get_from_metadata(doc, "contract number")
+        vendor = get_from_metadata(doc, "vendor").replace(".", "")
+        department = get_from_metadata(doc, "department").replace(".", "")
 
-	try:
-		purchaseno = doc.data["purchase order"]
-	except:
-		purchaseno = "unknown"
+        dateadded = doc.created_at
+        title = doc.title
+        description = doc.description
 
-	try:
-		contractno = doc.data["contract number"]
-	except:
-		contractno = "unknown"
+        lens_db.add_department(department)
+        lens_db.add_vendor(vendor)
 
-	try:
-		vendor = doc.data["vendor"].replace(".", "")
-		if len(vendor)==0:
-			vendor="unknown"
-	except:
-		vendor = "unknown"
+        department = lens_db.get_department_id(department)
+        vendorid = lens_db.get_lens_vendor_id(vendor)
 
-	try:
-		department = doc.data["department"]
-		if len(department)==0:
-			department="unknown"
-	except:
-		department = "unknown"
+        if not lens_db.has_contract(purchaseno):
+            contract = Contract(purchaseno)
+            keep_synching = True
+        else:
+            contract = lens_db.get_contract(purchaseno)
+            keep_synching = False
 
-	dateadded = doc.created_at
-	title = doc.title
-	description = doc.description
+        contract.contractnumber = contractno
+        contract.doc_cloud_id = doc.id
+        contract.vendorid = vendorid
+        contract.departmentid = department
+        contract.dateadded = dateadded
+        contract.title = title
+        contract.description = description
+        lens_db.add_contract(contract)
 
-	addDepartment(department)
-	addVendor(vendor.replace(".", ""))
-
-	department = session.query(Department).filter(Department.name==department).first().id
-	vendorid = session.query(Vendor).filter(Vendor.name==vendor).first().id
-
-	if session.query(Contract).filter(Contract.purchaseordernumber==purchaseno).count() == 0:
-		contract = Contract(purchaseno)
-		keep_synching = True
-	else:
-		contract = session.query(Contract).filter(Contract.purchaseordernumber==purchaseno).first()
-		keep_synching = False
-
-	contract.contractnumber=contractno
-	contract.doc_cloud_id = doc.id
-	contract.vendorid = vendorid
-	contract.departmentid = department
-	contract.dateadded = dateadded
-	contract.title = title
-	contract.description = description
-	session.add(contract)
-	session.flush()
-	session.commit()
-	return keep_synching
+    return keep_synching
 
 
 def matchLensDBtoDocumentCloud():
+    '''
+    Match the Lens database to document cloud
+    '''
+    docs = client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
+    keep_synching = True
 
-	docs = client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
-	keep_synching = True
+    for i in range(0,len(docs)):   #loop thru docs. assumption is document cloud returns newist first (it does)
+        if keep_synching or force:          #if newest is not in the db, keep looking
+            keep_synching = match_contract(docs[i])
+        else:
+            break   #else end the loop
 
-	for i in range(0,len(docs)):   #loop thru docs. assumption is document cloud returns newist first (it does)
-		if keep_synching or force:          #if newest is not in the db, keep looking
-			keep_synching = match_contract(docs[i])
-		else:
-			break   #else end the loop
 
-matchLensDBtoDocumentCloud()
+if __name__ == '__main__':
+    matchLensDBtoDocumentCloud()

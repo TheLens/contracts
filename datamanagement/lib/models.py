@@ -12,6 +12,7 @@ import datetime
 import uuid
 import subprocess
 
+from sqlalchemy.orm import sessionmaker
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.lib.models import get_contract_index_page
@@ -21,12 +22,14 @@ from bs4 import BeautifulSoup
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from contracts.lib.models import valid_po
+from sqlalchemy import create_engine
+from contracts.lib.vaultclasses import Vendor, Department, Contract
 
 Base = declarative_base()
 
-settings = Settings()
+SETTINGS = Settings()
 
-logging.basicConfig(level=logging.DEBUG, filename=settings.log)
+logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
 #this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
 run_id = " " + str(uuid.uuid1())
@@ -101,7 +104,7 @@ class PurchaseOrder(object):
         Download an attachemnt associated with a purchase order
         """
         bidnumber = re.search('[0-9]+', attachment.get('href')).group()
-        bidfilelocation = settings.bids_location + bidnumber + ".pdf"
+        bidfilelocation = SETTINGS.bids_location + bidnumber + ".pdf"
         if not os.path.isfile(bidfilelocation):
             download_attachment_file(bidnumber, bidfilelocation)
             logging.info('{} | {} | Downloaded bid {} associated with purchase order {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), bidnumber, self.purchaseorder, self.purchaseorder))
@@ -114,9 +117,9 @@ class PurchaseOrder(object):
         Check to see if the purchase order should be downloaded.
         Then download it
         """
-        if os.path.isfile(settings.purchase_order_location + purchaseorderno):
+        if os.path.isfile(SETTINGS.purchase_order_location + purchaseorderno):
             logging.info('{} | {} | Already have purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
-            return "".join([i.replace("\n", "") for i in open(settings.purchase_order_location + purchaseorderno)])
+            return "".join([i.replace("\n", "") for i in open(SETTINGS.purchase_order_location + purchaseorderno)])
         else:
             self.download_purchaseorder(purchaseorderno)
 
@@ -128,12 +131,12 @@ class PurchaseOrder(object):
         if not valid_po(purchaseorderno):
             logging.info("not a valid po {}".format(purchaseorderno))
             return
-        if not os.path.exists(settings.purchase_order_location + purchaseorderno):
+        if not os.path.exists(SETTINGS.purchase_order_location + purchaseorderno):
             logging.info('{} | {} | Attempting to download url | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), url))
             url = 'http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract'
             response = urllib2.urlopen(url)
             html = response.read()
-            with open(settings.purchase_order_location + purchaseorderno, 'w') as f:
+            with open(SETTINGS.purchase_order_location + purchaseorderno, 'w') as f:
                 f.write(html)
                 logging.info('{} | {} | Downloaded purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
    
@@ -143,7 +146,7 @@ class PurchaseOrder(object):
         Download the vendor page associated with a purchase order
         (If we don't have the vendor page already)
         """
-        vendor_file_location = settings.vendors_location + vendor_id_city
+        vendor_file_location = SETTINGS.vendors_location + vendor_id_city
         if not os.path.isfile(vendor_file_location):
             try:
                 response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/vendor/vendorProfileOrgInfo.sdo?external=true&vendorId=' + vendor_id_city)
@@ -205,7 +208,7 @@ class PurchaseOrder(object):
             vendor = vendorlinktext.split('-')[1].strip().replace(".", "") #no periods in vendor names
             return vendor
         except IndexError:      #in cases of index error, go ahead and downlaod the vendor page
-            vendor_file_location = settings.vendors_location + self.vendor_id_city
+            vendor_file_location = SETTINGS.vendors_location + self.vendor_id_city
             html = "".join([l.replace("\n", "") for l in open(vendor_file_location)])
             new_soup = BeautifulSoup(html)
             header = new_soup.select(".sectionheader-01")[0]
@@ -354,7 +357,7 @@ class LensRepository(object):
         "skip list" so they are ignored in code
         """
         #To Do: skip list should not be hard coded
-        skiplist_loc = Settings().root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
+        skiplist_loc = SETTINGS.root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
         return skiplist
@@ -363,7 +366,7 @@ class LensRepository(object):
     def __init__(self):
         #do not include these aviation contracts. They are not posted on the city's public purchasing site (but are included in the city's contract logs.)
         self.skiplist = self.get_skip_list()
-        self.purchaseorders_location = Settings().corpus_loc + "/purchaseorders/" 
+        self.purchaseorders_location = SETTINGS.corpus_loc + "/purchaseorders/" 
 
 
 class DocumentCloudProject(object):
@@ -371,9 +374,8 @@ class DocumentCloudProject(object):
     Represents the collection of contracts on DC
     '''
     def __init__(self):
-        settings = Settings()
-        doc_cloud_user = settings.doc_cloud_user
-        doc_cloud_password = settings.doc_cloud_password
+        doc_cloud_user = SETTINGS.doc_cloud_user
+        doc_cloud_password = SETTINGS.doc_cloud_password
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         self.docs = None #sometimes won't need all the docs, so dont do the search on init
         self.skiplist = self.get_skip_list()
@@ -415,7 +417,7 @@ class DocumentCloudProject(object):
                 counter = 1
                 for a in po.attachments:
                     bidnumber = re.search('[0-9]+', a.get('href')).group()
-                    bidfilelocation = settings.bids_location + bidnumber + ".pdf"
+                    bidfilelocation = SETTINGS.bids_location + bidnumber + ".pdf"
                     extra_string = ""
                     if counter > 1:
                         extra_string = str(counter) + " of " + str(len(po.attachments))
@@ -448,7 +450,7 @@ class DocumentCloudProject(object):
 
 
     def get_skip_list(self):
-        skiplist_loc = Settings().root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
+        skiplist_loc = SETTINGS.root_folder + "/contracts/datamanagement/scrapers/skiplist.txt"
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
         return skiplist
@@ -458,39 +460,100 @@ class LensDatabase(object):
     '''
     Represents the Lens database that tracks contracts
     '''
+    def __init__(self):
+        engine = create_engine(SETTINGS.connection_string)
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+
+
+    def __enter__(self):
+        '''
+        This gets called when you do with LensDatabase() as db:"
+        '''
+        return self
+
+
     #refactor to take a type
-    def addVendor(vendor):
-        indb = session.query(Vendor).filter(Vendor.name==vendor).count()
+    def get_officers(self):
+        """
+        Returns a list of all company officers in the database
+        """
+        pass
+        # to do Tom Thoren
+
+    #refactor to take a type
+    def add_vendor(self, vendor):
+        """
+        Add vendor to the Lens db
+        """
+        indb = self.session.query(Vendor).filter(Vendor.name==vendor).count()
         if indb==0:
             vendor = Vendor(vendor)
-            session.add(vendor)
-            session.commit()
+            self.session.add(vendor)
+            self.session.commit()
 
-    def addDepartment(department):
+
+    def add_department(self, department):
         """
         Add department to the Lens db
         """
-        indb = session.query(Department).filter(Department.name==department).count()
+        indb = self.session.query(Department).filter(Department.name==department).count()
         if indb==0:
             department = Department(department)
-            session.add(department)
-            session.commit()
+            self.session.add(department)
+            self.session.commit()
         
 
-    def getVendorID_Lens(vendor):
+    def add_contract(self, contract):
+        """
+        Add a contract to the Lens db
+        """
+        self.session.add(contract)
+        self.session.flush()
+        self.session.commit()
+
+
+    def has_contract(self, purchaseorderno):
+        """
+        Add department to the Lens db
+        """
+        indb = self.session.query(Contract).filter(Contract.purchaseordernumber==purchaseorderno).count()
+        if indb==1:
+            return True
+        else:
+            return False
+
+
+    def get_contract(self, purchaseorderno):
+        """
+        Get a contract from the db
+        """
+        return self.session.query(Contract).\
+                filter(Contract.purchaseordernumber==purchaseorderno).\
+                first()
+
+
+    def get_lens_vendor_id(self, vendor):
         """
         Get a vendor in the db. To do: refactor 
         """
-        session.flush()
-        vendors = session.query(Vendor).filter(Vendor.name==vendor).all()
+        self.session.flush()
+        vendors = self.session.query(Vendor).filter(Vendor.name==vendor).all()
         vendor = vendors.pop()
 
 
-    def getDepartmentID(department):
+    def get_department_id(self, department):
         """
         Get a department in the db. To do: refactor 
         """
-        return session.query(Department).filter(Department.name==department).first().id
+        return self.session.query(Department).filter(Department.name==department).first().id
+
+
+    def __exit__(self, type, value, traceback):
+        """
+        Called when the database is closed
+        """
+        self.session.close()
 
 
 class SummaryProcessor(object):
