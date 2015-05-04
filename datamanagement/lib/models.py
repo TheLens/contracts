@@ -326,15 +326,16 @@ class LensRepository(object):
         if not valid_po(purchaseorderno):
             logging.warning('{} | {} | Invalid purchase order | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
             return  
-        if not self.has_pos(purchaseorderno):
+        file_loc = self.purchaseorders_location + purchaseorderno
+        if not os.path.isfile(file_loc):
             response = urllib2.urlopen('http://www.purchasing.cityofno.com/bso/external/purchaseorder/poSummary.sdo?docId=' + purchaseorderno + '&releaseNbr=0&parentUrl=contract')
             html = response.read()
-            self.write_pos(html, purchaseorderno)
+            self.write_pos(html, file_loc)
 
 
-    def write_pos(self, html, purchaseorderno):
-        file_loc = self.purchaseorders_location + purchaseorderno
+    def write_pos(self, html, file_loc):
         with open(file_loc,'w') as f:
+            logging.warning('{} | {} | Writing purchaseorderno to file | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file_loc))
             f.write(html) # python will convert \n to os.linesep
 
 
@@ -574,11 +575,11 @@ class DailyScraper(object):
     '''
     Daily job that gets new contracts from the purchasing portal
     '''
-    def run(self):
+    def run(self, page_no):
         logging.info('{} | {} | Daily scraper run '.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
         doc_cloud_project = DocumentCloudProject()
         lens_repo = LensRepository()
-        html = get_contract_index_page(1)
+        html = get_contract_index_page(page_no)
         output = get_po_numbers_from_index_page(html)
         for purchaseorderno in output:
             logging.info('{} | {} | Daily scraper found po {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
