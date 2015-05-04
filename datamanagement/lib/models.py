@@ -441,6 +441,10 @@ class DocumentCloudProject(object):
             return #do not upload. There is a problem
         newcontract = self.client.documents.upload(file, title.replace("/", ""), 'City of New Orleans', description, None,'http://vault.thelensnola.org/contracts', 'public', '1542-city-of-new-orleans-contracts', data, False)
         logging.info('{} | {} | {} has doc_cloud_id {} | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], newcontract.id, data['purchase order']))
+        c = Contract()
+        c.doc_cloud_id = newcontract.id
+        with LensDatabase() as db:
+            db.add_contract(c)
 
 
     def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
@@ -509,9 +513,14 @@ class LensDatabase(object):
         """
         Add a contract to the Lens db
         """
-        self.session.add(contract)
-        self.session.flush()
-        self.session.commit()
+        if contract.doc_cloud_id is None:
+            indb = 0
+        else:
+            indb = self.session.query(Contract).filter(Contract.doc_cloud_id==contract.doc_cloud_id).count()
+        if indb == 0:
+            self.session.add(contract)
+            self.session.flush()
+            self.session.commit()
 
 
     def has_contract(self, purchaseorderno):

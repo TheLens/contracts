@@ -136,9 +136,16 @@ class Contract(Base):
     title = Column(String)
     dateadded = Column(Date)
 
-    def __init__(self, pn,cn = None, vendor_id= None, department_id= None, dcid= None, descript= None, name= None, added= None):
-        self.purchaseordernumber = pn
-        self.contractnumber = cn
+    def __init__(self, ponumber = None,
+                contractnumber = None,
+                vendor_id= None,
+                department_id= None,
+                dcid= None,
+                descript= None,
+                name= None,
+                added= None):
+        self.purchaseordernumber = ponumber
+        self.contractnumber = contractnumber
         self.vendorid = vendor_id
         self.departmentid = department_id
         self.doc_cloud_id = dcid
