@@ -46,17 +46,14 @@ def match_contract(doc):
         fields['purchaseno'] = get_from_metadata(doc, "purchase order")
         fields['contractno'] = get_from_metadata(doc, "contract number")
         fields['vendor'] = get_from_metadata(doc, "vendor").replace(".", "")
-        print fields['vendor']
         fields['department'] = get_from_metadata(doc, "vendor").replace(".", "")
         fields['dateadded'] = doc.created_at
         fields['title'] = doc.title
         fields['description'] = doc.description
         lens_db.add_department(fields['department'])
         lens_db.add_vendor(fields['vendor'])
-        print lens_db.get_lens_vendor_id(fields['vendor'])
         fields['department'] = lens_db.get_department_id(fields['department'])
         fields['vendor'] = lens_db.get_lens_vendor_id(fields['vendor'])
-        print fields['vendor']
         lens_db.update_contract_from_doc_cloud_doc(doc.id, fields)
 
     return keep_synching

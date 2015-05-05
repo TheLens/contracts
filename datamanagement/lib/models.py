@@ -495,7 +495,6 @@ class LensDatabase(object):
         Add vendor to the Lens db
         """
         indb = self.session.query(Vendor).filter(Vendor.name==vendor).count()
-        print indb
         if indb==0:
             vendor = Vendor(vendor)
             self.session.add(vendor)
