@@ -11,6 +11,7 @@ import logging
 import datetime
 import uuid
 
+from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
 from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
@@ -475,7 +476,7 @@ class LensDatabase(object):
 
 
     def get_all_contract_ids(self):
-        dcids = [i[0] for i in session.query(Contract.doc_cloud_id).order_by(desc(Contract.dateadded)).all()]
+        dcids = [i[0] for i in self.session.query(Contract.doc_cloud_id).order_by(desc(Contract.dateadded)).all()]
         return dcids
 
 

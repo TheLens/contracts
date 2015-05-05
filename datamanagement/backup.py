@@ -12,6 +12,7 @@ import argparse
 from contracts.datamanagement.lib.models import LensDatabase
 from documentcloud import DocumentCloud
 from contracts.settings import Settings
+from documentcloud.toolbox import DoesNotExistError
 from dateutil import parser
 
 parser = argparse.\
@@ -120,5 +121,7 @@ if __name__ == "__main__":
     for document_cloud_id in DOC_CLOUD_IDS:
         try:
             backup(document_cloud_id)
-        except NotImplementedError:
-            pass
+        except DoesNotExistError:
+            logging.info(" {} | {}".\
+                    format(time.strftime("%H:%M:%S"),
+                    document_cloud_id + " DoesNotExistError"))

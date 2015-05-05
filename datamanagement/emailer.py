@@ -51,7 +51,9 @@ def get_message():
     with LensDatabase() as lens_db:
         contracts = lens_db.get_daily_contracts()
         len_contracts = str(len(contracts))
-        output = template.render(len_contracts=len_contracts)  
+        output = template.render(len_contracts=len_contracts)
+        # there are two loops here, so not sure how to put it into template
+        # Not sure if it is worth the headache...  
         for contract in contracts:
             output +=  '<tr>'
             cid = contract[0]
