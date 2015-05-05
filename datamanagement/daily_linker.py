@@ -314,7 +314,6 @@ def process_direct_hit(raw_html, vendor_name):
     print "adding {}".format(vendor_name)
     addvendor(vendor_name)
     soup = BeautifulSoup(raw_html)
-    totalls = [s for s in soup]
     try:
         officers = soup.find_all(id="ctl00_cphContent_pnlOfficers")[0].select(".TableBorder")
     except IndexError: #some places have no listed officers. ex 311 networks
@@ -355,7 +354,7 @@ def get_from_config(field):
 
 
 def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
-    contracts = session.query(Contract.doc_cloud_id, Vendor.name).filter(Contract.dateadded==today_string).filter(Contract.vendorid==Vendor.id).all()
+    contracts = session.query(Contract.doc_cloud_id, Vendor.name).filter(Contract.dateadded == today_string).filter(Contract.vendorid == Vendor.id).all()
     return contracts
 
 
@@ -366,7 +365,10 @@ def get_state_contributions(name):
 
 
 def get_names_from_vendor(name):
-    recccs = session.query(Person.name).filter(Vendor.id==VendorOfficer.vendorid).filter(Person.id==VendorOfficer.personid).filter(Vendor.name==name).all()
+    recccs = session.query(Person.name).\
+                     filter(Vendor.id == VendorOfficer.vendorid).\
+                     filter(Person.id == VendorOfficer.personid).\
+                     filter(Vendor.name == name).all()
     return [str(i[0]) for i in recccs]
 
 
