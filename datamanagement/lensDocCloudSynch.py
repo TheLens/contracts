@@ -3,9 +3,7 @@ Matches the lens db with document cloud
 '''
 import ConfigParser
 import logging
-import argparse
 import datetime
-
 
 from documentcloud import DocumentCloud
 from contracts.lib.vaultclasses import Vendor, Department, Contract
@@ -15,14 +13,7 @@ from contracts.datamanagement.lib.models import LensDatabase
 SETTINGS = Settings()
 logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
-parser = argparse.ArgumentParser(description='Synch the lens db to ducment cloud repo')
-parser.add_argument('--force', dest='keep_synching', action='store_true', help="try to synch the whole db, not just the newest")
-parser.set_defaults(feature=False)
-args = parser.parse_args()
-force = args.keep_synching
-
 client = DocumentCloud()
-
 
 def get_from_metadata(doc, field):
     try:
@@ -65,7 +56,11 @@ def matchLensDBtoDocumentCloud():
     '''
     with LensDatabase() as db:
         for c in db.get_half_filled_contracts():
-            match_contract(client.documents.get(c.doc_cloud_id))
+            try:
+                match_contract(client.documents.get(c.doc_cloud_id))
+            except documentcloud.toolbox.DoesNotExistError:
+                print c.doc_cloud_id + 'is not quite ready yet'
+                log_string = '{} | DC still processing {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), c.doc_cloud_id)
 
 
 if __name__ == '__main__':
