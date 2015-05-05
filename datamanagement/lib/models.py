@@ -379,6 +379,7 @@ class DocumentCloudProject(object):
     def get_all_docs(self):
         if self.docs is None:
             self.docs = self.client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
+            return self.docs
         else:
             return self.docs
 
