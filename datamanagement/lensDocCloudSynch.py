@@ -51,7 +51,7 @@ def match_contract(doc):
 
 
 def get_timestamp():
-	date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return date_string
 
 def matchLensDBtoDocumentCloud():
