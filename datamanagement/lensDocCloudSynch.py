@@ -55,13 +55,16 @@ def matchLensDBtoDocumentCloud():
     Match the Lens database to document cloud
     '''
     with LensDatabase() as db:
-        for c in db.get_half_filled_contracts():
+        for contract in db.get_half_filled_contracts():
             try:
-                match_contract(client.documents.get(c.doc_cloud_id))
-            except:
-                print c.doc_cloud_id + 'is not quite ready yet'
-                log_string = '{} | DC still processing {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), c.doc_cloud_id)
-
+                match_contract(client.documents.get(contract.doc_cloud_id))
+            except Exception, ex:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                print message
+                print contract.doc_cloud_id
+                log_string = '{} | Error {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message)
+                logging.info(log_string)
 
 if __name__ == '__main__':
     matchLensDBtoDocumentCloud()
