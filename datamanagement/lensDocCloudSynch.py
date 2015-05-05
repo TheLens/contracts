@@ -50,13 +50,17 @@ def match_contract(doc):
     return keep_synching
 
 
+def get_timestamp():
+	date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return date_string
+
 def matchLensDBtoDocumentCloud():
     '''
     Match the Lens database to document cloud
     '''
     with LensDatabase() as db:
-    	half_filled_contracts = db.get_half_filled_contracts()
-        '{} | {} half filled contracts need to be synched'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), doc.id)
+        half_filled_contracts = db.get_half_filled_contracts()
+        '{} | {} half filled contracts need to be synched'.format(get_timestamp(), len(half_filled_contracts))
         for contract in half_filled_contracts:
             try:
                 match_contract(client.documents.get(contract.doc_cloud_id))
