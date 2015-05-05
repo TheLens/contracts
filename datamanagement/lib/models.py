@@ -18,7 +18,6 @@ from contracts.lib.models import get_contract_index_page
 from contracts.lib.models import get_po_numbers_from_index_page
 from contracts.settings import Settings
 from bs4 import BeautifulSoup
-from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from contracts.lib.models import valid_po
 from sqlalchemy import create_engine
@@ -558,23 +557,19 @@ class LensDatabase(object):
         self.session.close()
 
 
-class DailyScraper(object):
+def check_page(self, page_no):
     '''
-    Daily job that gets new contracts from the purchasing portal
+    Run the scraper. Need a class here? Just function?
     '''
-    def run(self, page_no):
-        '''
-        Run the scraper. Need a class here? Just function?
-        '''
-        logging.info('{} | {} | Daily scraper run page: {}'.format(run_id, get_timestamp(), str(page_no)))
-        doc_cloud_project = DocumentCloudProject()
-        lens_repo = LensRepository()
-        html = get_contract_index_page(page_no)
-        output = get_po_numbers_from_index_page(html)
-        for purchaseorderno in output:
-            logging.info('{} | {} | Daily scraper found po {}'.format(run_id, get_timestamp(), purchaseorderno))
-            try:
-                lens_repo.sync(purchaseorderno)
-                doc_cloud_project.add_contract(purchaseorderno)
-            except urllib2.HTTPError:
-                logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, get_timestamp(), purchaseorderno))
+    logging.info('{} | {} | Daily scraper run check_page: {}'.format(run_id, get_timestamp(), str(page_no)))
+    doc_cloud_project = DocumentCloudProject()
+    lens_repo = LensRepository()
+    html = get_contract_index_page(page_no)
+    output = get_po_numbers_from_index_page(html)
+    for purchaseorderno in output:
+        logging.info('{} | {} | Daily scraper found po {}'.format(run_id, get_timestamp(), purchaseorderno))
+        try:
+            lens_repo.sync(purchaseorderno)
+            doc_cloud_project.add_contract(purchaseorderno)
+        except urllib2.HTTPError:
+            logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, get_timestamp(), purchaseorderno))
