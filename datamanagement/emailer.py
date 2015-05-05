@@ -14,7 +14,7 @@ import sqlalchemy.exc
 import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from ethics_classes import EthicsRecord
+from contracts.datamanagement.lib.ethics_record import EthicsRecord
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
