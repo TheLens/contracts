@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-These models gather and organize 
+These models gather and organize
 published contracts from the city
 """
 import os
@@ -10,7 +10,6 @@ import datetime
 import logging
 import datetime
 import uuid
-import subprocess
 
 from sqlalchemy.orm import sessionmaker
 from contracts.datamanagement.lib.utilities import download_attachment_file
@@ -31,7 +30,7 @@ SETTINGS = Settings()
 
 logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
-#this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run 
+#this is a uuid that is unique to a given run of the program. Grep for it in the log file to see a certain run
 run_id = " " + str(uuid.uuid1())
 
 
@@ -45,6 +44,9 @@ class PurchaseOrder(object):
     purchasing system.
     """
     def __init__(self, tt, download_attachments=True):
+        '''
+        A purchase order number
+        '''
         purchaseorderno = tt
         if not valid_po(purchaseorderno):
             logging.info('{} | {} | Skipping. Not a valid purchaseorder | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
@@ -393,8 +395,8 @@ class DocumentCloudProject(object):
     def has_contract(self, field, value):
         searchterm = '\'' + field + '\':' + "'" + value + "'"
         if len(self.client.documents.search(searchterm))<1:
-            return False; #it is a new contract
-        return True; #it is an existing contract. We know the k-number
+            return False #it is a new contract
+        return True #it is an existing contract. We know the k-number
 
 
     def add_contract(self, ponumber):
@@ -526,6 +528,11 @@ class LensDatabase(object):
             self.session.commit()
 
 
+    def get_all_contract_ids(self):
+        dcids = [i[0] for i in session.query(Contract.doc_cloud_id).order_by(desc(Contract.dateadded)).all()]
+        return dcids
+
+
     def update_contract_from_doc_cloud_doc(self, doc_cloud_id, fields):
         """
         Add a contract to the Lens db
@@ -602,20 +609,6 @@ class LensDatabase(object):
         Called when the database is closed
         """
         self.session.close()
-
-
-class SummaryProcessor(object):
-
-
-    def process(self, purchaseorderno):
-        logging.warning('{} | {} | Processing | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
-        doc_cloud_project = DocumentCloudProject()
-        lens_repo = LensRepository()
-        try:
-            lens_repo.sync(purchaseorderno)                     #add it to the repo, if needed   
-            logging.info('{} | {} | Synched | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
-        except urllib2.HTTPError:
-            logging.warning('{} | {} | Contract not posted publically | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), purchaseorderno))
 
 
 class DailyScraper(object):

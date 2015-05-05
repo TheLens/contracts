@@ -58,7 +58,7 @@ def matchLensDBtoDocumentCloud():
         for c in db.get_half_filled_contracts():
             try:
                 match_contract(client.documents.get(c.doc_cloud_id))
-            except documentcloud.toolbox.DoesNotExistError:
+            except:
                 print c.doc_cloud_id + 'is not quite ready yet'
                 log_string = '{} | DC still processing {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), c.doc_cloud_id)
 
