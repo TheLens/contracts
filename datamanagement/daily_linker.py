@@ -1,37 +1,26 @@
 import datetime
 import re
 import dateutil.parser
-from vaultclasses import Vendor, Department, Contract, Person, VendorOfficer, VendorOfficerCompany, Company
-from documentcloud import DocumentCloud
+from contracts.lib.vaultclasses import Vendor, Department, Contract, Person, VendorOfficer, VendorOfficerCompany, Company
 from address import AddressParser, Address
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 import ConfigParser
 from ethics_classes import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from address import AddressParser, Address
 
 Base = declarative_base()
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
+from contracts.settings import Settings
 
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
-
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-user = get_from_config('user')
-database = get_from_config('database')
+SETTINGS = Settings()
 
 
 last_names = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.all.last.txt", "r"))]
@@ -41,9 +30,9 @@ first_names = first_female + first_male
 
 ap = AddressParser()
 
-Base = declarative_base()
 # an Engine, which the Session will use for connection
-engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/thevault')
+engine = create_engine(SETTINGS.connection_string)
+
 # create a configured "Session" class
 Session = sessionmaker(bind=engine)
 # create a Session
@@ -61,42 +50,42 @@ class Option:
         self.city = city
 
 def addAddress(street, city, state, zipcode, sourcefile):
-	#convert address from pyaddress to the address model from our db
-	indb = session.query(Address).filter(Address.street==street, Address.city==city, Address.state==state, Address.zipcode==zipcode).count()
-	if indb==0:
-		address = Address(street,city,state, zipcode,sourcefile)
-		session.add(address)
-		session.commit()
+    #convert address from pyaddress to the address model from our db
+    indb = session.query(Address).filter(Address.street==street, Address.city==city, Address.state==state, Address.zipcode==zipcode).count()
+    if indb==0:
+        address = Address(street,city,state, zipcode,sourcefile)
+        session.add(address)
+        session.commit()
 
 def hasKnownPersonSuffix(name):
-	nameregexes = [', JR$',', JR\.?', '^REV', '^MR', '^MRS', 'MRS\. ', '^REV\. ' ,'^DR\. ' , ' JR\.$', ' SR$', ' JR$', ', PROFESSOR,', 'MBA$' , 'MSW$' , ', DEAN,' ,  ', MPH', ' M\.D\.', 'MR\. ', ', SR\.?$', ", P\.?E\.?" ,", PH\.D\.", " III$", "D\.?M\.?D\.?", "II$", "AIA$",', IV$', ", M\.S\.C\.$", ', DMD', ', D\.?V\.?M\.?', ', PHD', ', RSM', ', DVM', 'DR ']
-	for n in nameregexes:
-		reg = re.compile(n)
-		if reg.search(name): #people with Jr ect at the end of the name are people
-			return True
-	return False
+    nameregexes = [', JR$',', JR\.?', '^REV', '^MR', '^MRS', 'MRS\. ', '^REV\. ' ,'^DR\. ' , ' JR\.$', ' SR$', ' JR$', ', PROFESSOR,', 'MBA$' , 'MSW$' , ', DEAN,' ,  ', MPH', ' M\.D\.', 'MR\. ', ', SR\.?$', ", P\.?E\.?" ,", PH\.D\.", " III$", "D\.?M\.?D\.?", "II$", "AIA$",', IV$', ", M\.S\.C\.$", ', DMD', ', D\.?V\.?M\.?', ', PHD', ', RSM', ', DVM', 'DR ']
+    for n in nameregexes:
+        reg = re.compile(n)
+        if reg.search(name): #people with Jr ect at the end of the name are people
+            return True
+    return False
  
 
 def hasKnownCompanySuffix(name):
-	companyregexes = [', INC\.?$', ', L\.?L\.?C\.?$', ', INC\.?' , 'L.L.C.$', ', L\.L\.C\.' ,' LLP$', ', L\.L\.C\.$', "CORPORATION", "ASSOCIATION", ' & ' ]
-	for n in companyregexes:
-		reg = re.compile(n)
-		if reg.search(name): #people with Jr ect at the end of the name are people
-			return True
-	return False
+    companyregexes = [', INC\.?$', ', L\.?L\.?C\.?$', ', INC\.?' , 'L.L.C.$', ', L\.L\.C\.' ,' LLP$', ', L\.L\.C\.$', "CORPORATION", "ASSOCIATION", ' & ' ]
+    for n in companyregexes:
+        reg = re.compile(n)
+        if reg.search(name): #people with Jr ect at the end of the name are people
+            return True
+    return False
 
 
 def isCommonFirstAndLastNameAndHasInitial(name):
     if len(name.split(" ")) == 2:
         return False
-	if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names and len(name.split(" ")[1])==1:
-		return True
-	if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names:
-		if len(name.split(" ")[1])==1:
-			return True
+    if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names and len(name.split(" ")[1])==1:
+        return True
+    if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names:
+        if len(name.split(" ")[1])==1:
+            return True
 
-		return True
-	return False
+        return True
+    return False
 
 
 def isOnListOfKnownPeople(name):
@@ -111,13 +100,13 @@ def isOnListOfKnownCompanies(name):
     return False
 
 def is_this_a_person(name_of_thing):
-	if hasKnownPersonSuffix(name_of_thing):
-		return True
-	if isCommonFirstAndLastNameAndHasInitial(name_of_thing):
-		return True
-	if isOnListOfKnownPeople(name_of_thing):
-		return True
-	return False
+    if hasKnownPersonSuffix(name_of_thing):
+        return True
+    if isCommonFirstAndLastNameAndHasInitial(name_of_thing):
+        return True
+    if isOnListOfKnownPeople(name_of_thing):
+        return True
+    return False
 
 
 def is_this_a_company(name_of_thing):
@@ -125,30 +114,30 @@ def is_this_a_company(name_of_thing):
         return True
     if isOnListOfKnownCompanies(name_of_thing):
         return True
-	return False
+    return False
 
 
 def addname(name):
-	name=name.replace(".","").strip()
-	if is_this_a_person(name): #people with Jr ect at the end of the name are people
-		indb = session.query(Person).filter(Person.name == name).count()
-		if indb==0:
-			person = Person(name)
-			session.add(person)
-			session.commit()
-			return
-		if indb == 1:
-			return
-	if is_this_a_company(name):
-		indb = session.query(Company).filter(Company.name == name).count()
-		if indb == 0:
-			company = Company(name)
-			session.add(company)
-			session.commit()
-			return
-		if indb == 1:
-			return
-	print "coult not link {}".format(name)
+    name=name.replace(".","").strip()
+    if is_this_a_person(name): #people with Jr ect at the end of the name are people
+        indb = session.query(Person).filter(Person.name == name).count()
+        if indb==0:
+            person = Person(name)
+            session.add(person)
+            session.commit()
+            return
+        if indb == 1:
+            return
+    if is_this_a_company(name):
+        indb = session.query(Company).filter(Company.name == name).count()
+        if indb == 0:
+            company = Company(name)
+            session.add(company)
+            session.commit()
+            return
+        if indb == 1:
+            return
+    print "coult not link {}".format(name)
 
 def addvendor(vendor_name):
     indb = session.query(Vendor).filter(Vendor.name == vendor_name).count()
@@ -158,44 +147,45 @@ def addvendor(vendor_name):
         session.commit()
 
 def addAddresses(o):
-	name, title, address1, citystatezip, country, extrafield = [l.text for l in o.select("span")]
-	if len(re.findall('[0-9]{5}-[0-9]{4}',citystatezip)): #parser fails on 9 digit zip codes
-		end = re.findall('[0-9]{5}-[0-9]{4}',citystatezip).pop().split("-")[1].encode("UTF-8")
-		citystatezip = citystatezip.replace("-", "").replace(end, "")
-	string = address1 + " " + citystatezip
-	address = ap.parse_address(string)
-	addAddress(address1,citystatezip.split(",")[0], address.state, address.zip, directory + "/page.html")
-	#print "Address is: {0} {1} {2} {3} {4}".format(address.house_number, address.street, address.city, address.state, address.zip)
+    name, title, address1, citystatezip, country, extrafield = [l.text for l in o.select("span")]
+    if len(re.findall('[0-9]{5}-[0-9]{4}',citystatezip)): #parser fails on 9 digit zip codes
+        end = re.findall('[0-9]{5}-[0-9]{4}',citystatezip).pop().split("-")[1].encode("UTF-8")
+        citystatezip = citystatezip.replace("-", "").replace(end, "")
+    string = address1 + " " + citystatezip
+    address = ap.parse_address(string)
+    addAddress(address1,citystatezip.split(",")[0], address.state, address.zip, directory + "/page.html")
+    #print "Address is: {0} {1} {2} {3} {4}".format(address.house_number, address.street, address.city, address.state, address.zip)
 
 
-
-#link the vendor to the company when the officer is a person, not a
 def link(name,vendor):
-	name = name.strip("\n").replace(".", "").strip()
-	vendorindb = session.query(Vendor).filter(Vendor.name==vendor).first() #get the vendor
-	personindb = session.query(Person).filter(Person.name==name).first() #get the person
-	co = session.query(Company).filter(Company.name == name)
-	companyindb = co.first() #get the company
-	if personindb is not None and companyindb is None:
-		link = session.query(VendorOfficer).filter(VendorOfficer.vendorid==vendorindb.id).filter(VendorOfficer.personid==personindb.id).count()
-		if vendorindb is not None and personindb is not None and link<1:
-			print "linking {} to {}".format(str(vendorindb.id), str(personindb.id))
-			vendorID = vendorindb.id
-			personID = personindb.id
-			link = VendorOfficer(vendorindb.id, personindb.id)
-			session.add(link)
-			session.commit()
-			return
-	if companyindb is not None and personindb is None:
-		link = session.query(VendorOfficerCompany).filter(VendorOfficerCompany.vendorid==vendorindb.id).filter(VendorOfficerCompany.companiesid==companyindb.id).count()
-		if vendorindb is not None and companyindb is not None and link<1:
-			print "linking {} to {}".format(str(vendorindb.id), str(companyindb.id))
-			vendorID = vendorindb.id
-			companyid = companyindb.id
-			link = VendorOfficerCompany(vendorindb.id, companyindb.id)
-			session.add(link)
-			session.commit()
-			return
+    '''
+    link the vendor to the company
+    '''
+    name = name.strip("\n").replace(".", "").strip()
+    vendorindb = session.query(Vendor).filter(Vendor.name==vendor).first() #get the vendor
+    personindb = session.query(Person).filter(Person.name==name).first() #get the person
+    co = session.query(Company).filter(Company.name == name)
+    companyindb = co.first() #get the company
+    if personindb is not None and companyindb is None:
+        link = session.query(VendorOfficer).filter(VendorOfficer.vendorid==vendorindb.id).filter(VendorOfficer.personid==personindb.id).count()
+        if vendorindb is not None and personindb is not None and link<1:
+            print "linking {} to {}".format(str(vendorindb.id), str(personindb.id))
+            vendorID = vendorindb.id
+            personID = personindb.id
+            link = VendorOfficer(vendorindb.id, personindb.id)
+            session.add(link)
+            session.commit()
+            return
+    if companyindb is not None and personindb is None:
+        link = session.query(VendorOfficerCompany).filter(VendorOfficerCompany.vendorid==vendorindb.id).filter(VendorOfficerCompany.companiesid==companyindb.id).count()
+        if vendorindb is not None and companyindb is not None and link<1:
+            print "linking {} to {}".format(str(vendorindb.id), str(companyindb.id))
+            vendorID = vendorindb.id
+            companyid = companyindb.id
+            link = VendorOfficerCompany(vendorindb.id, companyindb.id)
+            session.add(link)
+            session.commit()
+            return
 
 def get_options(soup):
     table = [t for t in soup.select("#ctl00_cphContent_grdSearchResults_EntityNameOrCharterNumber").pop().select("tr") if not t.attrs["class"][0] == "RowHeader"]
@@ -289,10 +279,10 @@ def pick_from_options(firm):
                     potential_hits = get_rows_in_city(potential_vendors[3])
                     pages = get_pages_for_potential_hits(potential_hits)
                     if len(pages) == 1:
-                    	pass #check that it is correct
+                        pass #check that it is correct
                     else:
                         driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
-                    	return "Ambiguous results"
+                        return "Ambiguous results"
                 else:
                     driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
                     return "Ambiguous results"
@@ -301,7 +291,11 @@ def pick_from_options(firm):
     driver.find_element_by_id("btnNewSearch").click()
     return "It's complicated"
 
+
 def search_sos(vendor):
+    '''
+    Search for a vendor
+    '''
     driver.get("http://coraweb.sos.la.gov/commercialsearch/commercialsearch.aspx")
     driver.find_element_by_id("ctl00_cphContent_txtEntityName").send_keys(vendor)
     driver.find_element_by_id("ctl00_cphContent_btnSearchEntity").click()
@@ -337,6 +331,7 @@ def process_direct_hit(raw_html, vendor_name):
     #    name = [l.text for l in o.select("span")].pop(0)
     #    addname(name)
 
+
 def get_total_hits(page):
     if "ctl00_cphContent_tblResults" in driver.page_source:
         return 1
@@ -352,29 +347,15 @@ def try_to_link(vendor_name):
         print "perfect hit for {}".format(vendor_name)
         process_direct_hit(search_results, vendor_name)
 
-CONFIG_LOCATION = '/apps/contracts/app.cfg'
-
 
 def get_from_config(field):
     config = ConfigParser.RawConfigParser()
     config.read(CONFIG_LOCATION)
     return config.get('Section1', field)
 
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-database = get_from_config('database')
-user = get_from_config('user')
-
-engine = create_engine('postgresql://abe:' + databasepassword + '@' + server + ':5432/' + database)
-
-Session = sessionmaker(bind=engine)
-Session.configure(bind=engine)
-session = Session()
-
 
 def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
     contracts = session.query(Contract.doc_cloud_id, Vendor.name).filter(Contract.dateadded==today_string).filter(Contract.vendorid==Vendor.id).all()
-    session.close()
     return contracts
 
 
