@@ -444,7 +444,7 @@ class LensDatabase(object):
         """
         Add vendor to the Lens db
         """
-        indb = self.session.query(Vendor).filter(Vendor.name==vendor).count()
+        indb = self.session.query(Vendor).filter(Vendor.name == vendor).count()
         if indb==0:
             vendor = Vendor(vendor)
             self.session.add(vendor)
@@ -455,7 +455,7 @@ class LensDatabase(object):
         """
         Add department to the Lens db
         """
-        indb = self.session.query(Department).filter(Department.name==department).count()
+        indb = self.session.query(Department).filter(Department.name == department).count()
         if indb==0:
             department = Department(department)
             self.session.add(department)
@@ -466,10 +466,7 @@ class LensDatabase(object):
         """
         Add a contract to the Lens db
         """
-        if contract.doc_cloud_id is None:
-            indb = 0
-        else:
-            indb = self.session.query(Contract).filter(Contract.doc_cloud_id==contract.doc_cloud_id).count()
+        indb = self.session.query(Contract).filter(Contract.doc_cloud_id == contract.doc_cloud_id).count()
         if indb == 0:
             self.session.add(contract)
             self.session.flush()
@@ -485,7 +482,7 @@ class LensDatabase(object):
         """
         Add a contract to the Lens db
         """
-        contract = self.session.query(Contract).filter(Contract.doc_cloud_id==doc_cloud_id).first()
+        contract = self.session.query(Contract).filter(Contract.doc_cloud_id == doc_cloud_id).first()
         contract.contractnumber = fields['contractno']
         contract.vendorid = fields['vendor']
         contract.departmentid = fields['department']
@@ -494,9 +491,8 @@ class LensDatabase(object):
         contract.purchaseordernumber = fields['purchaseno']
         contract.description = fields['description']
         self.session.add(contract)
-        self.session.commit()
         self.session.flush()
-        self.session.close()
+        self.session.commit()
 
 
     def has_contract(self, purchaseorderno):

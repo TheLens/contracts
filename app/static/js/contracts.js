@@ -124,24 +124,24 @@ function buildSearch(){
     var searchQuery = $("#textbox").val();
     var selectedvendor = $('#vendors :selected').first().attr("value")!="" && $('#vendors :selected').first().attr("value") != undefined;
     if (selectedvendor) {
-        searchQuery = searchQuery + "&vendor=\"" + $('#vendors :selected').first().text() + "\"";
+        searchQuery = searchQuery + " vendor:\"" + $('#vendors :selected').first().text() + "\"";
     }
 
     var selecteddeps = $('#departments :selected').first().attr("value")!="" && $('#departments :selected').first().attr("value") != undefined;
     if (selecteddeps) {
-        searchQuery = searchQuery + "&department=\"" + $('#departments :selected').first().text() + "\"";
+        searchQuery = searchQuery + " department:\"" + $('#departments :selected').first().text() + "\"";
     }
 
     var selectedofficers = $('#officers :selected').first().attr("value")!="" && $('#officers :selected').first().attr("value") != undefined;
     if (selectedofficers) {
-        searchQuery = searchQuery + "&officer=\"" + $('#officers :selected').first().text() + "\"";
+        searchQuery = searchQuery + " officers:\"" + $('#officers :selected').first().text() + "\"";
     }
 
     searchQuery = searchQuery.replace(/^and /, ""); //remove and space if it starts the string
 
     offset = $("#pagination").attr("data-offset");
 
-    searchQuery += "&page=" + offset;
+    searchQuery += "&&offset:" + offset;
 
     return searchQuery;
 }
@@ -199,7 +199,7 @@ function setHandlers(){
 
 }
 
-function handlePost(data, new_url){
+function handlePost(data){
 	$("#contract_results").html(data);
 	setupDocList();
 	results = $("#pagination").attr("data-total");
@@ -207,33 +207,22 @@ function handlePost(data, new_url){
 		id = $(".contractpreview").first().attr("id");
 	}
 	setHandlers();
-    window.history.pushState('page2', 'Title', new_url);
-}
-
-function post_back(query){
-    $.post(query, function(data, status) {
-         handlePost(data, query);
-    });
 }
 
 function previous(){
-    var page = parseInt($("#pagination").attr("data-offset")) - 1;
-    if (page < 1){
-        page = 1;
-    }
-    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + page; //page can't go below 0
+    searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
     resetUI();
-    post_back(searchQuery);
+    $.post("previous/" + searchQuery, function(data, status) {
+		handlePost(data);
+    });
 }
 
 function next(){
-    var page = parseInt($("#pagination").attr("data-offset")) + 1;
-    if (page > parseInt($("#pagination").attr("data-pages"))){
-        page = $("#pagination").attr("data-pages"); //page cant go over total pages
-    }
-    searchQuery = "search?query=" + $("#pagination").attr("data-query") + "&page=" + page;
+    searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
     resetUI();
-    post_back(searchQuery);
+    $.post("next/" + searchQuery, function(data, status) {
+         handlePost(data);
+    });
 }
 
 function post_search() {
@@ -243,18 +232,13 @@ function post_search() {
         return;
     }
 
-    $("#pagination").attr("data-offset", 1);
-
     searchQuery = buildSearch();
     resetUI();
 
     $("#results_status").html("Searching...");
     $("#nav_context").remove();
-
-    var new_url = "search?query=" + searchQuery;
-
-    $.post(new_url, function(data, status) {
-        handlePost(data, new_url);
+    $.post("search/" + searchQuery, function(data, status) {
+        handlePost(data);
     });
 }
 
