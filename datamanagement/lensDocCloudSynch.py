@@ -28,7 +28,7 @@ def get_from_metadata(doc, field):
     try:
         output = doc.data[field]
         if len(output)==0:
-        	output = "unknown"
+            output = "unknown"
     except:
         output = "unknown"
     return output
@@ -42,36 +42,22 @@ def match_contract(doc):
     log_string = '{} | Synching {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), doc.id)
     logging.info(log_string)
     with LensDatabase() as lens_db: 
-        purchaseno = get_from_metadata(doc, "purchase order")
-        contractno = get_from_metadata(doc, "contract number")
-        vendor = get_from_metadata(doc, "vendor").replace(".", "")
-        department = get_from_metadata(doc, "department").replace(".", "")
-
-        dateadded = doc.created_at
-        title = doc.title
-        description = doc.description
-
-        lens_db.add_department(department)
-        lens_db.add_vendor(vendor)
-
-        department = lens_db.get_department_id(department)
-        vendorid = lens_db.get_lens_vendor_id(vendor)
-
-        if not lens_db.has_contract(purchaseno):
-            contract = Contract(purchaseno)
-            keep_synching = True
-        else:
-            contract = lens_db.get_contract(purchaseno)
-            keep_synching = False
-
-        contract.contractnumber = contractno
-        contract.doc_cloud_id = doc.id
-        contract.vendorid = vendorid
-        contract.departmentid = department
-        contract.dateadded = dateadded
-        contract.title = title
-        contract.description = description
-        lens_db.add_contract(contract)
+        fields = {}
+        fields['purchaseno'] = get_from_metadata(doc, "purchase order")
+        fields['contractno'] = get_from_metadata(doc, "contract number")
+        fields['vendor'] = get_from_metadata(doc, "vendor").replace(".", "")
+        print fields['vendor']
+        fields['department'] = get_from_metadata(doc, "vendor").replace(".", "")
+        fields['dateadded'] = doc.created_at
+        fields['title'] = doc.title
+        fields['description'] = doc.description
+        lens_db.add_department(fields['department'])
+        lens_db.add_vendor(fields['vendor'])
+        print lens_db.get_lens_vendor_id(fields['vendor'])
+        fields['department'] = lens_db.get_department_id(fields['department'])
+        fields['vendor'] = lens_db.get_lens_vendor_id(fields['vendor'])
+        print fields['vendor']
+        lens_db.update_contract_from_doc_cloud_doc(doc.id, fields)
 
     return keep_synching
 
@@ -80,14 +66,9 @@ def matchLensDBtoDocumentCloud():
     '''
     Match the Lens database to document cloud
     '''
-    docs = client.documents.search('projectid: 1542-city-of-new-orleans-contracts')
-    keep_synching = True
-
-    for i in range(0,len(docs)):   #loop thru docs. assumption is document cloud returns newist first (it does)
-        if keep_synching or force:          #if newest is not in the db, keep looking
-            keep_synching = match_contract(docs[i])
-        else:
-            break   #else end the loop
+    with LensDatabase() as db:
+        for c in db.get_half_filled_contracts():
+            match_contract(client.documents.get(c.doc_cloud_id))
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ def get_contract_index_page(pageno):
     req.add_header('Origin', 'http://www.purchasing.cityofno.com')
     req.add_header('Accept-Encoding', 'gzip, deflate')
     req.add_header('Content-Type', 'application/x-www-form-urlencoded')
-    req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+    req.add_header('Accept', 'text/add_contracthtml,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
     req.add_header('Cache-Control', 'no-cache')
     req.add_header('Referer', 'http://www.purchasing.cityofno.com/bso/external/advsearch/searchContract.sdo')
     req.add_header('Connection', 'keep-alive')

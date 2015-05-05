@@ -436,6 +436,9 @@ class DocumentCloudProject(object):
 
 
     def upload_contract(self, file, data, description, title):
+        '''
+        this uploads a contract onto document cloud
+        '''
         if len(data['contract number'])<1:
             logging.info('{} | {} | Not adding {} to DocumentCloud. Contract number {} is null | {}'.format(run_id, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data['purchase order'], data['contract number'], data['purchase order']))
             return #do not upload. There is a problem
@@ -492,6 +495,7 @@ class LensDatabase(object):
         Add vendor to the Lens db
         """
         indb = self.session.query(Vendor).filter(Vendor.name==vendor).count()
+        print indb
         if indb==0:
             vendor = Vendor(vendor)
             self.session.add(vendor)
@@ -523,6 +527,23 @@ class LensDatabase(object):
             self.session.commit()
 
 
+    def update_contract_from_doc_cloud_doc(self, doc_cloud_id, fields):
+        """
+        Add a contract to the Lens db
+        """
+        contract = self.session.query(Contract).filter(Contract.doc_cloud_id==doc_cloud_id).first()
+        contract.contractnumber = fields['contractno']
+        contract.vendorid = fields['vendor']
+        contract.departmentid = fields['department']
+        contract.dateadded = fields['dateadded']
+        contract.title = fields['title']
+        contract.purchaseordernumber = fields['purchaseno']
+        contract.description = fields['description']
+        self.session.add(contract)
+        self.session.commit()
+        self.session.flush()
+        self.session.close()
+
     def has_contract(self, purchaseorderno):
         """
         Add department to the Lens db
@@ -543,13 +564,22 @@ class LensDatabase(object):
                 first()
 
 
+    def get_contract_doc_cloud_id(self, doc_cloud_id):
+        """
+        Get a contract from the db
+        """
+        return self.session.query(Contract).\
+                filter(Contract.doc_cloud_id==doc_cloud_id).\
+                first()
+
+
     def get_lens_vendor_id(self, vendor):
         """
         Get a vendor in the db. To do: refactor 
         """
         self.session.flush()
-        vendors = self.session.query(Vendor).filter(Vendor.name==vendor).all()
-        vendor = vendors.pop()
+        vendor = self.session.query(Vendor).filter(Vendor.name==vendor).first()
+        return vendor.id
 
 
     def get_department_id(self, department):
@@ -557,6 +587,15 @@ class LensDatabase(object):
         Get a department in the db. To do: refactor 
         """
         return self.session.query(Department).filter(Department.name==department).first().id
+
+
+    def get_half_filled_contracts(self):
+        """
+        DocCloud doesn't give immediate access to all document properties.
+        This pulls out the contracts in the db added
+        during upload but that still need to have their details filled in
+        """
+        return self.session.query(Contract).filter(Contract.purchaseordernumber == None).all()
 
 
     def __exit__(self, type, value, traceback):
