@@ -23,6 +23,10 @@ class Settings(object):
         self.doc_cloud_password = self.get_from_config('doc_cloud_password')
         self.root_folder = self.get_from_config('root_folder')
         self.log = self.get_from_config('log_location')
+        self.to_list = self.get_from_config('to_list')
+        self.sender = self.get_from_config('sender')
+        self.gmail_user = self.get_from_config('gmail_user')
+        self.email_pw = self.get_from_config('email_pw')
         self.vendors_location = self.corpus_loc + "/vendors/"
         self.purchase_order_location = self.corpus_loc + "/purchaseorders/"
         self.bids_location = self.corpus_loc + "/bids/"

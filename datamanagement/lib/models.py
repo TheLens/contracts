@@ -436,6 +436,7 @@ class LensDatabase(object):
         pass
         # to do Tom Thoren
 
+
     #refactor to take a type
     def add_vendor(self, vendor):
         """
@@ -548,6 +549,35 @@ class LensDatabase(object):
         during upload but that still need to have their details filled in
         """
         return self.session.query(Contract).filter(Contract.purchaseordernumber == None).all()
+
+
+
+    def get_daily_contracts(self):  #defaults to today
+        """
+        Get today's contracts (and the vendors) for the daily email
+        """
+        today_string = datetime.datetime.today().strftime('%Y-%m-%d')
+        contracts = self.session.query(Contract.doc_cloud_id, Vendor.name)\
+                           .filter(Contract.dateadded == today_string)\
+                           .filter(Contract.vendorid == Vendor.id).all()
+        return contracts
+
+ 
+    def get_people_associated_with_vendor(self, name):
+        """
+        Get people assiciated with vendor
+        """
+        recccs = self.session.query(Person.name).\
+                         filter(Vendor.id==VendorOfficer.vendorid).\
+                         filter(Person.id==VendorOfficer.personid).\
+                         filter(Vendor.name==name).all()
+        return [str(i[0]) for i in recccs]
+
+
+    def get_state_contributions(self, name):
+        recccs = self.session.query(EthicsRecord).filter(EthicsRecord.contributorname==name).all()
+        recccs.sort(key = lambda x: dateutil.parser.parse(x.receiptdate))
+        return recccs
 
 
     def __exit__(self, type, value, traceback):
