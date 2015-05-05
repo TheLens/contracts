@@ -6,6 +6,7 @@ import logging
 import argparse
 
 from contracts.settings import Settings
+from contracts.datamanagement.lensDocCloudSynch import matchLensDBtoDocumentCloud
 
 parser = argparse.ArgumentParser(description='Scrape a page from the contract index, adding contracts')
 parser.add_argument('pages', metavar='N', type=int, nargs='+')
@@ -15,6 +16,8 @@ pages = args.pages
 
 SETTINGS = Settings()
 logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
+
+matchLensDBtoDocumentCloud()
 
 for page in pages:
     from contracts.datamanagement.lib.models import DailyScraper
