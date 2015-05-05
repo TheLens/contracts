@@ -1,0 +1,1 @@
+rsync -avzh abe@projects.thelensnola.org:/backups/contracts /Volumes/bigone/lensdata
