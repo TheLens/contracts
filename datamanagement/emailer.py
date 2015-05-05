@@ -21,7 +21,9 @@ template = env.get_template('email.html')
 
 
 def sendEmail(title, message):
-    for to in SETTINGS.to_list:
+    print SETTINGS.to_list    
+    for to in SETTINGS.to_list.split(","):
+        print to
         gmail_user = SETTINGS.sender
         smtpserver = smtplib.SMTP('smtp.gmail.com', 587)
         smtpserver.ehlo()
@@ -70,5 +72,3 @@ def get_message():
     return output
 
 sendEmail('Contracts from The Vault: ' + time.strftime("%x"), get_message())
-
-session.close()
