@@ -69,7 +69,7 @@ def matchLensDBtoDocumentCloud():
                 message = template.format(type(ex).__name__, ex.args)
                 print message
                 print contract.doc_cloud_id
-                log_string = '{} | Error {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message)
+                log_string = '{} | {} | Error {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), contract.doc_cloud_id, message)
                 logging.info(log_string)
 
 if __name__ == '__main__':
