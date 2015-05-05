@@ -55,7 +55,9 @@ def matchLensDBtoDocumentCloud():
     Match the Lens database to document cloud
     '''
     with LensDatabase() as db:
-        for contract in db.get_half_filled_contracts():
+    	half_filled_contracts = db.get_half_filled_contracts()
+        '{} | {} half filled contracts need to be synched'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), doc.id)
+        for contract in half_filled_contracts:
             try:
                 match_contract(client.documents.get(contract.doc_cloud_id))
             except Exception, ex:
