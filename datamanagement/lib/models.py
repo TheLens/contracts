@@ -35,7 +35,7 @@ run_id = " " + str(uuid.uuid1())
 
 
 def get_timestamp():
-    return get_timestamp()
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 class PurchaseOrder(object):
@@ -588,7 +588,7 @@ class LensDatabase(object):
         self.session.close()
 
 
-def check_page(self, page_no):
+def check_page(page_no):
     '''
     Run the scraper. Need a class here? Just function?
     '''
