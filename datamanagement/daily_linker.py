@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 import ConfigParser
-from ethics_classes import EthicsRecord
+from contracts.datamanagement.lib.ethics_record import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
