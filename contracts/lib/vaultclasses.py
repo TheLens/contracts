@@ -5,18 +5,19 @@ These classes that map to tables in the underlying database
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-import ConfigParser
-from contracts.settings import Settings
-
-SETTINGS = Settings()
+# import ConfigParser
+# from contracts.settings import Settings
+from contracts import connection_string
+# SETTINGS = Settings()
 
 Base = declarative_base()
 
+
 class Vendor(Base):
     """
-    A vendor sells goods or services to the city. 
+    A vendor sells goods or services to the city.
     [*] vendor_id_city is city's ID number for the
-    vendor. 
+    vendor.
     """
     __tablename__ = 'vendors'
 
@@ -30,9 +31,10 @@ class Vendor(Base):
     def __repr__(self):
         return "<Vendor: {}>".format(self.name)
 
+
 class Department(Base):
     """
-    A department is a part of city government. 
+    A department is a part of city government.
     Ex: Blight or Sanitation
     """
     __tablename__ = 'departments'
@@ -45,6 +47,7 @@ class Department(Base):
 
     def __repr__(self):
         return "<Department(Department='%s')>" % (self.department)
+
 
 class Person(Base):
     """
@@ -61,6 +64,7 @@ class Person(Base):
     def __repr__(self):
         return "<Person(Name='%s')>" % (self.name)
 
+
 class Company(Base):
     """
     A company does business with the city
@@ -76,6 +80,7 @@ class Company(Base):
     def __repr__(self):
         return "<Department(Department='%s')>" % (self.department)
 
+
 class Address(Base):
     """
     An address is, well...
@@ -90,7 +95,7 @@ class Address(Base):
     zipcode = Column(Integer)
     sourcefile = Column(String)
 
-    def __init__(self, street,city,state,zipcode,sourcefile):
+    def __init__(self, street, city, state, zipcode, sourcefile):
         self.street = street
         self.city = city
         self.state = state
@@ -100,29 +105,30 @@ class Address(Base):
     def __repr__(self):
         return "<Department(Department='%s')>" % (self.department)
 
+
 class Contract(Base):
     """
     A contract is any piece of paper that gets
     posted on the city's public purchasing portal.
     Sometimes the city posts "contracts" that are really
-    film permits or MOUs. The doc_cloud_id links the 
-    contract to Document Cloud. The URL for the contract 
-    on Document Cloud will be 
+    film permits or MOUs. The doc_cloud_id links the
+    contract to Document Cloud. The URL for the contract
+    on Document Cloud will be
     https://www.documentcloud.org/documents/{{doc_cloud_id}}}.html
 
-    The city uses two ID numbers to track contracts: 
-    k numbers and PO numbers. 
+    The city uses two ID numbers to track contracts:
+    k numbers and PO numbers.
 
     To buy anything, the city must go thru an internal
-    approval process that generates a purchase order. 
-    This purchase order number gets associated w/ the 
-    final contract. 
+    approval process that generates a purchase order.
+    This purchase order number gets associated w/ the
+    final contract.
 
     Each contract that goes to the law department also
-    gets assigned a k number. But some contracts are 
+    gets assigned a k number. But some contracts are
     rejected by the law department and are resubmitted.
     If this happens, the k number is retired. So there
-    will be gaps in the k numbers. 
+    will be gaps in the k numbers.
     """
     __tablename__ = 'contracts'
 
@@ -136,14 +142,16 @@ class Contract(Base):
     title = Column(String)
     dateadded = Column(Date)
 
-    def __init__(self, ponumber = None,
-                contractnumber = None,
-                vendor_id= None,
-                department_id= None,
-                dcid= None,
-                descript= None,
-                name= None,
-                added= None):
+    def __init__(
+        self, ponumber=None,
+        contractnumber=None,
+        vendor_id=None,
+        department_id=None,
+        dcid=None,
+        descript=None,
+        name=None,
+        added=None
+    ):
         self.purchaseordernumber = ponumber
         self.contractnumber = contractnumber
         self.vendorid = vendor_id
@@ -154,8 +162,14 @@ class Contract(Base):
         self.dateadded = added
 
     def __repr__(self):
-        return "<Contract: contractnumber {} purchaseordernumber {} vendorid {} departmentid {}>".format(self.contractnumber, self.purchaseordernumber, self.vendorid, self.departmentid)
-        
+        return (
+            "<Contract: contractnumber {} purchaseordernumber {} " +
+            "vendorid {} departmentid {}>".format(
+                self.contractnumber, self.purchaseordernumber,
+                self.vendorid, self.departmentid
+            )
+        )
+
 
 class CompanyAddress(Base):
     """
@@ -203,12 +217,13 @@ class VendorOfficer(Base):
     vendorid = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     personid = Column(Integer, ForeignKey("people.id"), nullable=False)
 
-    def __init__(self, vendorID, personID):
-        self.vendorid = vendorID
-        self.personid = personID
+    def __init__(self, vendorid, personid):
+        self.vendorid = vendorid
+        self.personid = personid
 
     def __repr__(self):
         return "<VendorOfficer(Department='%s')>" % (self.vendorid)
+
 
 class VendorOfficerCompany(Base):
     """
@@ -229,9 +244,9 @@ class VendorOfficerCompany(Base):
         return "<VendorOfficerCompany(Department='%s')>" % (self.vendorid)
 
 
-def remakeDB():
-    engine = create_engine(SETTINGS.connection_string)
+def remake_db():
+    engine = create_engine(connection_string)
     Base.metadata.create_all(engine)
 
 if __name__ == "__main__":
-    remakeDB()
+    remake_db()
