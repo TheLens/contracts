@@ -2,7 +2,6 @@ import datetime
 import re
 import dateutil.parser
 from contracts.lib.vaultclasses import Vendor, Department, Contract, Person, VendorOfficer, VendorOfficerCompany, Company
-from address import AddressParser, Address
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +13,6 @@ import ConfigParser
 from ethics_classes import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from address import AddressParser, Address
 
 Base = declarative_base()
 
@@ -28,7 +26,6 @@ first_male = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.male.first.t
 first_female = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.female.first.txt", "r"))]
 first_names = first_female + first_male
 
-ap = AddressParser()
 
 # an Engine, which the Session will use for connection
 engine = create_engine(SETTINGS.connection_string)
