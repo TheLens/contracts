@@ -113,7 +113,6 @@ def css():
     local('git add %s/contracts.css' % CSS_DIR)
     local('git add %s/foundation.css' % CSS_DIR)
     local('git add %s/icons.css' % CSS_DIR)
-    local('git add %s/lens.css' % CSS_DIR)
     local('git add %s/reset.css' % CSS_DIR)
     local('git add %s/style.css' % CSS_DIR)
     local('git add %s/stylesheet.css' % CSS_DIR)
@@ -177,14 +176,16 @@ def templates():
     '''/contracts/templates'''
 
     local('git add %s/banner.html' % TEMPLATE_DIR)
-    local('git add %s/contract_child.html' % TEMPLATE_DIR)
     local('git add %s/contract.html' % TEMPLATE_DIR)
     local('git add %s/documentcloud.html' % TEMPLATE_DIR)
     local('git add %s/email.html' % TEMPLATE_DIR)
-    local('git add %s/intro_child.html' % TEMPLATE_DIR)
-    local('git add %s/intro.html' % TEMPLATE_DIR)
-    local('git add %s/lens_layout.html' % TEMPLATE_DIR)
+    local('git add %s/footer.html' % TEMPLATE_DIR)
+    local('git add %s/head.html' % TEMPLATE_DIR)
+    local('git add %s/index.html' % TEMPLATE_DIR)
+    local('git add %s/js.html' % TEMPLATE_DIR)
+    local('git add %s/search-area.html' % TEMPLATE_DIR)
     local('git add %s/select.html' % TEMPLATE_DIR)
+    local('git add %s/table.html' % TEMPLATE_DIR)
     local('git add %s/vendors.html' % TEMPLATE_DIR)
 
 

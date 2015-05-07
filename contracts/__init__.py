@@ -50,6 +50,12 @@ else:  # Local
     )
     TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
 
+    BANNER_CSS = '/static/css/banner.css'
+    CONTRACTS_CSS = '/static/css/contracts.css'
+
+    LENS_JS = '/static/js/lens.js'
+    CONTRACTS_JS = '/static/js/contracts.js'
+
 # Logging
 if os.path.isfile(LOG_PATH):
     os.remove(LOG_PATH)

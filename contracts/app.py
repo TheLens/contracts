@@ -19,7 +19,14 @@ from contracts.lib.vaultclasses import (
 from contracts.lib.models import QueryBuilder
 from documentcloud import DocumentCloud
 # from contracts.settings import Settings
-from contracts import CONNECTION_STRING, log  # , templates
+from contracts import (
+    CONNECTION_STRING,
+    BANNER_CSS,
+    CONTRACTS_CSS,
+    LENS_JS,
+    CONTRACTS_JS,
+    log
+)
 
 # settings = Settings()
 
@@ -31,9 +38,43 @@ documentCloudClient = DocumentCloud()
 
 engine = create_engine(CONNECTION_STRING)
 
-log.debug(engine)
-
 dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
+
+
+@app.route('/contracts/', methods=['GET'])
+def intro():
+    """
+    Intro page for the web app
+    """
+
+    log.debug('index')
+
+    docs = get_contracts(0, PAGELENGTH)
+    totaldocs = get_contracts_count()
+    pages = int(totaldocs / PAGELENGTH) + 1
+    vendors = get_vendors()
+    departments = get_departments()
+    officers = get_officers()
+    status = "Newest city contracts ..."
+    updateddate = time.strftime("%m/%d/%Y")
+    return render_template(
+        'index.html',
+        vendors=vendors,
+        departments=departments,
+        offset=0,
+        totaldocs=totaldocs,
+        pages=pages,
+        page=1,
+        status=status,
+        docs=docs,
+        officers=officers,
+        query=dc_query,
+        updated=updateddate,
+        banner_css=BANNER_CSS,
+        contracts_css=CONTRACTS_CSS,
+        lens_js=LENS_JS,
+        contracts_js=CONTRACTS_JS
+    )
 
 
 # @cache.memoize(timeout=900)
@@ -255,49 +296,20 @@ def departments(query=None):
     return render_template('select.html', options=departments)
 
 
-@app.route('/contracts/', methods=['GET'])
-def intro():
-    """
-    Intro page for the web app
-    """
-
-    log.debug('index')
-
-    docs = get_contracts(0, PAGELENGTH)
-    totaldocs = get_contracts_count()
-    pages = int(totaldocs / PAGELENGTH) + 1
-    vendors = get_vendors()
-    departments = get_departments()
-    officers = get_officers()
-    status = "Newest city contracts ..."
-    updateddate = time.strftime("%m/%d/%Y")
-    return render_template(
-        'index.html',
-        vendors=vendors,
-        departments=departments,
-        offset=0,
-        totaldocs=totaldocs,
-        pages=pages,
-        page=1,
-        status=status,
-        docs=docs,
-        officers=officers,
-        query=dc_query,
-        title="New Orleans city contracts",
-        updated=updateddate,
-        url="contracts"
-    )
-
-
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
     """
     Request for a given contract
     """
     doc_cloud_id = re.sub(".html$", "", doc_cloud_id)
-    return render_template('contract_child.html',
-                           doc_cloud_id=doc_cloud_id,
-                           title="New Orleans city contracts")
+    return render_template(
+        'contract.html',
+        doc_cloud_id=doc_cloud_id,
+        banner_css=BANNER_CSS,
+        contracts_css=CONTRACTS_CSS,
+        lens_js=LENS_JS,
+        contracts_js=CONTRACTS_JS
+    )
 
 
 def query_request(field):
@@ -403,9 +415,12 @@ def query_docs():
             docs=docs,
             officers=officers,
             query=searchterm.replace(standard_query, ""),
-            title="New Orleans city contracts",
             updated=updateddate,
-            url="contracts"
+            url="contracts",
+            banner_css=BANNER_CSS,
+            contracts_css=CONTRACTS_CSS,
+            lens_js=LENS_JS,
+            contracts_js=CONTRACTS_JS
         )
     if request.method == 'POST':
         return render_template(
@@ -416,7 +431,11 @@ def query_docs():
             page=offset + 1,
             vendor=vendor,
             totaldocs=totaldocs,
-            query=searchterm.replace(standard_query, "")
+            query=searchterm.replace(standard_query, ""),
+            banner_css=BANNER_CSS,
+            contracts_css=CONTRACTS_CSS,
+            lens_js=LENS_JS,
+            contracts_js=CONTRACTS_JS
         )
 
 if __name__ == '__main__':

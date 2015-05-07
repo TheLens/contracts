@@ -1,0 +1,47 @@
+<div id="blockOfStuff" language="text"> 
+  <div id="top_row" class="row">
+    <div id="components" class="large-8 medium-8 small-8 small-centered medium-centered large-centered columns"> 
+      <input id='textbox' type="text" placeholder="Keyword (example: uniforms)" class="lensinput"/>
+        <div id="advanced_search" class="minortext right">
+          Advanced Search
+        </div>
+        <div class="row advancedsearch">
+          <div class="small-centered medium-centered large-centered columns">
+            <select id="vendors" onchange="resetOfficers();" data-placeholder="Vendor (example: Three fold Consultants)" >
+              {% for v in vendors %}
+              	<option value="{{v}}">{{v}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row advancedsearch">
+          <div class="small-centered medium-centered large-centered columns">
+            <select  id="departments" data-placeholder="Department (example: Information Technology)">
+              {% for d in departments %}
+              	<option value="{{d}}">{{d}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row advancedsearch">
+          <div class="small-centered medium-centered large-centered columns">
+            <select id="officers" onchange="resetVendor();" data-placeholder="Company officer (example: Joe Smith)  - New feature in progress">
+              {% for o in officers %}
+              	<option value="{{o}}">{{o}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div> 
+      </div>
+    </div>
+    <div class="row">
+      <div class="large-8 large-centered medium-8 medium-centered small-8 small-centered columns">
+        <div class="centered">
+          <div id="search_button" class="small button search_button">
+            Search
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

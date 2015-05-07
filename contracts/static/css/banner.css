@@ -1,6 +1,5 @@
 .banner {
     z-index: 9999;
-    /*position: fixed;*/
     position: relative;
     margin-bottom: 20px;
     width: 100%;
@@ -9,7 +8,7 @@
     border-bottom: 3px solid #B33125;
     background: #FFFFFF;
     box-shadow: 0 0 0.9px 1px rgba(0,0,0,.8);
-    top: 0;
+    /*top: 0;*/
 }
 .banner .sponsor-image {
     margin: 3px 10px 0 10px;
@@ -20,7 +19,7 @@
 }
 .banner .banner-title {
     float: left;
-    margin: 8px 15px 0 20px;
+    margin: 5px 15px 0 20px;
     font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
     font-size: 20px;
 }
@@ -40,7 +39,7 @@
 .banner .banner-support {
     float: right;
     font-size: 26px;
-    margin: 5px 15px 0 0;
+    margin: 0 15px 0 0;
 }
 .banner .banner-support {
     font-size: 14px;
@@ -51,6 +50,7 @@
 .banner a,
 .banner a.banner-title,
 .banner a.banner-logo,
+.banner a.banner-support,
 .banner a.banner-social-twitter,
 .banner a.banner-social-facebook,
 .banner a.banner-social-email {
