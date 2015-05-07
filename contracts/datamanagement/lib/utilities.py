@@ -4,14 +4,15 @@ from contracts.settings import Settings
 
 settings = Settings()
 
+
 def download_attachment_file(bidno, bidfilelocation):
         if not os.path.exists(bidno):
             p = subprocess.Popen([
                 'curl',
                 '-o',
                 bidfilelocation,
-                'http://www.purchasing.cityofno.com/bso/external/document/attachments/attachmentFileDetail.sdo'
-                    ,
+                'http://www.purchasing.cityofno.com/bso/external/document/' +
+                'attachments/attachmentFileDetail.sdo',
                 '-H',
                 'Pragma: no-cache',
                 '-H',
@@ -21,11 +22,11 @@ def download_attachment_file(bidno, bidfilelocation):
                 '-H',
                 'Accept-Language: en-US,en;q=0.8',
                 '-H',
-                'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG'
-                    ,
+                'Content-Type: multipart/form-data; ' +
+                'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
                 '-H',
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-                    ,
+                'Accept: text/html,application/xhtml+xml,' +
+                'application/xml;q=0.9,image/webp,*/*;q=0.8',
                 '-H',
                 'Connection: keep-alive',
                 '--data-binary',
@@ -44,9 +45,7 @@ Content-Disposition: form-data; name="parentId"\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="fileNbr"\r
 \r
-'''
-                    + bidno
-                    + '''\r
+''' + bidno + '''\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="workingDir"\r
 \r
@@ -70,9 +69,7 @@ Content-Disposition: form-data; name="releaseNbr"\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="downloadFileNbr"\r
 \r
-'''
-                    + bidno
-                    + '''\r
+''' + bidno + '''\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="itemNbr"\r
 \r
@@ -123,6 +120,6 @@ Content-Disposition: form-data; name="displayName"\r
 Grainger Inc. Februaryl 2008.pdf\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG--\r
 ''',
-                '--compressed',
-                ])
+                '--compressed'
+            ])
             p.wait()

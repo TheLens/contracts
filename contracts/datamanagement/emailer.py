@@ -1,16 +1,11 @@
 #!/usr/bin/python
-import dateutil.parser
-import subprocess
-import datetime
-import subprocess
+
 import time
 import smtplib
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from contracts.datamanagement.lib.models import LensDatabase
-from contracts.datamanagement.lib.ethics_record import EthicsRecord
-from contracts.lib.vaultclasses import Contract
 from contracts.settings import Settings
 from jinja2 import Environment, FileSystemLoader
 
@@ -20,8 +15,8 @@ env = Environment(loader=FileSystemLoader(TEMPLATE_LOC))
 template = env.get_template('email.html')
 
 
-def sendEmail(title, message):
-    print SETTINGS.to_list    
+def send_email(title, message):
+    print SETTINGS.to_list
     for to in SETTINGS.to_list.split(","):
         print to
         gmail_user = SETTINGS.sender
@@ -53,24 +48,25 @@ def get_message():
         len_contracts = str(len(contracts))
         output = template.render(len_contracts=len_contracts)
         # there are two loops here, so not sure how to put it into template
-        # Not sure if it is worth the headache...  
+        # Not sure if it is worth the headache...
         for contract in contracts:
-            output +=  '<tr>'
+            output += '<tr>'
             cid = contract[0]
             vendor = contract[1]
             output += '<td WIDTH="20%">' + vendor + '</td>'
-            output += '<td WIDTH="20%">' + "https://www.documentcloud.org/documents/" + cid + '</td>'
-            output += '<td WIDTH="60%">' 
+            output += '<td WIDTH="20%">' + \
+                "https://www.documentcloud.org/documents/" + cid + '</td>'
+            output += '<td WIDTH="60%">'
             names = lens_db.get_people_associated_with_vendor(vendor)
             for name in names:
                 contributions = lens_db.get_state_contributions(name)
                 if len(contributions) > 0:
-                    output += "<br><br>" + name + "<br><br>" 
+                    output += "<br><br>" + name + "<br><br>"
                     for contribution in contributions:
                         output += "<br>" + str(contribution)
-            output += '</td>' 
+            output += '</td>'
             output += '</tr>'
         output += '</table>'
     return output
 
-sendEmail('Contracts from The Vault: ' + time.strftime("%x"), get_message())
+send_email('Contracts from The Vault: ' + time.strftime("%x"), get_message())

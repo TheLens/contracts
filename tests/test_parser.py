@@ -1,5 +1,5 @@
-from os.path import dirname, join
 from unittest import TestCase
+
 
 class TestParser(TestCase):
 

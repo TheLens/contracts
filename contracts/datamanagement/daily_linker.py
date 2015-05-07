@@ -1,31 +1,35 @@
 import datetime
 import re
 import dateutil.parser
-from contracts.lib.vaultclasses import Vendor, Department, Contract, Person, VendorOfficer, VendorOfficerCompany, Company
+from contracts.lib.vaultclasses import (
+    Vendor,
+    Contract,
+    Person,
+    VendorOfficer,
+    VendorOfficerCompany,
+    Company
+)
 from address import AddressParser, Address
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
 import ConfigParser
 from ethics_classes import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from address import AddressParser, Address
+from contracts.settings import Settings
 
 Base = declarative_base()
-
-from contracts.settings import Settings
 
 SETTINGS = Settings()
 
 
-last_names = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.all.last.txt", "r"))]
-first_male = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.male.first.txt", "r"))]
-first_female = [l.strip("\n").split(" ")[0] for l in tuple(open("dist.female.first.txt", "r"))]
+last_names = [l.strip("\n").split(" ")[0] for l in tuple(
+    open("dist.all.last.txt", "r"))]
+first_male = [l.strip("\n").split(" ")[0] for l in tuple(
+    open("dist.male.first.txt", "r"))]
+first_female = [l.strip("\n").split(" ")[0] for l in tuple(
+    open("dist.female.first.txt", "r"))]
 first_names = first_female + first_male
 
 ap = AddressParser()
@@ -38,10 +42,14 @@ Session = sessionmaker(bind=engine)
 # create a Session
 session = Session()
 
-driver = webdriver.PhantomJS(executable_path='/usr/local/bin/phantomjs', port=65000)
+driver = webdriver.PhantomJS(
+    executable_path='/usr/local/bin/phantomjs', port=65000)
 
-known_people = [t.strip("\n").replace(".", "") for t in tuple(open("known_people.txt", "r"))] # a list of known people
-known_companies = [t.strip("\n").replace(".", "") for t in tuple(open("known_companies.txt", "r"))]
+known_people = [t.strip("\n").replace(".", "") for t in tuple(
+    open("known_people.txt", "r"))]  # a list of known people
+known_companies = [t.strip("\n").replace(".", "") for t in tuple(
+    open("known_companies.txt", "r"))]
+
 
 class Option:
     def __init__(self, name, org_type, city):
@@ -49,79 +57,147 @@ class Option:
         self.type = org_type
         self.city = city
 
-def addAddress(street, city, state, zipcode, sourcefile):
-    #convert address from pyaddress to the address model from our db
-    indb = session.query(Address).filter(Address.street==street, Address.city==city, Address.state==state, Address.zipcode==zipcode).count()
-    if indb==0:
-        address = Address(street,city,state, zipcode,sourcefile)
+
+def add_address(street, city, state, zipcode, sourcefile):
+    # convert address from pyaddress to the address model from our db
+    indb = session.query(Address).filter(
+        Address.street == street,
+        Address.city == city,
+        Address.state == state,
+        Address.zipcode == zipcode
+    ).count()
+    if indb == 0:
+        address = Address(street, city, state, zipcode, sourcefile)
         session.add(address)
         session.commit()
 
-def hasKnownPersonSuffix(name):
-    nameregexes = [', JR$',', JR\.?', '^REV', '^MR', '^MRS', 'MRS\. ', '^REV\. ' ,'^DR\. ' , ' JR\.$', ' SR$', ' JR$', ', PROFESSOR,', 'MBA$' , 'MSW$' , ', DEAN,' ,  ', MPH', ' M\.D\.', 'MR\. ', ', SR\.?$', ", P\.?E\.?" ,", PH\.D\.", " III$", "D\.?M\.?D\.?", "II$", "AIA$",', IV$', ", M\.S\.C\.$", ', DMD', ', D\.?V\.?M\.?', ', PHD', ', RSM', ', DVM', 'DR ']
+
+def has_known_person_suffix(name):
+    nameregexes = [
+        ', JR$',
+        ', JR\.?',
+        '^REV',
+        '^MR',
+        '^MRS',
+        'MRS\. ',
+        '^REV\. ',
+        '^DR\. ',
+        ' JR\.$',
+        ' SR$',
+        ' JR$',
+        ', PROFESSOR,',
+        'MBA$',
+        'MSW$',
+        ', DEAN,',
+        ', MPH',
+        ' M\.D\.',
+        'MR\. ',
+        ', SR\.?$',
+        ", P\.?E\.?",
+        ", PH\.D\.",
+        " III$",
+        "D\.?M\.?D\.?",
+        "II$",
+        "AIA$",
+        ', IV$',
+        ", M\.S\.C\.$",
+        ', DMD',
+        ', D\.?V\.?M\.?',
+        ', PHD',
+        ', RSM',
+        ', DVM',
+        'DR '
+    ]
     for n in nameregexes:
         reg = re.compile(n)
-        if reg.search(name): #people with Jr ect at the end of the name are people
+        # people with Jr ect at the end of the name are people:
+        if reg.search(name):
             return True
     return False
- 
 
-def hasKnownCompanySuffix(name):
-    companyregexes = [', INC\.?$', ', L\.?L\.?C\.?$', ', INC\.?' , 'L.L.C.$', ', L\.L\.C\.' ,' LLP$', ', L\.L\.C\.$', "CORPORATION", "ASSOCIATION", ' & ' ]
+
+def has_known_company_suffix(name):
+    companyregexes = [
+        ', INC\.?$',
+        ', L\.?L\.?C\.?$',
+        ', INC\.?',
+        'L.L.C.$',
+        ', L\.L\.C\.',
+        ' LLP$',
+        ', L\.L\.C\.$',
+        "CORPORATION",
+        "ASSOCIATION",
+        ' & '
+    ]
     for n in companyregexes:
         reg = re.compile(n)
-        if reg.search(name): #people with Jr ect at the end of the name are people
+        # people with Jr ect at the end of the name are people:
+        if reg.search(name):
             return True
     return False
 
 
-def isCommonFirstAndLastNameAndHasInitial(name):
+def is_common_first_and_last_name_and_has_initial(name):
     if len(name.split(" ")) == 2:
         return False
-    if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names and len(name.split(" ")[1])==1:
+
+    condition1 = (
+        name.split(" ")[0] in first_names and
+        name.split(" ")[2] in last_names and
+        len(name.split(" ")[1])
+    )
+    if condition1 == 1:
         return True
-    if (name.split(" ")[0] in first_names) and name.split(" ")[2] in last_names:
-        if len(name.split(" ")[1])==1:
+
+    condition2 = (
+        (name.split(" ")[0] in first_names) and
+        name.split(" ")[2] in last_names
+    )
+    if condition2:
+        if len(name.split(" ")[1]) == 1:
             return True
 
         return True
     return False
 
 
-def isOnListOfKnownPeople(name):
+def is_on_list_of_known_people(name):
     if name in known_people:
         return True
     return False
 
 
-def isOnListOfKnownCompanies(name):
+def is_on_list_of_known_companies(name):
     if name in known_companies:
         return True
     return False
 
+
 def is_this_a_person(name_of_thing):
-    if hasKnownPersonSuffix(name_of_thing):
+    if has_known_person_suffix(name_of_thing):
         return True
-    if isCommonFirstAndLastNameAndHasInitial(name_of_thing):
+    if is_common_first_and_last_name_and_has_initial(name_of_thing):
         return True
-    if isOnListOfKnownPeople(name_of_thing):
+    if is_on_list_of_known_people(name_of_thing):
         return True
     return False
 
 
 def is_this_a_company(name_of_thing):
-    if hasKnownCompanySuffix(name_of_thing):
+    if has_known_company_suffix(name_of_thing):
         return True
-    if isOnListOfKnownCompanies(name_of_thing):
+    if is_on_list_of_known_companies(name_of_thing):
         return True
     return False
 
 
 def addname(name):
-    name=name.replace(".","").strip()
-    if is_this_a_person(name): #people with Jr ect at the end of the name are people
+    name = name.replace(".", "").strip()
+    if is_this_a_person(name):
+        # people with Jr ect at the end of the name are people
+
         indb = session.query(Person).filter(Person.name == name).count()
-        if indb==0:
+        if indb == 0:
             person = Person(name)
             session.add(person)
             session.commit()
@@ -139,6 +215,7 @@ def addname(name):
             return
     print "coult not link {}".format(name)
 
+
 def addvendor(vendor_name):
     indb = session.query(Vendor).filter(Vendor.name == vendor_name).count()
     if indb == 0:
@@ -146,49 +223,80 @@ def addvendor(vendor_name):
         session.add(vendor)
         session.commit()
 
-def addAddresses(o):
-    name, title, address1, citystatezip, country, extrafield = [l.text for l in o.select("span")]
-    if len(re.findall('[0-9]{5}-[0-9]{4}',citystatezip)): #parser fails on 9 digit zip codes
-        end = re.findall('[0-9]{5}-[0-9]{4}',citystatezip).pop().split("-")[1].encode("UTF-8")
+
+def add_addresses(o):
+    name, title, address1, citystatezip, country, extrafield = [
+        l.text for l in o.select("span")]
+    if len(re.findall('[0-9]{5}-[0-9]{4}', citystatezip)):
+        # parser fails on 9 digit zip codes
+
+        end = re.findall(
+            '[0-9]{5}-[0-9]{4}', citystatezip
+        ).pop().split("-")[1].encode("UTF-8")
         citystatezip = citystatezip.replace("-", "").replace(end, "")
     string = address1 + " " + citystatezip
     address = ap.parse_address(string)
-    addAddress(address1,citystatezip.split(",")[0], address.state, address.zip, directory + "/page.html")
-    #print "Address is: {0} {1} {2} {3} {4}".format(address.house_number, address.street, address.city, address.state, address.zip)
+    add_address(
+        address1,
+        citystatezip.split(",")[0],
+        address.state,
+        address.zip,
+        # directory + "/page.html"
+    )
+    # print "Address is: {0} {1} {2} {3} {4}".format(
+    #    address.house_number, address.street,
+    #    address.city, address.state, address.zip)
 
 
-def link(name,vendor):
+def link(name, vendor):
     '''
     link the vendor to the company
     '''
     name = name.strip("\n").replace(".", "").strip()
-    vendorindb = session.query(Vendor).filter(Vendor.name==vendor).first() #get the vendor
-    personindb = session.query(Person).filter(Person.name==name).first() #get the person
+
+    # get the vendor:
+    vendorindb = session.query(Vendor).filter(Vendor.name == vendor).first()
+
+    # get the person:
+    personindb = session.query(Person).filter(Person.name == name).first()
     co = session.query(Company).filter(Company.name == name)
-    companyindb = co.first() #get the company
+    companyindb = co.first()  # get the company
     if personindb is not None and companyindb is None:
-        link = session.query(VendorOfficer).filter(VendorOfficer.vendorid==vendorindb.id).filter(VendorOfficer.personid==personindb.id).count()
-        if vendorindb is not None and personindb is not None and link<1:
-            print "linking {} to {}".format(str(vendorindb.id), str(personindb.id))
-            vendorID = vendorindb.id
-            personID = personindb.id
+        link = session.query(
+            VendorOfficer
+        ).filter(
+            VendorOfficer.vendorid == vendorindb.id
+        ).filter(
+            VendorOfficer.personid == personindb.id
+        ).count()
+        if vendorindb is not None and personindb is not None and link < 1:
+            print "linking {} to {}".format(
+                str(vendorindb.id), str(personindb.id))
             link = VendorOfficer(vendorindb.id, personindb.id)
             session.add(link)
             session.commit()
             return
     if companyindb is not None and personindb is None:
-        link = session.query(VendorOfficerCompany).filter(VendorOfficerCompany.vendorid==vendorindb.id).filter(VendorOfficerCompany.companiesid==companyindb.id).count()
-        if vendorindb is not None and companyindb is not None and link<1:
-            print "linking {} to {}".format(str(vendorindb.id), str(companyindb.id))
-            vendorID = vendorindb.id
-            companyid = companyindb.id
+        link = session.query(
+            VendorOfficerCompany
+        ).filter(
+            VendorOfficerCompany.vendorid == vendorindb.id
+        ).filter(
+            VendorOfficerCompany.companiesid == companyindb.id
+        ).count()
+        if vendorindb is not None and companyindb is not None and link < 1:
+            print "linking {} to {}".format(
+                str(vendorindb.id), str(companyindb.id))
             link = VendorOfficerCompany(vendorindb.id, companyindb.id)
             session.add(link)
             session.commit()
             return
 
+
 def get_options(soup):
-    table = [t for t in soup.select("#ctl00_cphContent_grdSearchResults_EntityNameOrCharterNumber").pop().select("tr") if not t.attrs["class"][0] == "RowHeader"]
+    table = [t for t in soup.select(
+        "#ctl00_cphContent_grdSearchResults_EntityNameOrCharterNumber"
+    ).pop().select("tr") if not t.attrs["class"][0] == "RowHeader"]
     options = []
     for t in table:
         try:
@@ -202,18 +310,21 @@ def get_options(soup):
             pass
     return options
 
+
 def find_button_to_click(firm):
     soup = BeautifulSoup(driver.page_source)
     rows = soup.find_all("tr")
     rows = [r for r in rows if "class" in r.attrs.keys()]
-    row = [r for r in rows if r.attrs['class'][0] == "RowNormal" or r.attrs['class']== "RowAlt" ]
+    row = [r for r in rows if r.attrs[
+        'class'][0] == "RowNormal" or r.attrs['class'] == "RowAlt"]
     if len(row) == 1:
         contents = row.pop().contents
         contents = contents[4]
         t = contents.contents[1].attrs
         return t['id']
     elif len(row) > 1:
-        row = [r for r in row if r.text.split("\n")[1].replace(",", "").replace(".", "") == firm]
+        row = [r for r in row if r.text.split(
+            "\n")[1].replace(",", "").replace(".", "") == firm]
         contents = row.pop().contents
         contents = contents[4]
         t = contents.contents[1].attrs
@@ -229,7 +340,9 @@ def get_rows_in_city(city):
     rows_alt = [r for r in rows if r.attrs['class'][0] == "RowAlt"]
     rows = rows_alt + rows_normal
     city_rows = [r for r in rows if city in ''.join(r.findAll(text=True))]
-    return [r.contents[4].contents[1] for r in city_rows]   #return the IDs for each button to explore
+
+    # return the IDs for each button to explore
+    return [r.contents[4].contents[1] for r in city_rows]
 
 
 def get_pages_for_potential_hits(potential_hits):
@@ -239,52 +352,75 @@ def get_pages_for_potential_hits(potential_hits):
         driver.find_element_by_id(id).click()
         page = driver.page_source
         pages.append(page)
-        driver.find_element_by_id("ctl00_cphContent_btnBackToSearchResults").click()
+        driver.find_element_by_id(
+            "ctl00_cphContent_btnBackToSearchResults").click()
     return pages
 
 
 def pick_from_options(firm):
-    if "ctl00_cphContent_lblTotalResults" in driver.page_source:  #results listing page
-        text = driver.find_element_by_id("ctl00_cphContent_lblTotalResults").text
-        if str(text) == "0":   #no hits
+    if "ctl00_cphContent_lblTotalResults" in driver.page_source:
+        # results listing page
+
+        text = driver.find_element_by_id(
+            "ctl00_cphContent_lblTotalResults").text
+        if str(text) == "0":  # no hits
             driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
             return "Zero results"
-        if int(text) > 0:  #more than one hits
-            potential_vendors = set([unicode(v.split("\t")[1].upper()) for v in vendors if v.split("\t")[1] == firm])
+        if int(text) > 0:  # more than one hits
+            potential_vendors = set([unicode(v.split("\t")[
+                1].upper()) for v in vendors if v.split("\t")[1] == firm])
             options = get_options(BeautifulSoup(driver.page_source))
-            direct_hits = [o.name for o in options if o.name.upper() == firm.upper()]
-            if len(direct_hits)==1:       #one of the rows matches perfectly so pick that one
+            direct_hits = [
+                o.name for o in options if o.name.upper() == firm.upper()]
+            if len(direct_hits) == 1:
+                # one of the rows matches perfectly so pick that one
+
                 try:
                     id = find_button_to_click(direct_hits.pop())
                 except:
                     return "Ambiguous results"
                 driver.find_element_by_id(id).click()
                 page = driver.page_source.encode('utf8')
-                driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
+                driver.find_element_by_id(
+                    "ctl00_cphContent_btnNewSearch").click()
                 return page
-            ignore_periods_commas_hits = [o.name.replace(".", "").replace(",", "") for o in options if o.name.upper().replace(".", "").replace(",", "") == firm.upper().replace(".", "").replace(",", "")]
-            if len(ignore_periods_commas_hits)==1:  #one matches perfectly without periods and commas, so pick that one
+            ignore_periods_commas_hits = [o.name.replace(".", "").replace(
+                ",", "") for o in options if o.name.upper().replace(
+                ".", "").replace(",", "") == firm.upper().replace(
+                ".", "").replace(",", "")]
+            # one matches perfectly without periods and commas, so pick that:
+            if len(ignore_periods_commas_hits) == 1:
                 try:
                     id = find_button_to_click(ignore_periods_commas_hits.pop())
                 except:
                     return "Ambiguous results"
                 driver.find_element_by_id(id).click()
                 page = driver.page_source.encode('utf8')
-                driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
+                driver.find_element_by_id(
+                    "ctl00_cphContent_btnNewSearch").click()
                 return page
             if len(direct_hits) == 0:
-                potential_vendors = list(set([(v.split("\t")[1], v.split("\t")[2], v.split("\t")[3], v.split("\t")[4], v.split("\t")[5]) for v in vendors if v.split("\t")[1] == firm]))
+                potential_vendors = list(set([
+                    (
+                        v.split("\t")[1],
+                        v.split("\t")[2],
+                        v.split("\t")[3],
+                        v.split("\t")[4],
+                        v.split("\t")[5]
+                    ) for v in vendors if v.split("\t")[1] == firm]))
                 if len(potential_vendors) == 1:
                     potential_vendors = potential_vendors.pop()
                     potential_hits = get_rows_in_city(potential_vendors[3])
                     pages = get_pages_for_potential_hits(potential_hits)
                     if len(pages) == 1:
-                        pass #check that it is correct
+                        pass  # check that it is correct
                     else:
-                        driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
+                        driver.find_element_by_id(
+                            "ctl00_cphContent_btnNewSearch").click()
                         return "Ambiguous results"
                 else:
-                    driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
+                    driver.find_element_by_id(
+                        "ctl00_cphContent_btnNewSearch").click()
                     return "Ambiguous results"
             driver.find_element_by_id("ctl00_cphContent_btnNewSearch").click()
             return "Ambiguous results"
@@ -296,8 +432,10 @@ def search_sos(vendor):
     '''
     Search for a vendor
     '''
-    driver.get("http://coraweb.sos.la.gov/commercialsearch/commercialsearch.aspx")
-    driver.find_element_by_id("ctl00_cphContent_txtEntityName").send_keys(vendor)
+    driver.get(
+        "http://coraweb.sos.la.gov/commercialsearch/commercialsearch.aspx")
+    driver.find_element_by_id(
+        "ctl00_cphContent_txtEntityName").send_keys(vendor)
     driver.find_element_by_id("ctl00_cphContent_btnSearchEntity").click()
     page = driver.page_source
     return page
@@ -314,19 +452,26 @@ def process_direct_hit(raw_html, vendor_name):
     print "adding {}".format(vendor_name)
     addvendor(vendor_name)
     soup = BeautifulSoup(raw_html)
+
     try:
-        officers = soup.find_all(id="ctl00_cphContent_pnlOfficers")[0].select(".TableBorder")
-    except IndexError: #some places have no listed officers. ex 311 networks
+        officers = soup.find_all(
+            id="ctl00_cphContent_pnlOfficers")[0].select(".TableBorder")
+    except IndexError:  # some places have no listed officers. ex 311 networks
         officers = []
-    try:
-        agents = soup.find_all(id="ctl00_cphContent_pnlAgents")[0].select(".TableBorder")
-    except:
-        agents = []
+
+    # agents = []
+
+    # try:
+    #     agents = soup.find_all(
+    #         id="ctl00_cphContent_pnlAgents")[0].select(".TableBorder")
+    # except:
+    #     agents = []
+
     for o in officers:
         name = [l.text for l in o.select("span")].pop(0)
         addname(name)
-        link(name,vendor_name)
-    #for a in agents:
+        link(name, vendor_name)
+    # for a in agents:
     #    name = [l.text for l in o.select("span")].pop(0)
     #    addname(name)
 
@@ -335,7 +480,7 @@ def get_total_hits(page):
     if "ctl00_cphContent_tblResults" in driver.page_source:
         return 1
     text = driver.find_element_by_id("ctl00_cphContent_lblTotalResults").text
-    return int(text) #no hits
+    return int(text)  # no hits
     raise Exception("Error!")
 
 
@@ -347,28 +492,51 @@ def try_to_link(vendor_name):
         process_direct_hit(search_results, vendor_name)
 
 
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
+# def get_from_config(field):
+#     config = ConfigParser.RawConfigParser()
+#     config.read(CONFIG_LOCATION)
+#     return config.get('Section1', field)
 
 
-def get_daily_contracts(today_string = datetime.datetime.today().strftime('%Y-%m-%d')):  #defaults to today
-    contracts = session.query(Contract.doc_cloud_id, Vendor.name).filter(Contract.dateadded == today_string).filter(Contract.vendorid == Vendor.id).all()
+def get_daily_contracts(
+    today_string=datetime.datetime.today().strftime('%Y-%m-%d')
+):
+    # defaults to today
+    contracts = session.query(
+        Contract.doc_cloud_id,
+        Vendor.name
+    ).filter(
+        Contract.dateadded == today_string
+    ).filter(
+        Contract.vendorid == Vendor.id
+    ).all()
+
     return contracts
 
 
 def get_state_contributions(name):
-    recccs = session.query(EthicsRecord).filter(EthicsRecord.contributorname==name).all()
-    recccs.sort(key = lambda x: dateutil.parser.parse(x.receiptdate))
+    recccs = session.query(
+        EthicsRecord
+    ).filter(
+        EthicsRecord.contributorname == name
+    ).all()
+
+    recccs.sort(key=lambda x: dateutil.parser.parse(x.receiptdate))
+
     return recccs
 
 
 def get_names_from_vendor(name):
-    recccs = session.query(Person.name).\
-                     filter(Vendor.id == VendorOfficer.vendorid).\
-                     filter(Person.id == VendorOfficer.personid).\
-                     filter(Vendor.name == name).all()
+    recccs = session.query(
+        Person.name
+    ).filter(
+        Vendor.id == VendorOfficer.vendorid
+    ).filter(
+        Person.id == VendorOfficer.personid
+    ).filter(
+        Vendor.name == name
+    ).all()
+
     return [str(i[0]) for i in recccs]
 
 

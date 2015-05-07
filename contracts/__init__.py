@@ -2,50 +2,63 @@
 
 """
 Holds the settings so that they are accessible to other classes.
-Actual configurations are stored in /configs/contracts.cfg, outside the repo.
-In other words: the actual configurations are not posted to github!
+All private information is stored in environment variables and should never
+be written into files in this repo.
 """
-import ConfigParser
+
 import os
 import logging
+import logging.handlers
+import getpass
 
+USER = getpass.getuser()
+PROJECT_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..'))
 
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_LOCATION)
-    return config.get('Section1', field)
+if USER == 'ubuntu':  # Server
+    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
+    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
+    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
+    ROOT_FOLDER = "/home/%s" % USER
+    LOG_PATH = "/home/%s/contracts/logs/contracts.log" % USER
 
-CONFIG_LOCATION = "/configs/contracts.cfg"
-server = get_from_config('server')
-databasepassword = get_from_config('databasepassword')
-user = get_from_config('user')
-corpus_loc = get_from_config('corpus_loc')
-database = get_from_config('database')
-doc_cloud_user = get_from_config('doc_cloud_user')
-doc_cloud_password = get_from_config('doc_cloud_password')
-root_folder = get_from_config('root_folder')
-log_folder = get_from_config('log_location')
-to_list = get_from_config('to_list')
-sender = get_from_config('sender')
-gmail_user = get_from_config('gmail_user')
-email_pw = get_from_config('email_pw')
-vendors_location = corpus_loc + "/vendors/"
-purchase_order_location = corpus_loc + "/purchaseorders/"
-bids_location = corpus_loc + "/bids/"
-connection_string = 'postgresql://' + \
-    user + ':' + databasepassword + \
-    '@' + server + ':5432/' + database
-templates = root_folder + "/contracts/templates"
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
+    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+        os.environ.get('DATABASE_USERNAME'),
+        os.environ.get('DATABASE_PASSWORD'),
+        os.environ.get('DATABASE_SERVER'),
+        os.environ.get('DATABASE_NAME'),
+    )
+    TEMPLATES = "%s/templates" % PROJECT_DIR
+else:  # Local
+    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
+    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
+    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
+    ROOT_FOLDER = "/Users/%s" % USER
+    LOG_PATH = "/Users/%s/projects/contracts/logs/contracts.log" % USER
+
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
+    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+        os.environ.get('DATABASE_USERNAME'),
+        os.environ.get('DATABASE_PASSWORD'),
+        os.environ.get('DATABASE_SERVER'),
+        os.environ.get('DATABASE_NAME'),
+    )
+    TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
 
 # Logging
-if os.path.isfile(log_folder):
-    os.remove(log_folder)
+if os.path.isfile(LOG_PATH):
+    os.remove(LOG_PATH)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 # Create file handler which logs debug messages or higher
-filehandler = logging.FileHandler(log_folder)
+filehandler = logging.FileHandler(LOG_PATH)
 filehandler.setLevel(logging.DEBUG)
 
 # Create formatter and add it to the handlers
