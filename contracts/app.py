@@ -19,7 +19,7 @@ from contracts.lib.vaultclasses import (
 from contracts.lib.models import QueryBuilder
 from documentcloud import DocumentCloud
 # from contracts.settings import Settings
-from contracts import connection_string, log  # , templates
+from contracts import CONNECTION_STRING, log  # , templates
 
 # settings = Settings()
 
@@ -29,7 +29,9 @@ app = Flask(__name__)  # , template_folder=templates)
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 documentCloudClient = DocumentCloud()
 
-engine = create_engine(connection_string)
+engine = create_engine(CONNECTION_STRING)
+
+log.debug(engine)
 
 dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
 
@@ -258,6 +260,9 @@ def intro():
     """
     Intro page for the web app
     """
+
+    log.debug('index')
+
     docs = get_contracts(0, PAGELENGTH)
     totaldocs = get_contracts_count()
     pages = int(totaldocs / PAGELENGTH) + 1
@@ -267,7 +272,7 @@ def intro():
     status = "Newest city contracts ..."
     updateddate = time.strftime("%m/%d/%Y")
     return render_template(
-        'intro_child.html',
+        'index.html',
         vendors=vendors,
         departments=departments,
         offset=0,
@@ -351,8 +356,11 @@ def get_offset(offset):
 @app.route('/contracts/search', methods=['POST', 'GET'])
 def query_docs():
     """
-    The main contract search
+    The main contract search.
     """
+
+    log.debug('search')
+
     offset = query_request("page")
     offset = get_offset(offset)
     searchterm = translate_web_query_to_dc_query()
@@ -377,8 +385,11 @@ def query_docs():
     vendors = get_vendors()
     officers = get_officers()
     departments = get_departments()
+
     log.info('Pages = {}'.format(pages))
+
     standard_query = 'projectid: "1542-city-of-new-orleans-contracts" '
+
     if request.method == 'GET':
         return render_template(
             'intro_child.html',

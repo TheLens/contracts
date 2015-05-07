@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 # import ConfigParser
 # from contracts.settings import Settings
-from contracts import connection_string
+from contracts import CONNECTION_STRING
 # SETTINGS = Settings()
 
 Base = declarative_base()
@@ -245,7 +245,7 @@ class VendorOfficerCompany(Base):
 
 
 def remake_db():
-    engine = create_engine(connection_string)
+    engine = create_engine(CONNECTION_STRING)
     Base.metadata.create_all(engine)
 
 if __name__ == "__main__":

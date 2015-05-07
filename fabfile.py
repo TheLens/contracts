@@ -108,6 +108,7 @@ def lib():
 def css():
     '''/contracts/static/css'''
 
+    local('git add %s/banner.css' % CSS_DIR)
     local('git add %s/chosen.css' % CSS_DIR)
     local('git add %s/contracts.css' % CSS_DIR)
     local('git add %s/foundation.css' % CSS_DIR)
@@ -175,6 +176,7 @@ def js_views():
 def templates():
     '''/contracts/templates'''
 
+    local('git add %s/banner.html' % TEMPLATE_DIR)
     local('git add %s/contract_child.html' % TEMPLATE_DIR)
     local('git add %s/contract.html' % TEMPLATE_DIR)
     local('git add %s/documentcloud.html' % TEMPLATE_DIR)

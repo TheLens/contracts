@@ -1,15 +1,3 @@
-{% extends "lens_layout.html" %}
-
-<!--child block contains the premium tag, not parent block -->
-
-{% block url %}
-{{url}}
-{% endblock %}
-
-{% block title %}{{title}}{% endblock %}
-
-{% block content %}
-
 <link rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/lensnola/contracts/lens.css" media="screen" charset="utf-8">
 <link rel="stylesheet" href='https://s3-us-west-2.amazonaws.com/lensnola/lensfoundationoverides.css'media="screen" charset="utf-8">
 <link rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/lensnola/contracts/contracts.css" media="screen" charset="utf-8">
@@ -132,5 +120,3 @@ Search
 </div>
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/contracts.js') }}"></script>
-
-{% endblock %}
