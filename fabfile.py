@@ -75,6 +75,8 @@ def contracts():
 
     local('git add %s/__init__.py' % APP_DIR)
     local('git add %s/app.py' % APP_DIR)
+    local('git add %s/models.py' % APP_DIR)
+    local('git add %s/views.py' % APP_DIR)
 
 
 def datamanagement():
