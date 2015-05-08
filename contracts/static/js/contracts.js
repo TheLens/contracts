@@ -108,17 +108,17 @@ $(window).load(function() {
   // $(".chosen-select").chosen({
   //   max_selected_options: 1
   // });
-  $(".hide").removeClass("hide");
-  $("#advanced_search").click(function(){
-    var display = $(".advancedsearch").css("display");
-    if (display === "none") {
-      $(".advancedsearch").fadeIn(200);
-      $(".advancedsearch").css("display", "block");
-    } else {
-      $(".advancedsearch").css("display", "none");
-    }
-    $("#advanced_search").remove();
-  });
+  // $(".hide").removeClass("hide");
+  // $("#advanced-search").click(function(){
+  //   var display = $(".advancedsearch").css("display");
+  //   if (display === "none") {
+  //     $(".advancedsearch").fadeIn(200);
+  //     $(".advancedsearch").css("display", "block");
+  //   } else {
+  //     $(".advancedsearch").css("display", "none");
+  //   }
+  // $("#advanced-search").remove();
+  // });
   $("#vendors").children().first().attr("value", "");
   $("#departments").children().first().attr("value", "");
   $("#officers").children().first().attr("value", "");
@@ -134,13 +134,13 @@ $(document).ready(function() {
 
   $(document).keypress(function(e) {
     if (e.which == 13) {
-      post_search();
+      postSearch();
     }
   });
 
   // From lens.js
   // $("#searchButton").on("click", function() {
-  //   post_search();
+  //   postSearch();
   // });
 
   // $("#next").on("click", function() {
@@ -157,7 +157,7 @@ $(document).ready(function() {
   });
 
   // From lens.js:
-  // $("#advanced_search").click(function(){
+  // $("#advanced-search").click(function(){
   //   var display = $("#officers_chosen").css("display");
   //   if (display === "none"){
   //     $("#officers_chosen").fadeIn(200);
@@ -252,8 +252,8 @@ function setHandlers(){
     }
   );
 
-  $("#search_button").on("click", function() {
-    post_search();
+  $("#search-button").on("click", function() {
+    postSearch();
   });
 
   $(".contractpreview").on("click", function(event) {
@@ -263,20 +263,20 @@ function setHandlers(){
     openDetail(this.id);
   });
 
-  $(".open_button").on("click", function(event) {
+  $(".open-button").on("click", function(event) {
     event.stopPropagation();
     var toopen = $(this).parents(".contractpreview").attr("id");
     openDetail(toopen);
   });
 
-  $(".download_button").on("click", function(event) {
+  $(".download-button").on("click", function(event) {
     event.stopPropagation();
     downloadFile("http://" + window.location.host + "/contracts/download/" + $(this).parents(".contractpreview").attr("id"));
   });
 }
 
 function handlePost(data){
-  $("#contract_results").html(data);
+  $("#contract-results").html(data);
   setupDocList();
   results = $("#pagination").attr("data-total");
   if (results > 0){
@@ -301,7 +301,7 @@ function next(){
   });
 }
 
-function post_search() {
+function postSearch() {
   var valid = validate();
   if (!valid) {
     return;
@@ -310,8 +310,8 @@ function post_search() {
   searchQuery = buildSearch();
   resetUI();
 
-  $("#results_status").html("Searching...");
-  $("#nav_context").remove();
+  $("#results-status").html("Searching...");
+  $("#nav-context").remove();
   $.post("search/" + searchQuery, function(data, status) {
     handlePost(data);
   });
@@ -349,10 +349,10 @@ function checkForChanges() {
   } else {
     console.log('Survey completed or skipped. Adding in advancedsearch');
     var html = $("#blockOfStuff").html();
-    $("#post_gcs").html(html);
-    $("#advanced_search").on("click", function() {
-      $("#advanced_search").remove();
-    });
+    $("#post-gcs").html(html);
+    // $("#advanced-search").on("click", function() {
+    //   $("#advanced-search").remove();
+    // });
   }
 
   if ($("#vendors").length === 1) {
@@ -373,12 +373,25 @@ function checkForChanges() {
     }); //fill the officers block
   }
 
-  $("#advanced_search").on("click", function() {
-    var display = $(".advancedsearch").first().css("display");
-    if (display === "none") {
-      $(".advancedsearch").css("display","block");
-    } else {
-      $(".advancedsearch").css("display","none");
-    }
-  });
+  // $("#advanced-search").on("click", function() {
+  //   var display = $(".advancedsearch").first().css("display");
+  //   if (display === "none") {
+  //     $(".advancedsearch").css("display","block");
+  //     document.getElementById('advanced-search').innerHTML = 'Hide advanced search <i class="fa fa-caret-up"></i>';
+  //   } else {
+  //     $(".advancedsearch").css("display","none");
+  //     document.getElementById('advanced-search').innerHTML = 'Show advanced search <i class="fa fa-caret-down"></i>';
+  //   }
+  // });
 }
+
+$("#advanced-search").on("click", function() {
+  var display = $(".advancedsearch").first().css("display");
+  if (display === "none") {
+    $(".advancedsearch").css("display","block");
+    document.getElementById('advanced-search').innerHTML = 'Hide advanced search <i class="fa fa-caret-up"></i>';
+  } else {
+    $(".advancedsearch").css("display","none");
+    document.getElementById('advanced-search').innerHTML = 'Show advanced search <i class="fa fa-caret-down"></i>';
+  }
+});

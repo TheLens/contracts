@@ -21,6 +21,7 @@ from documentcloud import DocumentCloud
 # from contracts.settings import Settings
 from contracts import (
     CONNECTION_STRING,
+    LENS_CSS,
     BANNER_CSS,
     CONTRACTS_CSS,
     LENS_JS,
@@ -70,6 +71,7 @@ def intro():
         officers=officers,
         query=dc_query,
         updated=updateddate,
+        lens_css=LENS_CSS,
         banner_css=BANNER_CSS,
         contracts_css=CONTRACTS_CSS,
         lens_js=LENS_JS,

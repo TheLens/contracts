@@ -5,17 +5,6 @@ body {
   font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
 }
 
-a,
-a:focus,
-a:visited,
-a:active {
-  color: #B43018;
-}
-a:hover {
-  text-decoration: underline;
-  color: #000;
-}
-
 b {
   background-color: #FFFF00;
 }
@@ -36,7 +25,7 @@ select {
   height: 40px;
 }
 
-input{
+input {
   text-transform: uppercase; 
 }
 
@@ -66,7 +55,8 @@ input[type="search"] {
 }
 
 input#textbox {
-  width: 100% !important;
+  width: 100%;
+  margin-bottom: 0px;
   border-radius: 0;
   min-height: 40px;
 }
@@ -88,7 +78,7 @@ input#textbox {
 }
 
 div#buttons {
-min-height: 80px;
+  min-height: 80px;
 }
 
 .container {
@@ -111,7 +101,7 @@ min-height: 80px;
 	margin: 0;
 }
 
-div#open_button:hover {
+div#open-button:hover {
   background-color: whitesmoke;
   color: black;
 }
@@ -120,7 +110,7 @@ div#open_button:hover {
   border-bottom: 0 solid grey;
 }
 
-div#download_button:hover {
+div#download-button:hover {
   background-color: whitesmoke;
   color: black;
 }
@@ -131,7 +121,7 @@ div#download_button:hover {
 	background-color: white;
 }
 
-#search_button{
+#search-button{
 	margin-bottom: 0;
 }
 
@@ -139,12 +129,12 @@ div#download_button:hover {
   background-color: white;
 }
 
-#back_arrow{
+#back-arrow{
 	height: 7%;
 	font-family: sans-serif;
 }
 
-#contract_viewer{
+#contract-viewer{
   height: 600px;
 }
 
@@ -167,10 +157,6 @@ div#officers {
   padding: 3px;
   font-size: 1.2em;
   cursor: pointer;
-}
-
-.advanced_search {
-	display:none;
 }
 
 #panel {
@@ -197,7 +183,7 @@ div#officers {
 	font-size: .9em;
 }
 
-div#position_chosen {
+div#position-chosen {
   text-transform: uppercase;
 }
 
@@ -233,7 +219,7 @@ div.display {
   min-height: 60px;
 }
 
-div#nav_context {
+div#nav-context {
   margin-bottom: 15px;
 }
 
@@ -249,19 +235,19 @@ div.detailsrow {
   font-weight: bold;
 }
 
-div#department_chosen {
+div#department-chosen {
   width: 100%;
 }
 
-div#ui_components {
+div#ui-components {
 	float: right;
 }
 
-.nav_context{
+.nav-context{
 	padding: 5px;
 }
 
-div#position_chosen {
+div#position-chosen {
   width: 100% !important;
 }
 
@@ -327,7 +313,7 @@ ul.chosen-choices {
 	padding-left: 0 !important;
 }
 
-#search_query {
+#search-query {
   vertical-align: middle;
   height: 30px;
   font-family: Arial;
@@ -414,6 +400,10 @@ ul.chosen-choices {
 	font-size: 11px;
 	font-style: italic;
 	display: inline-block;
+}
+
+.advanced-search {
+  cursor: pointer;
 }
 
 .row.advancedsearch {

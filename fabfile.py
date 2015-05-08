@@ -113,6 +113,7 @@ def css():
     local('git add %s/contracts.css' % CSS_DIR)
     local('git add %s/foundation.css' % CSS_DIR)
     local('git add %s/icons.css' % CSS_DIR)
+    local('git add %s/lens.css' % CSS_DIR)
     local('git add %s/reset.css' % CSS_DIR)
     local('git add %s/style.css' % CSS_DIR)
     local('git add %s/stylesheet.css' % CSS_DIR)
