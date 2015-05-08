@@ -26,14 +26,12 @@ class Views(object):
         '''docstring'''
 
         docs = data['docs']
-        totaldocs = data['totaldocs']
+        total_docs = data['total_docs']
         pages = data['pages']
         vendors = data['vendors']
         departments = data['departments']
         officers = data['officers']
-        status = data['status']
-        updateddate = data['updateddate']
-        dc_query = data['dc_query']
+        updated_date = data['updated_date']
 
         response = make_response(
             render_template(
@@ -41,66 +39,13 @@ class Views(object):
                 vendors=vendors,
                 departments=departments,
                 offset=0,
-                totaldocs=totaldocs,
+                totaldocs=total_docs,
                 pages=pages,
                 page=1,
-                status=status,
                 docs=docs,
                 officers=officers,
-                query=dc_query,
-                updated=updateddate,
+                updated=updated_date,
                 lens_css=LENS_CSS,
-                banner_css=BANNER_CSS,
-                contracts_css=CONTRACTS_CSS,
-                lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS
-            )
-        )
-
-        return response
-
-    def get_vendors(self, vendors):
-        '''docstring'''
-
-        response = make_response(
-            render_template(
-                'select.html',
-                options=vendors
-            )
-        )
-
-        return response
-
-    def get_officers(self, officers):
-        '''docstring'''
-
-        response = make_response(
-            render_template(
-                'select.html',
-                options=officers
-            )
-        )
-
-        return response
-
-    def get_departments(self, departments):
-        '''docstring'''
-
-        response = make_response(
-            render_template(
-                'select.html',
-                options=departments
-            )
-        )
-
-        return response
-
-    def get_contracts(self, doc_cloud_id):
-
-        response = make_response(
-            render_template(
-                'contract.html',
-                doc_cloud_id=doc_cloud_id,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
@@ -124,11 +69,10 @@ class Views(object):
         officers = data['officers']
         query = data['query']
         updated = data['updated']
-        url = data['url']
 
         response = make_response(
             render_template(
-                'intro_child.html',
+                'index.html',
                 vendors=vendors,
                 departments=departments,
                 offset=offset,
@@ -140,7 +84,7 @@ class Views(object):
                 officers=officers,
                 query=query,
                 updated=updated,
-                url=url,
+                lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
@@ -163,7 +107,7 @@ class Views(object):
 
         response = make_response(
             render_template(
-                'documentcloud.html',
+                'index.html',
                 status=status,
                 docs=docs,
                 pages=pages,
@@ -171,6 +115,7 @@ class Views(object):
                 vendor=vendor,
                 totaldocs=totaldocs,
                 query=query,
+                lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
@@ -179,3 +124,55 @@ class Views(object):
         )
 
         return response
+
+    def get_contract(self, doc_cloud_id):
+
+        response = make_response(
+            render_template(
+                'contract.html',
+                doc_cloud_id=doc_cloud_id,
+                lens_css=LENS_CSS,
+                banner_css=BANNER_CSS,
+                contracts_css=CONTRACTS_CSS,
+                lens_js=LENS_JS,
+                contracts_js=CONTRACTS_JS
+            )
+        )
+
+        return response
+
+    # def get_vendors(self, vendors):
+    #     '''docstring'''
+
+    #     response = make_response(
+    #         render_template(
+    #             'select.html',
+    #             options=vendors
+    #         )
+    #     )
+
+    #     return response
+
+    # def get_officers(self, officers):
+    #     '''docstring'''
+
+    #     response = make_response(
+    #         render_template(
+    #             'select.html',
+    #             options=officers
+    #         )
+    #     )
+
+    #     return response
+
+    # def get_departments(self, departments):
+    #     '''docstring'''
+
+    #     response = make_response(
+    #         render_template(
+    #             'select.html',
+    #             options=departments
+    #         )
+    #     )
+
+    #     return response

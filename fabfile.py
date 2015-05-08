@@ -111,68 +111,16 @@ def css():
     '''/contracts/static/css'''
 
     local('git add %s/banner.css' % CSS_DIR)
-    local('git add %s/chosen.css' % CSS_DIR)
     local('git add %s/contracts.css' % CSS_DIR)
-    local('git add %s/foundation.css' % CSS_DIR)
-    local('git add %s/icons.css' % CSS_DIR)
     local('git add %s/lens.css' % CSS_DIR)
-    local('git add %s/reset.css' % CSS_DIR)
-    local('git add %s/style.css' % CSS_DIR)
-    local('git add %s/stylesheet.css' % CSS_DIR)
     local('git add %s/ui.css' % CSS_DIR)
-    local('git add %s/workplace.css' % CSS_DIR)
-    local('git add %s/workspace.css' % CSS_DIR)
-
-
-def images():
-    '''/contracts/static/css/images'''
-
-    local('git add %s/chosen-sprite.png' % IMAGES_DIR)
 
 
 def js():
     '''/contracts/static/js'''
 
-    local('git add %s/chosen.jquery.min.js' % JS_DIR)
     local('git add %s/contracts.js' % JS_DIR)
-    local('git add %s/foundation.min.js' % JS_DIR)
-    local('git add %s/jquery-1.11.0.min.js' % JS_DIR)
-    local('git add %s/jquery.tablesorter.min.js' % JS_DIR)
     local('git add %s/lens.js' % JS_DIR)
-
-
-def js_models():
-    '''/contracts/static/js/models'''
-
-    local('git add %s/models/search_facets.js' % JS_DIR)
-    local('git add %s/models/search_query.js' % JS_DIR)
-
-
-def js_templates():
-    '''/contracts/static/js/templates'''
-
-    local('git add %s/templates/search_box.jst' % JS_DIR)
-    local('git add %s/templates/search_facet.jst' % JS_DIR)
-    local('git add %s/templates/search_input.jst' % JS_DIR)
-    local('git add %s/templates/templates.js' % JS_DIR)
-
-
-def js_utils():
-    '''/contracts/static/js/utils'''
-
-    local('git add %s/utils/backbone_extensions.js' % JS_DIR)
-    local('git add %s/utils/hotkeys.js' % JS_DIR)
-    local('git add %s/utils/inflector.js' % JS_DIR)
-    local('git add %s/utils/jquery_extensions.js' % JS_DIR)
-    local('git add %s/utils/search_parser.js' % JS_DIR)
-
-
-def js_views():
-    '''/contracts/static/js/views'''
-
-    local('git add %s/views/search_box.js' % JS_DIR)
-    local('git add %s/views/search_facet.js' % JS_DIR)
-    local('git add %s/views/search_input.js' % JS_DIR)
 
 
 def templates():
@@ -180,16 +128,13 @@ def templates():
 
     local('git add %s/banner.html' % TEMPLATE_DIR)
     local('git add %s/contract.html' % TEMPLATE_DIR)
-    local('git add %s/documentcloud.html' % TEMPLATE_DIR)
-    local('git add %s/email.html' % TEMPLATE_DIR)
+    local('git add %s/email-template.html' % TEMPLATE_DIR)
     local('git add %s/footer.html' % TEMPLATE_DIR)
     local('git add %s/head.html' % TEMPLATE_DIR)
     local('git add %s/index.html' % TEMPLATE_DIR)
     local('git add %s/js.html' % TEMPLATE_DIR)
     local('git add %s/search-area.html' % TEMPLATE_DIR)
-    local('git add %s/select.html' % TEMPLATE_DIR)
     local('git add %s/table.html' % TEMPLATE_DIR)
-    local('git add %s/vendors.html' % TEMPLATE_DIR)
 
 
 def scripts():
@@ -223,12 +168,7 @@ def addthemall():
     datamanagement_lib()
     lib()
     css()
-    images()
     js()
-    js_models()
-    js_templates()
-    js_utils()
-    js_views()
     templates()
     scripts()
     tests()

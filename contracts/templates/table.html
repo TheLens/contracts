@@ -1,42 +1,43 @@
-<div id="blockOfStuff" language="text"> 
-  <div class="container">
-    <div id="post_gcs"></div>
-    <div id="contract_results" class="row">
-      <div class="row">
-        <div id="results_status" class="large-9 medium-9 small-9 columns large-centered medium-centered small-centered">
-          {{status}} </div>
-        </div>
-        <div class="row">
-          <div class="large-9 medium-9 small-9 columns large-centered medium-centered small-centered">
-            <div id="doclist">
-              {% for doc in docs %}
-              <div id="{{doc.id}}" class="row contractpreview">
-                <div class="left large-7 medium-7 small-12 columns">
-                  <div class="contract-title contract">{{ doc.title }}</div>
-                  <div class="contract-description contract">{{ doc.description }}</div>
-                  <div class="contract-date contract">{{ doc.dateadded }}</div>
-                </div>
-                <div class="button-group large-4 medium-4 small-12 columns right">
-                  <ul>
-                    <li class="button tiny cropped subduedbutton open_button">Open</li>
-                    <li class="button tiny cropped subduedbutton download_button">Download</li>
-                  </ul>
-                </div>
-              </div>
-              {% endfor %}
+<div class="row">
+  <div id="results-status" class="small-10 small-centered slim columns">
+    Showing the newest city contracts...
+  </div>
+</div>
+<div class="row">
+  <div class="small-10 small-centered columns">
+    <div id="doclist">
+      {% for doc in docs %}
+        <div id="{{ doc.id }}" class="row contract-preview">
+          <div class="small-12 medium-7 left columns">
+            <div class="contract-title">
+              {{ doc.title }}
+            </div>
+            <div class="contract-description">
+              {{ doc.description }}
+            </div>
+            <div class="contract-date">
+              {{ doc.dateadded }}
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div id="nav_context" class="large-2 medium-2 small-2 columns large-centered medium-centered small-centered">
-            <div id="pages">Page {{page}} of {{pages}}</div>
-            <div id="pagination" data-offset="{{page}}" data-total="{{totaldocs}}" data-pages="{{pages}}" data-query="{{query}}">
-              <span id="previous" class="page">Back</span>
-              <span id="next" class="page">More</span>
-            </div>
+          <div class="button-group small-12 medium-4 right columns">
+            <button class="button tiny open-button" id="open-button">
+              Open
+            </button>
+            <button class="button tiny download-button" id="download-button">
+              Download
+            </button>
           </div>
         </div>
-      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div id="nav-context" class="small-2 small-centered columns">
+    <div id="pages">Page {{ page }} of {{ pages }}</div>
+    <div id="pagination" data-offset="{{ page }}" data-total="{{ totaldocs }}" data-pages="{{ pages }}" data-query="{{ query }}">
+      <span id="previous" class="page">Previous</span>
+      <span id="next" class="page">Next</span>
     </div>
   </div>
 </div>

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+
     {% include 'head.html' %}
+
   </head>
   <body>
   	<!-- <script type="text/javascript">
@@ -21,10 +23,9 @@
     {% include 'banner.html' %}
 
   	<div id="app-area" class="row">
-
   		<div class="row hide-for-small-only">
-  			<div id="app-title" class="small-6 medium-12 large-12 columns centered">
-  				<h3 class="subheader centered">New Orleans city contracts</h3>
+  			<div id="app-title" class="small-6 medium-12 columns centered">
+  				<h1 class="text-center">New Orleans city contracts</h1>
   			</div>
   		</div>
 
@@ -37,6 +38,7 @@
     </div>
 
     {% include 'js.html' %}
+
     <script type="text/javascript" src={{ lens_js }}></script>
     <script type="text/javascript" src={{ contracts_js }}></script>
   </body>

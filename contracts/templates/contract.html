@@ -1,43 +1,41 @@
 <!DOCTYPE html>
 <html>
   <head>
+
     {% include 'head.html' %}
+
   </head>
   <body>
+
     {% include 'banner.html' %}
 
-  	<div id="{{doc_cloud_id}}" class="selected"></div>
-      <div id="buttons" class="small-12 small-centered columns">
-  		  <div class="left">
-  				<a href="/contracts">
-  					<div id="back-arrow">
-  						<i class="fa fa-arrow-left left"></i>
-  						<div class="left">Back to search</div>
-  					</div>
-  				</a>
-  			</div>
-  			<div class="button-group small-3 columns right small-centered">
-  				<div id="{{doc_cloud_id}}" class="contractpreview dummy">
-  					<div class="button search-button medium right download-button">
-              Download
-            </div>
-  				</div>
-  			</div>
-      </div>
-      <div id="contract-viewer" class="small-12 small-centered columns">
-  		  <div id="DV-viewer-{{doc_cloud_id}}" class="DV-container"></div>
+    <div class="row">
+			<div class="small-4 columns">
+        <a href="/contracts"><i class="fa fa-arrow-left"></i> Back to search</a>
+			</div>
+			<div class="small-8 columns">
+				<button class="button small right search-button download-button" id="search-button download-button">
+          Download
+        </button>
       </div>
     </div>
+    <div class="row">
+      <div class="small-12 columns">
+  		  <div class="DV-viewer" id="DV-viewer"></div>
+      </div>
+    </div>
+
     {% include 'footer.html' %}
 
     {% include 'js.html' %}
+
     <script src="//s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"></script>
     <script>
-      DV.load("//www.documentcloud.org/documents/{{doc_cloud_id}}.js", {
+      DV.load("//www.documentcloud.org/documents/{{ doc_cloud_id }}.js", {
         sidebar: false,
-        text: false,
-        pdf: false,
-        container: "#DV-viewer-{{doc_cloud_id}}"
+        text: true,
+        pdf: true,
+        container: "#DV-viewer"
       });
     </script>
     <script type="text/javascript" src={{ lens_js }}></script>

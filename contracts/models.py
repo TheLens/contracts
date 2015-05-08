@@ -2,9 +2,9 @@
 The web app that runs at vault.thelensnola.org/contracts
 """
 
-import re
+# import re
 import time
-from flask import Flask, request, make_response
+from flask import request, make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
@@ -22,15 +22,8 @@ from contracts import (
     log
 )
 
-PAGELENGTH = 8
-
-app = Flask(__name__)  # , template_folder=templates)
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 documentCloudClient = DocumentCloud()
-
-engine = create_engine(CONNECTION_STRING)
-
-dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
 
 
 class Models(object):
@@ -39,21 +32,26 @@ class Models(object):
 
     def __init__(self):
         '''docstring'''
+
+        self.engine = create_engine(CONNECTION_STRING)
+        self.PAGELENGTH = 8
+        self.dc_query = 'projectid: "1542-city-of-new-orleans-contracts"'
+
         pass
 
     def get_home(self):
         '''docstring'''
 
         data = {}
-        data['docs'] = self.get_contracts(0, PAGELENGTH)
-        data['totaldocs'] = self.get_contracts_count()
-        data['pages'] = int(data['totaldocs'] / PAGELENGTH) + 1
+        data['docs'] = self.get_contracts(limit=self.PAGELENGTH)
+        data['total_docs'] = self.get_contracts_count()
+        data['pages'] = int(data['total_docs'] / self.PAGELENGTH) + 1
         data['vendors'] = self.get_vendors()
         data['departments'] = self.get_departments()
         data['officers'] = self.get_officers()
-        data['status'] = "Newest city contracts ..."
-        data['updateddate'] = time.strftime("%m/%d/%Y")
-        data['dc_query'] = 'projectid: "1542-city-of-new-orleans-contracts"'
+        data['updated_date'] = time.strftime("%b %-d, %Y")
+        # data['status'] = "Newest city contracts ..."
+        # data['dc_query'] = self.dc_query
 
         return data
 
@@ -67,39 +65,6 @@ class Models(object):
 
         return response
 
-    def get_vendors_page(self, q):
-        '''docstring'''
-
-        if q == "all":
-            vendors = self.get_vendors()
-
-        return vendors
-
-    def get_officers_page(self, q):
-        '''docstring'''
-
-        if q == "all":
-            officers = self.get_officers()
-
-        return officers
-
-    def get_departments_page(self, q):
-        '''docstring'''
-
-        if q == "all":
-            departments = self.get_departments()
-        else:
-            pass
-
-        return departments
-
-    def get_contracts_page(self, doc_cloud_id):
-        '''docstring'''
-
-        doc_cloud_id = re.sub(".html$", "", doc_cloud_id)
-
-        return doc_cloud_id
-
     def get_search_page(self):
         '''docstring'''
 
@@ -109,17 +74,20 @@ class Models(object):
         searchterm = self.translate_web_query_to_dc_query()
 
         if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-            docs = self.get_contracts(0, PAGELENGTH)
+            docs = self.get_contracts()
             docs = self.translate_to_doc_cloud_form(docs)
         else:
             docs = self.query_document_cloud(searchterm)
-            # extract a window of PAGELENGTH number of docs
-            docs = docs[offset * PAGELENGTH:((offset + 1) * PAGELENGTH)]
+            # extract a window of self.PAGELENGTH number of docs
+            docs = docs[offset * self.PAGELENGTH:(
+                (offset + 1) * self.PAGELENGTH)]
 
         totaldocs = self.get_total_docs(searchterm)
 
-        pages = (totaldocs / PAGELENGTH)
-        vendor = self.query_request("vendor").upper()
+        pages = totaldocs / self.PAGELENGTH
+
+        vendor = self.query_request("vendor")
+
         pages = pages + 1  # increment 1 to get rid of 0 indexing
         page = offset + 1  # increment 1 to get rid of 0 indexing
 
@@ -146,7 +114,6 @@ class Models(object):
         data['officers'] = officers
         data['query'] = searchterm.replace(standard_query, "")
         data['updated'] = updateddate
-        data['url'] = "contracts"
         data['vendor'] = vendor
 
         return data
@@ -156,8 +123,9 @@ class Models(object):
     def query_document_cloud(searchterm):
         """
         This is it's own method so that queries
-        can be cached via @memoize to speed things up
+        can be cached via @memoize to speed things up.
         """
+
         return documentCloudClient.documents.search(searchterm)
 
     @staticmethod
@@ -174,14 +142,15 @@ class Models(object):
         return docs
 
     # @cache.memoize(timeout=900)
-    def get_contracts(self, offset, limit):
+    def get_contracts(self, offset=0, limit=None):
         """
         Simply query the newest contracts
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+
+        sn = sessionmaker(bind=self.engine)
         session = sn()
-        offset = offset * PAGELENGTH
+        offset = offset * self.PAGELENGTH
+
         contracts = session.query(
             Contract
         ).order_by(
@@ -191,65 +160,86 @@ class Models(object):
         ).limit(
             limit
         ).all()
+
         session.close()
         contracts = self.translate_to_doc_cloud_form(contracts)
+
         return contracts
 
     # @cache.memoize(timeout=100000)
-    @staticmethod
-    def get_contracts_count():
+    def get_contracts_count(self):
         """
         Query the count of all contracts
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+
+        sn = sessionmaker(bind=self.engine)
         session = sn()
-        total = session.query(Contract).count()
+
+        total = session.query(
+            Contract
+        ).count()
+
         session.close()
+
         return total
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
-    @staticmethod
-    def get_vendors():
+    def get_vendors(self):
         """
         Query all vendors in the database linked to a contract
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+
+        sn = sessionmaker(bind=self.engine)
         session = sn()
-        vendors = session.query(Vendor.name).\
-            filter(Vendor.id == Contract.vendorid).\
-            distinct().order_by(Vendor.name)
-        vendors = sorted(list(set([j[0].strip() for j in vendors])))
-        vendors.insert(0, "Vendor (example: Three fold Consultants)".upper())
+
+        vendors = session.query(
+            Vendor.name
+        ).filter(
+            Vendor.id == Contract.vendorid
+        ).distinct().order_by(
+            Vendor.name
+        )
+
+        vendors = sorted(
+            list(
+                set(
+                    [j[0].strip() for j in vendors]
+                )
+            )
+        )
+
         session.close()
+
         return vendors
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
-    @staticmethod
-    def get_departments():
+    def get_departments(self):
         """
         Query all departments in the database
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+
+        sn = sessionmaker(bind=self.engine)
         session = sn()
-        depts = session.query(Department.name).\
-            distinct().order_by(Department.name).all()
+        depts = session.query(
+            Department.name
+        ).distinct().order_by(
+            Department.name
+        ).all()
+
         depts = [j[0].strip() for j in depts]
         depts = sorted(list(set(depts)))
-        depts.insert(0, "Department (example: Information Technology)".upper())
+
         session.close()
+
         return depts
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
-    @staticmethod
-    def get_officers(vendor=None):
+    def get_officers(self, vendor=None):
         """
         Get officers for a given vendor
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+
+        sn = sessionmaker(bind=self.engine)
         session = sn()
         if vendor is None:
             officers = session.query(
@@ -261,40 +251,54 @@ class Models(object):
                 Person.name
             )
             session.close()
-            officers = sorted(list(set([o[1].name for o in officers])))
-            message = (
-                "Company officer (example: Joe Smith) - feature in progress")
-            officers.insert(0, message.upper())
+            officers = sorted(
+                list(
+                    set(
+                        [o[1].name for o in officers]
+                    )
+                )
+            )
+
             return officers
         else:
             vendor = vendor.replace("vendor:", "")
-            officers = session.\
-                query(VendorOfficer, Person, Vendor).\
-                filter(VendorOfficer.personid == Person.id).\
-                filter(VendorOfficer.vendorid == Vendor.id).\
-                filter(Vendor.name == vendor).all()
+            officers = session.query(
+                VendorOfficer,
+                Person,
+                Vendor
+            ).filter(
+                VendorOfficer.personid == Person.id
+            ).filter(
+                VendorOfficer.vendorid == Vendor.id
+            ).filter(
+                Vendor.name == vendor
+            ).all()
             session.close()
             officers = list(set([o[1].name for o in officers]))
             print officers
             return sorted(officers)
 
     # @cache.memoize(timeout=100000)
-    @staticmethod
-    def translate_to_vendor(officerterm):
+    def translate_to_vendor(self, officerterm):
         """
         Translates a request for an officer to a request for a vendor
         associated with a given officer
         """
-        sn = sessionmaker(bind=engine)
-        sn.configure(bind=engine)
+        sn = sessionmaker(bind=self.engine)
         session = sn()
         officerterm = officerterm.replace(
             '"', "").replace("officers:", "").strip()
-        results = session.query(Person, VendorOfficer, Vendor).\
-            filter(Person.name == officerterm).\
-            filter(Person.id == VendorOfficer.personid).\
-            filter(VendorOfficer.vendorid == Vendor.id).all()
-        # todo fix to get .first() working
+        results = session.query(
+            Person,
+            VendorOfficer,
+            Vendor
+        ).filter(
+            Person.name == officerterm
+        ).filter(
+            Person.id == VendorOfficer.personid
+        ).filter(
+            VendorOfficer.vendorid == Vendor.id
+        ).all()  # todo fix to get .first() working
         output = results.pop()[2].name
         log.info("translating | {} to {}".format(officerterm, output))
         return output
@@ -305,9 +309,10 @@ class Models(object):
         Get the total number of pages for a given search.
         """
         if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-            return int(self.get_contracts_count() / PAGELENGTH)
+            return int(self.get_contracts_count() / self.PAGELENGTH)
         else:
-            return int(len(self.query_document_cloud(searchterm)) / PAGELENGTH)
+            return int(len(
+                self.query_document_cloud(searchterm)) / self.PAGELENGTH)
 
     # @cache.memoize(timeout=100000)
     def get_total_docs(self, searchterm):
@@ -326,14 +331,13 @@ class Models(object):
         """
         basic_query = 'projectid: "1542-city-of-new-orleans-contracts"'
         output = ""
-        output = output + str(total) \
-            + " results | Query: " + \
-            searchterm.\
-            replace(basic_query, "")
+        output = output + str(total) + \
+            " results | Query: " + \
+            searchterm.replace(basic_query, "")
         output = output + " | "
         if searchterm == basic_query:
-            return output + "All city contracts: page "\
-                + str(page) + " of " + str(total)
+            return output + "All city contracts: page " + \
+                str(page) + " of " + str(total)
         else:
             return output + "Page " + str(page) + " of " + str(total)
 
@@ -388,4 +392,5 @@ class Models(object):
             offset = 0
         else:
             offset = int(offset) - 1  # a page is one more than an offset
+
         return offset

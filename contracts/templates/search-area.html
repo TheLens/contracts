@@ -3,45 +3,48 @@
     <div class="row collapse">
       <label>Search contracts</label>
       <div class="small-12 columns slim input-div" id="input-div">
-        <input id='textbox' type="text" placeholder="Keyword (example: uniforms)" class="lensinput"/>
+        <input id="text-box" type="text" placeholder="e.g. Uniforms, Dillard University, Mitch Landrieu, Three-Fold Consultants" class="lens-input"/>
       </div>
     </div>
   </div>
 </div>
 <div class="row">
-  <div class="small-10 small-centered text-right columns minortext advanced-search" id="advanced-search">
+  <div class="small-10 small-centered text-right columns minor-text advanced-search" id="advanced-search">
     Show advanced search <i class="fa fa-caret-down"></i>
   </div>
 </div>
-<div class="filters" id="filters" >
-  <div class="row advancedsearch">
+<div class="filters" id="filters">
+  <div class="row">
     <div class="small-10 small-centered columns">
-      <select id="vendors" onchange="resetOfficers();" data-placeholder="Vendor (example: Three fold Consultants)" >
-        {% for v in vendors %}
-        	<option value="{{v}}">{{v}}</option>
-        {% endfor %}
-      </select>
+      <div class="row">
+        <div class="small-4 center columns">
+          <select id="vendors" onchange="resetOfficers();" data-placeholder="Vendor" >
+            <option selected value="">Select vendor</option>
+            {% for vendor in vendors %}
+            	<option value="{{ v }}">{{ vendor }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="small-4 columns">
+          <select  id="departments" data-placeholder="Department">
+            <option selected value="">Select department</option>
+            {% for department in departments %}
+            	<option value="{{ d }}">{{ department }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="small-4 columns">
+          <select id="officers" onchange="resetVendor();" data-placeholder="Company officer">
+            <option selected value="">Select company officer</option>
+            {% for officer in officers %}
+            	<option value="{{ o }}">{{ officer }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="row advancedsearch">
-    <div class="small-10 small-centered columns">
-      <select  id="departments" data-placeholder="Department (example: Information Technology)">
-        {% for d in departments %}
-        	<option value="{{d}}">{{d}}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
-  <div class="row advancedsearch">
-    <div class="small-10 small-centered columns">
-      <select id="officers" onchange="resetVendor();" data-placeholder="Company officer (example: Joe Smith)  - New feature in progress">
-        {% for o in officers %}
-        	<option value="{{o}}">{{o}}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div> 
-</div>
+</div> 
 <div class="row">
   <div class="small-12 text-center centered columns">
     <button class="small button search-button" id="search-button">
