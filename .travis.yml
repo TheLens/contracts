@@ -7,5 +7,4 @@ before_script:
 - mkdir logs
 - touch logs/contracts.log
 script:
-- echo $(pwd)
-- coverage run tests/test_misc.py
+- coverage run tests/test*.py
