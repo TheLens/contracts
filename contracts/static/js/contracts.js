@@ -36,31 +36,54 @@ window.downloadFile = function (sUrl) {
     return true;
 };
 
-function buildSearch(){
-  var searchQuery = $("#text-box").val();
 
-  var selectedvendor = $('#vendors :selected').first().attr("value") !== "" && $('#vendors :selected').first().attr("value") !== undefined;
-  if (selectedvendor) {
-    searchQuery = searchQuery + " vendor:\"" + $('#vendors :selected').first().text() + "\"";
+
+function prepareData() {
+  var data = {};
+
+  data.search_input = encodeURIComponent($("#text-box").val());
+  data.vendor = encodeURIComponent($('#vendors').val());
+  data.department = encodeURIComponent($('#departments').val());
+  data.officer = encodeURIComponent($('#officers').val());
+
+  console.log(data);
+
+  return data;
+}
+
+function buildSearch(data) {
+  var query_string = '?';
+
+  if (data.search_input !== '') {
+    query_string = query_string + "q=" + data.search_input;
   }
 
-  var selecteddeps = $('#departments :selected').first().attr("value") !== "" && $('#departments :selected').first().attr("value") !== undefined;
-  if (selecteddeps) {
-    searchQuery = searchQuery + " department:\"" + $('#departments :selected').first().text() + "\"";
+  if (data.vendor !== '') {
+    if (query_string !== '?') {
+      query_string = query_string + '&';
+    }
+    query_string = query_string + "v=" + data.vendor;
   }
 
-  var selectedofficers = $('#officers :selected').first().attr("value") !== "" && $('#officers :selected').first().attr("value") !== undefined;
-  if (selectedofficers) {
-    searchQuery = searchQuery + " officers:\"" + $('#officers :selected').first().text() + "\"";
+  if (data.department !== '') {
+    if (query_string !== '?') {
+      query_string = query_string + '&';
+    }
+    query_string = query_string + "d=" + data.department;
   }
 
-  searchQuery = searchQuery.replace(/^and /, ""); //remove and space if it starts the string
+  if (data.officer !== '') {
+    if (query_string !== '?') {
+      query_string = query_string + '&';
+    }
+    query_string = query_string + "o=" + data.officer;
+  }
 
-  offset = $("#pagination").attr("data-offset");
+  if (query_string == '?') {
+    query_string = "";
+  }
 
-  // searchQuery += "&&offset:" + offset;
-
-  return searchQuery;
+  return query_string;
 }
 
 function setHandlers(){
@@ -73,22 +96,18 @@ function setHandlers(){
   });
 
   $("#search-button").on("click", function() {
-    postSearch();
-  });
-
-  $(".contract-preview").on("click", function(event) {
-    // window.location.href = '/contracts/contract/' + id;
+    getSearch();  // todo: Need to have GET at first, POST afterward.
   });
 
   $(".open-button").on("click", function(event) {
-    event.stopPropagation();
+    // event.stopPropagation();
     var id = $(this).parents(".contract-preview").attr("id");
     window.location.href = '/contracts/contract/' + id;
   });
 
   $(".download-button").on("click", function(event) {
-    event.stopPropagation();
-    downloadFile("http://" + window.location.host + "/contracts/download/" + $(this).parents(".contract-preview").attr("id"));
+    // event.stopPropagation();
+    downloadFile("/contracts/download/" + $(this).parents(".contract-preview").attr("id"));
   });
 }
 
@@ -102,46 +121,57 @@ function handlePost(data){
 }
 
 function previous() {
-  searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
-  resetUI();
-  $.post("previous/" + searchQuery, function(data, status) {
-    handlePost(data);
-    });
+  // searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
+
+  // $.post("previous/" + searchQuery, function(data, status) {
+  //   handlePost(data);
+  //   });
+
+  var new_current_page = $("#pagination").attr("data-current-page") - 1;
+  document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
+  
+  postSearch();
 }
 
 function next() {
-  searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
-  resetUI();
-  $.post("next/" + searchQuery, function(data, status) {
-    handlePost(data);
-  });
+  // searchQuery =  $("#pagination").attr("data-query") + "&&offset:" + $("#pagination").attr("data-offset");
+  // $.post("next/" + searchQuery, function(data, status) {
+  //   handlePost(data);
+  // });
+
+  var new_current_page = $("#pagination").attr("data-current-page") + 1;
+  document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
+  
+  postSearch();
+}
+
+function getSearch() {
+  var data = prepareData();
+
+  var query_string = buildSearch(data);
+  console.log(query_string);
+  
+  window.location.href = '/contracts/search/' + query_string;
 }
 
 function postSearch() {
-  searchQuery = buildSearch();
-  console.log('searchQuery:', searchQuery);
+  var data = prepareData();
 
-  resetUI();
-  console.log('resetUI');
+  var query_string = buildSearch(data);
+  console.log(query_string);
+  
+  data.current_page = $("#pagination").attr("data-current-page");
 
-  // $("#results-status").html("Searching...");
-  // $("#nav-context").remove();
   $.ajax({
     type: 'POST',
-    url: "search/" + searchQuery,
-    // data: data,
-    // contentType: ...,
+    url: "/contracts/search/" + query_string,
+    data: data,
+    contentType: "application/json; charset=utf-8",
     success: function(info) {
       console.log('info: ', info);
       handlePost(data);
     }
   });
-}
-
-function resetUI() {
-  document.getElementById('DV-container').innerHTML = "";
-  document.getElementById("search-results-container").innerHTML = "";
-  document.getElementById("doc-list").innerHTML = "";
 }
 
 function checkForChanges() {
@@ -167,20 +197,14 @@ $("#advanced-search").on("click", function() {
 });
 
 $(document).ready(function() {
-  var runsearch = true;
-
-  $("#DV-container").children().first().children().first().addClass('selected-viewer');
+  // $("#DV-container").children().first().children().first().addClass('selected-viewer');
 
   $(".contract-preview").first().addClass("selected");
 
   $(document).keypress(function(e) {
     if (e.which == 13) {
-      postSearch();
+      getSearch();  // todo: Need to have GET at first, POST afterward.
     }
-  });
-
-  $("#flip").click(function() {
-    $("#panel").slideToggle("slow");
   });
 
   setHandlers();

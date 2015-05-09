@@ -1,8 +1,5 @@
 import os
 import subprocess
-from contracts.settings import Settings
-
-settings = Settings()
 
 
 def download_attachment_file(bidno, bidfilelocation):

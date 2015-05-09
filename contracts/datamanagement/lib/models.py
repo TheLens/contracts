@@ -17,7 +17,6 @@ from contracts.datamanagement.lib.utilities import download_attachment_file
 from documentcloud import DocumentCloud
 from contracts.lib.models import get_contract_index_page
 from contracts.lib.models import get_po_numbers_from_index_page
-from contracts.settings import Settings
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.declarative import declarative_base
 from contracts.lib.models import valid_po
@@ -30,12 +29,18 @@ from contracts.lib.vaultclasses import (
     VendorOfficer,
     EthicsRecord
 )
+from contracts import (
+    VENDORS_LOCATION,
+    CORPUS_LOC,
+    ROOT_FOLDER,
+    DOC_CLOUD_USERNAME,
+    DOC_CLOUD_PASSWORD,
+    PURCHASE_ORDER_LOCATION,
+    CONNECTION_STRING,
+    BIDS_LOCATION
+)
 
 Base = declarative_base()
-
-SETTINGS = Settings()
-
-logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
 
 # this is a uuid that is unique to a given run of the program.
 # Grep for it in the log file to see a certain run
@@ -122,7 +127,7 @@ class PurchaseOrder(object):
         Download an attachemnt associated with a purchase order
         """
         bidnumber = re.search('[0-9]+', attachment.get('href')).group()
-        bidfilelocation = SETTINGS.bids_location + bidnumber + ".pdf"
+        bidfilelocation = BIDS_LOCATION + bidnumber + ".pdf"
         if not os.path.isfile(bidfilelocation):
             download_attachment_file(bidnumber, bidfilelocation)
             logging.info(
@@ -142,12 +147,12 @@ class PurchaseOrder(object):
         Check to see if the purchase order should be downloaded.
         Then download it
         """
-        if os.path.isfile(SETTINGS.purchase_order_location + purchaseorderno):
+        if os.path.isfile(PURCHASE_ORDER_LOCATION + purchaseorderno):
             logging.info(
                 '{} | {} | Already have purchase order | {}'.format(
                     run_id, get_timestamp(), purchaseorderno))
             return "".join([i.replace("\n", "") for i in open(
-                SETTINGS.purchase_order_location + purchaseorderno)])
+                PURCHASE_ORDER_LOCATION + purchaseorderno)])
         else:
             self.download_purchaseorder(purchaseorderno)
 
@@ -159,7 +164,7 @@ class PurchaseOrder(object):
             logging.info("not a valid po {}".format(purchaseorderno))
             return
         if not os.path.exists(
-            SETTINGS.purchase_order_location + purchaseorderno
+            PURCHASE_ORDER_LOCATION + purchaseorderno
         ):
             url = (
                 'http://www.purchasing.cityofno.com/bso/external/' +
@@ -173,7 +178,7 @@ class PurchaseOrder(object):
             response = urllib2.urlopen(url)
             html = response.read()
             with open(
-                SETTINGS.purchase_order_location + purchaseorderno, 'w'
+                PURCHASE_ORDER_LOCATION + purchaseorderno, 'w'
             ) as f:
                 f.write(html)
                 logging.info(
@@ -185,7 +190,7 @@ class PurchaseOrder(object):
         Download the vendor page associated with a purchase order
         (If we don't have the vendor page already)
         """
-        vendor_file_location = SETTINGS.vendors_location + vendor_id_city
+        vendor_file_location = VENDORS_LOCATION + vendor_id_city
         if not os.path.isfile(vendor_file_location):
             try:
                 response = urllib2.urlopen(
@@ -267,7 +272,7 @@ class PurchaseOrder(object):
         except IndexError:
             # in cases of index error, go ahead and downlaod the vendor page
             vendor_file_location = (
-                SETTINGS.vendors_location + self.vendor_id_city)
+                VENDORS_LOCATION + self.vendor_id_city)
             html = "".join([l.replace("\n", "") for l in open(
                 vendor_file_location)])
             new_soup = BeautifulSoup(html)
@@ -379,7 +384,7 @@ class LensRepository(object):
         """
         # TODO: skip list should not be hard coded
         skiplist_loc = (
-            SETTINGS.root_folder +
+            ROOT_FOLDER +
             "/contracts/datamanagement/scrapers/skiplist.txt")
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
@@ -390,7 +395,7 @@ class LensRepository(object):
         # city's public purchasing site (but are included in the city's
         # contract logs.)
         self.skiplist = self.get_skip_list()
-        self.purchaseorders_location = SETTINGS.corpus_loc + "/purchaseorders/"
+        self.purchaseorders_location = CORPUS_LOC + "/purchaseorders/"
 
 
 class DocumentCloudProject(object):
@@ -398,8 +403,8 @@ class DocumentCloudProject(object):
     Represents the collection of contracts on DC
     '''
     def __init__(self):
-        doc_cloud_user = SETTINGS.doc_cloud_user
-        doc_cloud_password = SETTINGS.doc_cloud_password
+        doc_cloud_user = DOC_CLOUD_USERNAME
+        doc_cloud_password = DOC_CLOUD_PASSWORD
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         # sometimes won't need all the docs, so dont do the search on init
         self.docs = None
@@ -459,7 +464,7 @@ class DocumentCloudProject(object):
                 counter = 1
                 for a in po.attachments:
                     bidnumber = re.search('[0-9]+', a.get('href')).group()
-                    bidfilelocation = SETTINGS.bids_location + \
+                    bidfilelocation = BIDS_LOCATION + \
                         bidnumber + ".pdf"
                     extra_string = ""
                     if counter > 1:
@@ -542,7 +547,7 @@ class DocumentCloudProject(object):
         contract.put()
 
     def get_skip_list(self):
-        skiplist_loc = SETTINGS.root_folder + \
+        skiplist_loc = ROOT_FOLDER + \
             "/contracts/datamanagement/scrapers/skiplist.txt"
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
@@ -554,7 +559,7 @@ class LensDatabase(object):
     Represents the Lens database that tracks contracts
     '''
     def __init__(self):
-        engine = create_engine(SETTINGS.connection_string)
+        engine = create_engine(CONNECTION_STRING)
         sn = sessionmaker(bind=engine)
         self.session = sn()
 

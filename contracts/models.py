@@ -42,16 +42,19 @@ class Models(object):
     def get_home(self):
         '''docstring'''
 
+        log.debug('get_home')
+
         data = {}
-        data['docs'] = self.get_contracts(limit=self.PAGELENGTH)
-        data['total_docs'] = self.get_contracts_count()
-        data['pages'] = int(data['total_docs'] / self.PAGELENGTH) + 1
+        data['documents'] = self.get_contracts(limit=self.PAGELENGTH)
+        data['number_of_documents'] = self.get_contracts_count()
+        data['number_of_pages'] = (
+            data['number_of_documents'] / self.PAGELENGTH) + 1
         data['vendors'] = self.get_vendors()
         data['departments'] = self.get_departments()
         data['officers'] = self.get_officers()
         data['updated_date'] = time.strftime("%b %-d, %Y")
-        # data['status'] = "Newest city contracts ..."
-        # data['dc_query'] = self.dc_query
+
+        log.debug('done collecting home data')
 
         return data
 
@@ -65,56 +68,103 @@ class Models(object):
 
         return response
 
-    def get_search_page(self):
+    def get_search_page(self, request):
         '''docstring'''
 
-        offset = self.query_request("page")
-        offset = self.get_offset(offset)
+        log.debug('start get_search_page')
 
-        searchterm = self.translate_web_query_to_dc_query()
+        data = self.parse_query_string(request)
 
-        if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
-            docs = self.get_contracts()
-            docs = self.translate_to_doc_cloud_form(docs)
+        # offset = self.query_request("page")
+        # offset = self.get_offset(offset)
+        offset = 0
+
+        # searchterm = self.translate_web_query_to_dc_query()
+        searchterm = data['search_input']
+
+        if data['search_input'] == '':
+            documents = self.get_contracts(limit=self.PAGELENGTH)
+            documents = self.translate_to_doc_cloud_form(documents)
         else:
-            docs = self.query_document_cloud(searchterm)
+            documents = self.query_document_cloud(searchterm)
             # extract a window of self.PAGELENGTH number of docs
-            docs = docs[offset * self.PAGELENGTH:(
+            documents = documents[offset * self.PAGELENGTH:(
                 (offset + 1) * self.PAGELENGTH)]
 
-        totaldocs = self.get_total_docs(searchterm)
+        log.debug('1')
 
-        pages = totaldocs / self.PAGELENGTH
+        number_of_documents = self.find_number_of_documents(searchterm)
 
-        vendor = self.query_request("vendor")
+        log.debug('2')
 
-        pages = pages + 1  # increment 1 to get rid of 0 indexing
-        page = offset + 1  # increment 1 to get rid of 0 indexing
+        number_of_pages = number_of_documents / self.PAGELENGTH
 
-        status = self.get_status(page, pages, searchterm)
-        updateddate = time.strftime("%m/%d/%Y")
+        # vendor = self.query_request("vendor")
+
+        # Increment 1 to get rid of 0 indexing:
+        number_of_pages = number_of_pages + 1
+        page = offset + 1
+
+        status = self.get_status(page, number_of_pages, searchterm)
+
+        updated_date = time.strftime("%b %-d, %Y")
+
         vendors = self.get_vendors()
         officers = self.get_officers()
         departments = self.get_departments()
 
-        log.info('Pages = {}'.format(pages))
+        # log.info('Pages = {}'.format(pages))
 
-        standard_query = 'projectid: "1542-city-of-new-orleans-contracts" '
+        # standard_query = 'projectid: "1542-city-of-new-orleans-contracts" '
 
         data = {}
 
         data['vendors'] = vendors
         data['departments'] = departments
-        data['offset'] = offset
-        data['totaldocs'] = totaldocs
-        data['status'] = status
-        data['pages'] = pages
-        data['page'] = offset + 1
-        data['docs'] = docs
         data['officers'] = officers
-        data['query'] = searchterm.replace(standard_query, "")
-        data['updated'] = updateddate
-        data['vendor'] = vendor
+        data['number_of_documents'] = number_of_documents
+        data['status'] = status
+        data['number_of_pages'] = number_of_pages
+        data['current_page'] = offset + 1
+        data['documents'] = documents
+        # data['query'] = searchterm.replace(standard_query, "")
+        data['updated_date'] = updated_date
+
+        log.debug('end of get_search_page')
+
+        return data
+
+    def get_contracts_page(self, doc_cloud_id):
+        '''docstring'''
+
+        data = {}
+
+        updated_date = time.strftime("%b %-d, %Y")
+
+        data['doc_cloud_id'] = doc_cloud_id
+        data['updated_date'] = updated_date
+
+        return data
+
+    @staticmethod
+    def parse_query_string(request):
+        '''
+        Receives URL query string parameters and returns as dict.
+
+        :param request: A (Flask object?) containing query string.
+        :returns: A dict with the query string parameters.
+        '''
+
+        data = {}
+        data['search_input'] = request.args.get('q')
+        data['vendor'] = request.args.get('v')
+        data['department'] = request.args.get('d')
+        data['officer'] = request.args.get('o')
+
+        # Change any missing parameters to 0-length string
+        for key in data:
+            if data[key] is None:
+                data[key] = ''
 
         return data
 
@@ -125,6 +175,8 @@ class Models(object):
         This is it's own method so that queries
         can be cached via @memoize to speed things up.
         """
+
+        log.debug('query_document_cloud')
 
         return documentCloudClient.documents.search(searchterm)
 
@@ -139,6 +191,7 @@ class Models(object):
         """
         for d in docs:
             d.id = d.doc_cloud_id
+
         return docs
 
     # @cache.memoize(timeout=900)
@@ -162,6 +215,7 @@ class Models(object):
         ).all()
 
         session.close()
+
         contracts = self.translate_to_doc_cloud_form(contracts)
 
         return contracts
@@ -172,6 +226,8 @@ class Models(object):
         Query the count of all contracts
         """
 
+        log.debug('Start get_contracts_count')
+
         sn = sessionmaker(bind=self.engine)
         session = sn()
 
@@ -180,6 +236,8 @@ class Models(object):
         ).count()
 
         session.close()
+
+        log.debug('End of get_contracts_count')
 
         return total
 
@@ -200,13 +258,7 @@ class Models(object):
             Vendor.name
         )
 
-        vendors = sorted(
-            list(
-                set(
-                    [j[0].strip() for j in vendors]
-                )
-            )
-        )
+        vendors = [vendor[0].strip() for vendor in vendors]
 
         session.close()
 
@@ -220,18 +272,23 @@ class Models(object):
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
-        depts = session.query(
+        departments = session.query(
             Department.name
         ).distinct().order_by(
             Department.name
         ).all()
 
-        depts = [j[0].strip() for j in depts]
-        depts = sorted(list(set(depts)))
+        departments = [department[0].strip() for department in departments]
+
+        # log.debug(departments)
+
+        # departments = sorted(list(set(departments)))
+
+        # log.debug(departments)
 
         session.close()
 
-        return depts
+        return departments
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_officers(self, vendor=None):
@@ -286,8 +343,10 @@ class Models(object):
         """
         sn = sessionmaker(bind=self.engine)
         session = sn()
+
         officerterm = officerterm.replace(
             '"', "").replace("officers:", "").strip()
+
         results = session.query(
             Person,
             VendorOfficer,
@@ -299,8 +358,10 @@ class Models(object):
         ).filter(
             VendorOfficer.vendorid == Vendor.id
         ).all()  # todo fix to get .first() working
+
         output = results.pop()[2].name
         log.info("translating | {} to {}".format(officerterm, output))
+
         return output
 
     # @cache.memoize(timeout=100000)
@@ -308,20 +369,25 @@ class Models(object):
         """
         Get the total number of pages for a given search.
         """
-        if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
+        if searchterm == '':
             return int(self.get_contracts_count() / self.PAGELENGTH)
         else:
             return int(len(
                 self.query_document_cloud(searchterm)) / self.PAGELENGTH)
 
     # @cache.memoize(timeout=100000)
-    def get_total_docs(self, searchterm):
+    def find_number_of_documents(self, searchterm):
         """
         Get the total number of relevant docs for a given search.
         """
-        if searchterm == 'projectid: "1542-city-of-new-orleans-contracts"':
+
+        log.debug('find_number_of_documents')
+
+        if searchterm == '':
+            log.debug('if')
             return self.get_contracts_count()
         else:
+            log.debug('else')
             return int(len(self.query_document_cloud(searchterm)))
 
     @staticmethod
@@ -365,10 +431,10 @@ class Models(object):
 
         terms = ['vendor', 'department']
 
-        for t in terms:
-            query_value = self.query_request(t)
-            if self.query_request(t) != "":
-                query_builder.add_term(t, query_value)
+        for term in terms:
+            query_value = self.query_request(term)
+            if self.query_request(term) != "":
+                query_builder.add_term(term, query_value)
 
         officers = self.query_request('officer')
 
@@ -382,8 +448,7 @@ class Models(object):
     @staticmethod
     def get_offset(offset):
         """
-        Offsets cant be "" or less than 0.
-        This handles translation
+        Offsets cant be "" or less than 0. This handles translation.
         """
         log.info("offset | {}".format(offset))
         if offset == "":

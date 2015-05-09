@@ -14,14 +14,14 @@
         <a href="/contracts"><i class="fa fa-arrow-left"></i> Back to search</a>
 			</div>
 			<div class="small-8 columns">
-				<button class="button small right search-button download-button" id="search-button download-button">
+				<button class="button small right download-button" id="download-button">
           Download
         </button>
       </div>
     </div>
     <div class="row">
       <div class="small-12 columns">
-  		  <div class="DV-viewer" id="DV-viewer"></div>
+  		  <div class="DV-container" id="DV-container"></div>
       </div>
     </div>
 
@@ -29,13 +29,14 @@
 
     {% include 'js.html' %}
 
-    <script src="//s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"></script>
+    <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript" charset="utf-8"></script>
     <script>
-      DV.load("//www.documentcloud.org/documents/{{ doc_cloud_id }}.js", {
+      console.log('{{ doc_cloud_id }}');
+      DV.load("https://www.documentcloud.org/documents/{{ doc_cloud_id }}.json", {
         sidebar: false,
         text: true,
         pdf: true,
-        container: "#DV-viewer"
+        container: "#DV-container"
       });
     </script>
     <script type="text/javascript" src={{ lens_js }}></script>

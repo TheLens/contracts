@@ -1,15 +1,15 @@
 <div class="row">
-  <div class="small-10 small-centered columns" id="components">
+  <div class="small-12 small-centered columns">
     <div class="row collapse">
       <label>Search contracts</label>
       <div class="small-12 columns slim input-div" id="input-div">
-        <input id="text-box" type="text" placeholder="e.g. Uniforms, Dillard University, Mitch Landrieu, Three-Fold Consultants" class="lens-input"/>
+        <input class="text-box" id="text-box" type="text" placeholder="e.g. Uniforms, Dillard University, Mitch Landrieu, Three-Fold Consultants" />
       </div>
     </div>
   </div>
 </div>
 <div class="row">
-  <div class="small-10 small-centered text-right columns minor-text advanced-search" id="advanced-search">
+  <div class="small-12 small-centered text-right columns advanced-search" id="advanced-search">
     Show advanced search <i class="fa fa-caret-down"></i>
   </div>
 </div>
@@ -18,26 +18,26 @@
     <div class="small-10 small-centered columns">
       <div class="row">
         <div class="small-4 center columns">
-          <select id="vendors" onchange="resetOfficers();" data-placeholder="Vendor" >
+          <select id="vendors">
             <option selected value="">Select vendor</option>
             {% for vendor in vendors %}
-            	<option value="{{ v }}">{{ vendor }}</option>
+            	<option value="{{ vendor }}">{{ vendor }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="small-4 columns">
-          <select  id="departments" data-placeholder="Department">
+          <select id="departments">
             <option selected value="">Select department</option>
             {% for department in departments %}
-            	<option value="{{ d }}">{{ department }}</option>
+            	<option value="{{ department }}">{{ department }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="small-4 columns">
-          <select id="officers" onchange="resetVendor();" data-placeholder="Company officer">
+          <select id="officers">
             <option selected value="">Select company officer</option>
             {% for officer in officers %}
-            	<option value="{{ o }}">{{ officer }}</option>
+            	<option value="{{ officer }}">{{ officer }}</option>
             {% endfor %}
           </select>
         </div>
@@ -46,7 +46,7 @@
   </div>
 </div> 
 <div class="row">
-  <div class="small-12 text-center centered columns">
+  <div class="small-12 text-center columns">
     <button class="small button search-button" id="search-button">
       Search
     </button> 

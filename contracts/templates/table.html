@@ -1,31 +1,31 @@
 <div class="row">
   <div id="results-status" class="small-10 small-centered slim columns">
-    Showing the newest city contracts...
   </div>
 </div>
 <div class="row">
-  <div class="small-10 small-centered columns">
+  <div class="small-12 small-centered columns">
     <div id="doclist">
-      {% for doc in docs %}
-        <div id="{{ doc.id }}" class="row contract-preview">
+      {% for document in documents %}
+        <div id="{{ document.id }}" class="row contract-preview">
           <div class="small-12 medium-7 left columns">
             <div class="contract-title">
-              {{ doc.title }}
+              {{ document.title }}
             </div>
             <div class="contract-description">
-              {{ doc.description }}
+              {{ document.description }}
             </div>
             <div class="contract-date">
-              {{ doc.dateadded }}
+              {{ document.dateadded }}
             </div>
           </div>
-          <div class="button-group small-12 medium-4 right columns">
+          <div class="small-12 medium-5 text-right button-group columns">
             <button class="button tiny open-button" id="open-button">
               Open
             </button>
-            <button class="button tiny download-button" id="download-button">
+            <br>
+            <a class="download" id="download">
               Download
-            </button>
+            </a>
           </div>
         </div>
       {% endfor %}
@@ -33,11 +33,9 @@
   </div>
 </div>
 <div class="row">
-  <div id="nav-context" class="small-2 small-centered columns">
-    <div id="pages">Page {{ page }} of {{ pages }}</div>
-    <div id="pagination" data-offset="{{ page }}" data-total="{{ totaldocs }}" data-pages="{{ pages }}" data-query="{{ query }}">
-      <span id="previous" class="page">Previous</span>
-      <span id="next" class="page">Next</span>
-    </div>
+  <div class="small-6 small-centered text-center pagination columns" id="pagination" data-current-page="{{ current_page }}" data-number-of-documents="{{ number_of_documents }}" data-number-of-pages="{{ number_of_pages }}">
+    <span class="page-change left" id="previous"><i class="fa fa-arrow-left"></i> Previous</span>
+    <span class="page center" id="pages">Page {{ current_page }} of {{ number_of_pages }}</span>
+    <span class="page-change right" id="next">Next <i class="fa fa-arrow-right"></i></span>
   </div>
 </div>

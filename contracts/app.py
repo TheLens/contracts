@@ -20,9 +20,12 @@ def intro():
     Intro page for the web app
     """
 
-    log.debug('index')
+    log.debug('/')
 
     data = Models().get_home()
+
+    log.debug('/ data:')
+    # log.debug(data)
 
     view = Views().get_home(data)
 
@@ -37,21 +40,26 @@ def query_docs():
 
     log.debug('/search/')
 
-    data = Models().get_search_page()
-
-    log.debug('data')
-
     if request.method == 'GET':
         log.debug('/search/ GET')
 
+        data = Models().get_search_page(request)
+
+        log.debug('/search/ data:')
+        # log.debug(data)
+
         view = Views().get_search_page(data)
 
-    if request.method == 'POST':
-        log.debug('/search/ POST')
+        log.debug('/search/ view:')
 
-        view = Views().post_search_page(data)
+        return view
 
-    return view
+    # if request.method == 'POST':
+    #     log.debug('/search/ POST')
+
+    #     data = Models().post_search_page(request)
+
+    #     view = Views().post_search_page(data)
 
 
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
@@ -62,9 +70,9 @@ def contract(doc_cloud_id):
 
     log.debug('/contract/')
 
-    # data = Models().get_contracts_page(doc_cloud_id)
+    data = Models().get_contracts_page(doc_cloud_id)
 
-    view = Views().get_contract(doc_cloud_id)
+    view = Views().get_contract(data)
 
     return view
 

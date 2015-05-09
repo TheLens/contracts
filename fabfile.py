@@ -133,6 +133,7 @@ def templates():
     local('git add %s/head.html' % TEMPLATE_DIR)
     local('git add %s/index.html' % TEMPLATE_DIR)
     local('git add %s/js.html' % TEMPLATE_DIR)
+    local('git add %s/search.html' % TEMPLATE_DIR)
     local('git add %s/search-area.html' % TEMPLATE_DIR)
     local('git add %s/table.html' % TEMPLATE_DIR)
 
@@ -148,9 +149,9 @@ def tests():
     '''/tests/'''
 
     local('git add %s/__init__.py' % TESTS_DIR)
-    local('git add %s/test_misc.py' % TESTS_DIR)
-    local('git add %s/test_models.py' % TESTS_DIR)
-    local('git add %s/test_parser.py' % TESTS_DIR)
+    # local('git add %s/test_misc.py' % TESTS_DIR)
+    # local('git add %s/test_models.py' % TESTS_DIR)
+    # local('git add %s/test_parser.py' % TESTS_DIR)
     local('git add %s/test_pep8.py' % TESTS_DIR)
     local('git add %s/test_pylint.py' % TESTS_DIR)
 

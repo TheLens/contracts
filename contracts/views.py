@@ -1,10 +1,11 @@
 
 """
-The web app that runs at vault.thelensnola.org/contracts
+The web app that runs at vault.thelensnola.org/contracts.
 """
 
 from flask import render_template, make_response
 from contracts import (
+    log,
     LENS_CSS,
     BANNER_CSS,
     CONTRACTS_CSS,
@@ -15,19 +16,19 @@ from contracts import (
 
 class Views(object):
 
-    '''docstring'''
+    '''Render views.'''
 
     def __init__(self):
-        '''docstring'''
+        '''Initialize any self variables.'''
 
         pass
 
     def get_home(self, data):
-        '''docstring'''
+        '''Render home page.'''
 
-        docs = data['docs']
-        total_docs = data['total_docs']
-        pages = data['pages']
+        documents = data['documents']
+        number_of_documents = data['number_of_documents']
+        number_of_pages = data['number_of_pages']
         vendors = data['vendors']
         departments = data['departments']
         officers = data['officers']
@@ -38,13 +39,13 @@ class Views(object):
                 'index.html',
                 vendors=vendors,
                 departments=departments,
-                offset=0,
-                totaldocs=total_docs,
-                pages=pages,
-                page=1,
-                docs=docs,
+                # offset=0,
+                number_of_documents=number_of_documents,
+                number_of_pages=number_of_pages,
+                # current_page=1,
+                documents=documents,
                 officers=officers,
-                updated=updated_date,
+                updated_date=updated_date,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -56,34 +57,36 @@ class Views(object):
         return response
 
     def get_search_page(self, data):
-        '''docstring'''
+        '''Render search results page.'''
+
+        log.debug('start of get_search_page')
 
         vendors = data['vendors']
         departments = data['departments']
-        offset = data['offset']
-        totaldocs = data['totaldocs']
+        # offset = data['offset']
+        number_of_documents = data['number_of_documents']
         status = data['status']
-        pages = data['pages']
-        page = data['page']
-        docs = data['docs']
+        number_of_pages = data['number_of_pages']
+        current_page = data['current_page']
+        documents = data['documents']
         officers = data['officers']
-        query = data['query']
-        updated = data['updated']
+        # query = data['query']
+        updated_date = data['updated_date']
 
         response = make_response(
             render_template(
-                'index.html',
+                'search.html',
                 vendors=vendors,
                 departments=departments,
-                offset=offset,
-                totaldocs=totaldocs,
+                # offset=offset,
+                number_of_documents=number_of_documents,
                 status=status,
-                pages=pages,
-                page=page,
-                docs=docs,
+                number_of_pages=number_of_pages,
+                current_page=current_page,
+                documents=documents,
                 officers=officers,
-                query=query,
-                updated=updated,
+                # query=query,
+                updated_date=updated_date,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -92,28 +95,30 @@ class Views(object):
             )
         )
 
+        log.debug('end of get_search_page')
+
         return response
 
     def post_search_page(self, data):
-        '''docstring'''
+        '''Render updated informatino to insert into search results page.'''
 
-        totaldocs = data['totaldocs']
+        number_of_documents = data['number_of_documents']
         status = data['status']
-        pages = data['pages']
-        page = data['page']
+        number_of_pages = data['number_of_pages']
+        current_page = data['current_page']
         docs = data['docs']
         query = data['query']
         vendor = data['vendor']
 
         response = make_response(
             render_template(
-                'index.html',
+                'search.html',
                 status=status,
                 docs=docs,
-                pages=pages,
-                page=page,
+                number_of_pages=number_of_pages,
+                current_page=current_page,
                 vendor=vendor,
-                totaldocs=totaldocs,
+                number_of_documents=number_of_documents,
                 query=query,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
@@ -125,12 +130,17 @@ class Views(object):
 
         return response
 
-    def get_contract(self, doc_cloud_id):
+    def get_contract(self, data):
+        '''Render the single contract page.'''
+
+        doc_cloud_id = data['doc_cloud_id']
+        updated_date = data['updated_date']
 
         response = make_response(
             render_template(
                 'contract.html',
                 doc_cloud_id=doc_cloud_id,
+                updated_date=updated_date,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -140,39 +150,3 @@ class Views(object):
         )
 
         return response
-
-    # def get_vendors(self, vendors):
-    #     '''docstring'''
-
-    #     response = make_response(
-    #         render_template(
-    #             'select.html',
-    #             options=vendors
-    #         )
-    #     )
-
-    #     return response
-
-    # def get_officers(self, officers):
-    #     '''docstring'''
-
-    #     response = make_response(
-    #         render_template(
-    #             'select.html',
-    #             options=officers
-    #         )
-    #     )
-
-    #     return response
-
-    # def get_departments(self, departments):
-    #     '''docstring'''
-
-    #     response = make_response(
-    #         render_template(
-    #             'select.html',
-    #             options=departments
-    #         )
-    #     )
-
-    #     return response
