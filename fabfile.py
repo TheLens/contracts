@@ -180,6 +180,7 @@ def addthemall():
     templates()
     scripts()
     tests()
+    pythondocumentcloud()
 
 
 def commit(message):
