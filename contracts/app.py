@@ -32,7 +32,7 @@ def intro():
     return view
 
 
-@app.route('/contracts/search/', methods=['GET', 'POST'])
+@app.route('/contracts/search/', methods=['GET'])
 def query_docs():
     """
     The main contract search.
@@ -53,13 +53,6 @@ def query_docs():
         log.debug('/search/ view:')
 
         return view
-
-    # if request.method == 'POST':
-    #     log.debug('/search/ POST')
-
-    #     data = Models().post_search_page(request)
-
-    #     view = Views().post_search_page(data)
 
 
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
@@ -88,46 +81,6 @@ def download(docid):
     # view = Views().get_download(data)
 
     return data
-
-
-# @app.route('/contracts/vendors/<string:q>', methods=['POST'])
-# def vendors(q=None):
-#     """
-#     Get requested vendors from a query string and return a template.
-#     Needs to be refactored using the flask query parser
-#     """
-
-#     data = Models().get_vendors_page(q)
-
-#     view = Views().get_vendors(data)
-
-#     return view
-
-
-# @app.route('/contracts/officers/<string:q>', methods=['POST'])
-# def officers(q=None):
-#     """
-#     Get requested officers. to do: say more.
-#     """
-
-#     data = Models().get_officers_page(q)
-
-#     view = Views().get_officers(data)
-
-#     return view
-
-
-# @app.route('/contracts/departments/<string:q>', methods=['POST'])
-# def departments(q=None):
-#     """
-#     Get requested departments
-#     """
-
-#     data = Models().get_departments_page(q)
-
-#     view = Views().get_departments(data)
-
-#     return view
 
 
 if __name__ == '__main__':

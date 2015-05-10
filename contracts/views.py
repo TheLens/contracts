@@ -26,9 +26,9 @@ class Views(object):
     def get_home(self, data):
         '''Render home page.'''
 
-        documents = data['documents']
-        number_of_documents = data['number_of_documents']
-        number_of_pages = data['number_of_pages']
+        # documents = data['documents']
+        # number_of_documents = data['number_of_documents']
+        # number_of_pages = data['number_of_pages']
         vendors = data['vendors']
         departments = data['departments']
         officers = data['officers']
@@ -40,10 +40,10 @@ class Views(object):
                 vendors=vendors,
                 departments=departments,
                 # offset=0,
-                number_of_documents=number_of_documents,
-                number_of_pages=number_of_pages,
+                # number_of_documents=number_of_documents,
+                # number_of_pages=number_of_pages,
                 # current_page=1,
-                documents=documents,
+                # documents=documents,
                 officers=officers,
                 updated_date=updated_date,
                 lens_css=LENS_CSS,

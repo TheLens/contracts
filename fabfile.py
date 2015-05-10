@@ -15,7 +15,6 @@ CSS_DIR = '%s/contracts/static/css' % PROJECT_DIR
 DATA_DIR = '%s/data' % PROJECT_DIR
 DATAMANAGEMENT_DIR = '%s/contracts/datamanagement' % PROJECT_DIR
 DOCS_DIR = '%s/docs' % PROJECT_DIR
-# FONTS_DIR = '%s/contracts/static/fonts' % PROJECT_DIR
 IMAGES_DIR = '%s/contracts/static/css/images' % PROJECT_DIR
 JS_DIR = '%s/contracts/static/js' % PROJECT_DIR
 LIB_DIR = '%s/contracts/lib' % PROJECT_DIR
@@ -23,6 +22,7 @@ PICTURES_DIR = '%s' % PROJECT_DIR + '/contracts/static/pictures'
 SCRIPTS_DIR = '%s/scripts' % PROJECT_DIR
 TEMPLATE_DIR = '%s/contracts/templates' % PROJECT_DIR
 TESTS_DIR = '%s/tests' % PROJECT_DIR
+PYTHON_DC_DIR = '%s/pythondocumentcloud' % PROJECT_DIR
 
 
 def repo():
@@ -113,7 +113,6 @@ def css():
     local('git add %s/banner.css' % CSS_DIR)
     local('git add %s/contracts.css' % CSS_DIR)
     local('git add %s/lens.css' % CSS_DIR)
-    local('git add %s/ui.css' % CSS_DIR)
 
 
 def js():
@@ -154,6 +153,14 @@ def tests():
     # local('git add %s/test_parser.py' % TESTS_DIR)
     local('git add %s/test_pep8.py' % TESTS_DIR)
     local('git add %s/test_pylint.py' % TESTS_DIR)
+
+
+def pythondocumentcloud():
+    '''/pythondocumentcloud/'''
+
+    local('git add %s/__init__.py' % PYTHON_DC_DIR)
+    local('git add %s/MultipartPostHandler.py' % PYTHON_DC_DIR)
+    local('git add %s/toolbox.py' % PYTHON_DC_DIR)
 
 
 # Others

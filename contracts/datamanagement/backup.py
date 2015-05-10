@@ -16,10 +16,12 @@ from documentcloud.toolbox import DoesNotExistError
 
 parser = argparse.ArgumentParser(
     description='Synch the lens db to document cloud repo')
-parser.add_argument('--force',
-                    dest='keep_synching',
-                    action='store_true',
-                    help="try to synch the whole db, not just the newest")
+parser.add_argument(
+    '--force',
+    dest='keep_synching',
+    action='store_true',
+    help="try to synch the whole db, not just the newest"
+)
 parser.set_defaults(feature=False)
 args = parser.parse_args()
 force = args.keep_synching
