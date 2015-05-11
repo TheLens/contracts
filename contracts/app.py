@@ -76,7 +76,11 @@ def download(docid):
     Download a requested contract
     """
 
+    log.debug('/download')
+
     data = Models().get_download(docid)
+
+    log.debug(data)
 
     # view = Views().get_download(data)
 

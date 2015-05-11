@@ -1,7 +1,7 @@
-#!/usr/bin/python
 """
-Some utility classes
+Some utility classes.
 """
+
 import re
 import urllib2
 
@@ -13,9 +13,10 @@ Base = declarative_base()
 
 class EthicsRecord(Base):
     """
-    It goes in datamanagement instead of lib/models because it doesn't
-    really concern the public web app
+    It goes in datamanagement instead of lib/models because it doesn't really
+    concern the public web app.
     """
+
     __tablename__ = 'ethics_records'
 
     primary_key = Column(Integer, primary_key=True)
@@ -78,8 +79,9 @@ class EthicsRecord(Base):
 
 def get_contract_index_page(pageno):
     '''
-    Get a given page in the list of current contracts
+    Get a given page in the list of current contracts.
     '''
+
     data = (
         'mode=sort&letter=&currentPage=' + str(pageno) + '&querySql=%5B' +
         'PROCESSED%5D-75%3A1d%3A4a%3A-6d%3A34%3A14%3A-5c%3A47%3A-30%3A1b' +
@@ -178,6 +180,7 @@ def get_contract_index_page(pageno):
         'rName=&bidNbr=&typeCode=&catalogId=&expireFromDateStr=&expireTo' +
         'DateStr=&itemDesc=&orgId=&departmentPrefix=&classId=&classItemI' +
         'd=&commodityCode=&includeExpired=on')
+
     url = 'http://www.purchasing.cityofno.com/bso/' + \
         'external/advsearch/searchContract.sdo'
 
@@ -210,62 +213,21 @@ def get_contract_index_page(pageno):
 
 def get_po_numbers_from_index_page(html):
     '''
-    Take an index page of contracts.
-    Return the contract numbers
+    Take an index page of contracts. Return the contract numbers.
     '''
+
     pattern = '(?<=docId=)[A-Z][A-Z][0-9]+'
     return re.findall(pattern, html)
 
 
-def valid_po(purchaseorderno):
+def valid_po(purchase_order_no):
     """
-    A simple method to determine if this
-    is a valid purchase order
+    A simple method to determine if this is a valid purchase order.
     """
+
     po_re = r'[A-Z]{2}\d{3,}'
     po_regex = re.compile(po_re)
-    if po_regex.match(purchaseorderno):
+    if po_regex.match(purchase_order_no):
         return True
     else:
         return False
-
-
-class QueryBuilder(object):
-    """
-    Build a query for the DocumentCloud API.
-    """
-
-    def __init__(self):
-        """
-        Initialized as blank. Terms are stored in a dictionary.
-        """
-
-        self.query = {}
-        self.text = ""
-
-    def add_term(self, term, value):
-        """
-        Add a term to the dictionary. If term is updated it will just
-        re-write the dictionary value.
-        """
-
-        self.query[term] = value
-
-    def add_text(self, text):
-        """
-        Add a freetext component to the query (ex. 'playground').
-        """
-
-        self.text = text
-
-    def get_query(self):
-        """
-        Translate the dictionary into a DocumentCloud query.
-        """
-
-        output = ""
-        for k in self.query.keys():
-            # 'projectid: "1542-city-of-new-orleans-contracts"'
-            output += k + ":" + '"' + self.query[k] + '" '
-        output = output + self.text
-        return output.strip()

@@ -4,7 +4,7 @@ The web app that runs at vault.thelensnola.org/contracts.
 
 # import re
 import time
-from flask import request, make_response
+from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
@@ -15,7 +15,6 @@ from contracts.lib.vaultclasses import (
     Person,
     VendorOfficer
 )
-from contracts.lib.models import QueryBuilder
 from pythondocumentcloud import DocumentCloud
 from contracts import (
     CONNECTION_STRING,
@@ -23,8 +22,6 @@ from contracts import (
 )
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-documentCloudClient = DocumentCloud()
-log.debug(documentCloudClient)
 
 
 class Models(object):
@@ -35,10 +32,9 @@ class Models(object):
         '''docstring'''
 
         self.engine = create_engine(CONNECTION_STRING)
-        self.PAGELENGTH = 8  # DocumentCloud API default is 10
+        self.pagelength = 8  # DocumentCloud API default is 10
         self.dc_query = 'projectid:1542-city-of-new-orleans-contracts'
-
-        pass
+        self.document_cloud_client = DocumentCloud()
 
     def get_home(self):
         '''docstring'''
@@ -46,14 +42,6 @@ class Models(object):
         log.debug('get_home')
 
         data = {}
-
-        # Get a list of documents (reverse chronological)
-        # data['documents'] = self.get_contracts(limit=self.PAGELENGTH)
-
-        # Find the total number of documents
-        # data['number_of_documents'] = self.get_contracts_count()
-        # data['number_of_pages'] = (
-        #     data['number_of_documents'] / self.PAGELENGTH) + 1
 
         # Get a list of vendors for dropdown
         data['vendors'] = self.get_vendors()
@@ -67,7 +55,7 @@ class Models(object):
         # Find the last updated date for footer
         data['updated_date'] = time.strftime("%b %-d, %Y")
 
-        log.debug('done collecting home data')
+        log.debug('Done collecting home data')
 
         return data
 
@@ -79,47 +67,35 @@ class Models(object):
         # Extract search parameters (text input and dropdown selections)
         data = self.parse_query_string(request)
 
-        # Extract query strings. Not needed because it is now in `data`.
-        # offset = self.query_request("page")
-
-        # Convert offset parameter.
-        offset = self.get_offset(data['page'])
-
         # Transform query parameters into string for DocumentCloud API.
-        # search_term = self.translate_web_query_to_dc_query()
         search_term = self.translate_web_query_to_dc_query(data)
 
         if search_term == self.dc_query:  # If no search input
             log.debug('No search parameters entered.')
 
             # Get a list of contracts from local DB, without any search filter:
-            documents = self.get_contracts(limit=self.PAGELENGTH)
+            documents = self.get_contracts(limit=self.pagelength)
+
             # Fixing IDs:
             documents = self.translate_to_doc_cloud_form(documents)
         else:
             log.debug('Some search parameters entered.')
 
             # Get a list of contracts by querying our project on DocCloud:
-            documents = self.query_document_cloud(search_term)
-
-            # extract a window of self.PAGELENGTH number of docs
-            start_range = offset * self.PAGELENGTH
-            end_range = (offset + 1) * self.PAGELENGTH
-            documents = documents[start_range:end_range]
+            documents = self.query_document_cloud(
+                search_term, page=data['current_page'])
 
         number_of_documents = self.find_number_of_documents(search_term)
 
-        number_of_pages = number_of_documents / self.PAGELENGTH
+        number_of_pages = number_of_documents / self.pagelength
 
-        # Not sure what this was for:
-        # vendor = self.query_request("vendor")
-
-        # Increment by 1 to get rid of 0 indexing:
+        # Increment by 1 to correct zero-indexing:
         number_of_pages = number_of_pages + 1
-        current_page = offset + 1
+        log.debug('number_of_pages: %d', number_of_pages)
 
         # Create results language to tell user what they searched for:
-        status = self.get_status(current_page, number_of_pages, search_term)
+        status = self.get_status(
+            data['current_page'], number_of_pages, search_term)
 
         updated_date = time.strftime("%b %-d, %Y")
 
@@ -127,28 +103,25 @@ class Models(object):
         officers = self.get_officers()
         departments = self.get_departments()
 
-        # log.info('Pages = {}'.format(pages))
+        output_data = {}
 
-        # standard_query = 'projectid:"1542-city-of-new-orleans-contracts" '
-
-        data = {}
-
-        data['vendors'] = vendors
-        data['departments'] = departments
-        data['officers'] = officers
-        data['number_of_documents'] = number_of_documents
-        data['status'] = status
-        data['number_of_pages'] = number_of_pages
-        data['current_page'] = current_page
-        data['documents'] = documents
-        # data['query'] = search_term.replace(standard_query, "")
-        data['updated_date'] = updated_date
+        output_data['vendors'] = vendors
+        output_data['departments'] = departments
+        output_data['officers'] = officers
+        output_data['number_of_documents'] = number_of_documents
+        output_data['status'] = status
+        output_data['number_of_pages'] = number_of_pages
+        output_data['current_page'] = data['current_page']
+        output_data['documents'] = documents
+        output_data['updated_date'] = updated_date
 
         log.debug('end of get_search_page')
+        # log.debug('current_page: %d', output_data['current_page'])
 
-        return data
+        return output_data
 
-    def get_contracts_page(self, doc_cloud_id):
+    @staticmethod
+    def get_contracts_page(doc_cloud_id):
         '''docstring'''
 
         data = {}
@@ -186,12 +159,14 @@ class Models(object):
         data['vendor'] = request.args.get('vendor')
         data['department'] = request.args.get('department')
         # data['officer'] = request.args.get('officer')
-        data['page'] = request.args.get('page')
+        data['current_page'] = request.args.get('page')
 
-        if data['page'] is None:
-            data['page'] = 1
+        if data['current_page'] is None or data['current_page'] == '':
+            data['current_page'] = 1
         else:
-            data['page'] = int(data['page'])
+            data['current_page'] = int(data['current_page'])
+
+        log.debug('current_page: %d', data['current_page'])
 
         # Change any missing parameters to 0-length string
         for key in data:
@@ -201,7 +176,7 @@ class Models(object):
         return data
 
     # @cache.memoize(timeout=900)
-    def query_document_cloud(self, search_term):
+    def query_document_cloud(self, search_term, page=1):
         """
         This is it's own method so that queries can be cached via @memoize to
         speed things up.
@@ -210,12 +185,10 @@ class Models(object):
         log.debug('query_document_cloud with search_term: ')
         log.debug(search_term)
 
-        output = documentCloudClient.documents.search(
-            search_term, page=1, per_page=self.PAGELENGTH)
+        output = self.document_cloud_client.documents.search(
+            search_term, page=page, per_page=self.pagelength)
 
-        log.debug('output')
         log.debug('len(output): %d', len(output))
-        log.debug(output)
 
         return output
 
@@ -228,7 +201,7 @@ class Models(object):
         log.debug(
             'query_document_cloud_count with search_term: %s', search_term)
 
-        output = documentCloudClient.documents.search_count(search_term)
+        output = self.document_cloud_client.documents.search_count(search_term)
 
         log.debug('output')
         log.debug(output)
@@ -261,7 +234,7 @@ class Models(object):
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
-        offset = offset * self.PAGELENGTH
+        offset = offset * self.pagelength
 
         contracts = session.query(
             Contract
@@ -333,6 +306,7 @@ class Models(object):
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
+
         departments = session.query(
             Department.name
         ).distinct().order_by(
@@ -422,21 +396,9 @@ class Models(object):
         ).all()  # todo fix to get .first() working
 
         output = results.pop()[2].name
-        log.info("translating | {} to {}".format(officerterm, output))
+        log.info("translating %s to %s", officerterm, output)
 
         return output
-
-    # @cache.memoize(timeout=100000)
-    def get_pages(self, search_term):
-        """
-        Get the total number of pages for a given search.
-        """
-
-        if search_term == '':
-            return self.get_contracts_count() / self.PAGELENGTH
-        else:
-            return len(
-                self.query_document_cloud(search_term)) / self.PAGELENGTH
 
     # @cache.memoize(timeout=100000)
     def find_number_of_documents(self, search_term):
@@ -469,18 +431,6 @@ class Models(object):
         else:
             return output + "Page " + str(page) + " of " + str(total)
 
-    @staticmethod
-    def query_request(field):
-        """
-        Pulls the field out from the request, returning "" if field is None.
-        """
-
-        field = request.args.get(field)
-        if field is None:
-            return ""
-        else:
-            return field
-
     def translate_web_query_to_dc_query(self, data):
         """
         Translates search input parameters into a request string for the
@@ -492,15 +442,13 @@ class Models(object):
         log.debug('translate_web_query_to_dc_query')
 
         query_builder = QueryBuilder()
-        # query = self.query_request("query")
         query_builder.add_text(data['search_input'])
         query_builder.add_term(
-            "projectid", "1542-city-of-new-orleans-contracts")
+            self.dc_query.split(':')[0], self.dc_query.split(':')[1])
 
         terms = ['vendor', 'department']  # , 'officer']
 
         for term in terms:
-            # query_value = self.query_request(term)
             query_value = data[term]
             if query_value != "":
                 query_builder.add_term(term, query_value)
@@ -518,21 +466,42 @@ class Models(object):
 
         return output
 
-    @staticmethod
-    def get_offset(offset):
+
+class QueryBuilder(object):
+    """
+    Build a query for the DocumentCloud API.
+    """
+
+    def __init__(self):
         """
-        Offsets can't be '' or less than 0. This handles translation.
+        Initialized as blank. Terms are stored in a dictionary.
         """
 
-        log.debug('get_offset')
+        self.query = {}
+        self.text = ""
 
-        log.info("offset: %d", offset)
+    def add_term(self, term, value):
+        """
+        Add a term to the dictionary. If term is updated it will just
+        re-write the dictionary value.
+        """
 
-        if offset == "":
-            offset = 0
-        elif offset < 0:
-            offset = 0
-        else:
-            offset -= offset  # a page is one more than an offset
+        self.query[term] = value
 
-        return offset
+    def add_text(self, text):
+        """
+        Add a freetext component to the query (ex. 'playground').
+        """
+
+        self.text = text
+
+    def get_query(self):
+        """
+        Translate the dictionary into a DocumentCloud query.
+        """
+
+        output = ""
+        for k in self.query.keys():
+            output += k + ":" + '"' + self.query[k] + '" '
+        output = output + self.text
+        return output.strip()

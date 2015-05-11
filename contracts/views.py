@@ -18,17 +18,10 @@ class Views(object):
 
     '''Render views.'''
 
-    def __init__(self):
-        '''Initialize any self variables.'''
-
-        pass
-
-    def get_home(self, data):
+    @staticmethod
+    def get_home(data):
         '''Render home page.'''
 
-        # documents = data['documents']
-        # number_of_documents = data['number_of_documents']
-        # number_of_pages = data['number_of_pages']
         vendors = data['vendors']
         departments = data['departments']
         officers = data['officers']
@@ -39,11 +32,6 @@ class Views(object):
                 'index.html',
                 vendors=vendors,
                 departments=departments,
-                # offset=0,
-                # number_of_documents=number_of_documents,
-                # number_of_pages=number_of_pages,
-                # current_page=1,
-                # documents=documents,
                 officers=officers,
                 updated_date=updated_date,
                 lens_css=LENS_CSS,
@@ -56,21 +44,21 @@ class Views(object):
 
         return response
 
-    def get_search_page(self, data):
+    @staticmethod
+    def get_search_page(data):
         '''Render search results page.'''
 
         log.debug('start of get_search_page')
+        log.debug('current_page: %d', data['current_page'])
 
         vendors = data['vendors']
         departments = data['departments']
-        # offset = data['offset']
         number_of_documents = data['number_of_documents']
         status = data['status']
         number_of_pages = data['number_of_pages']
         current_page = data['current_page']
         documents = data['documents']
         officers = data['officers']
-        # query = data['query']
         updated_date = data['updated_date']
 
         response = make_response(
@@ -78,14 +66,12 @@ class Views(object):
                 'search.html',
                 vendors=vendors,
                 departments=departments,
-                # offset=offset,
                 number_of_documents=number_of_documents,
                 status=status,
                 number_of_pages=number_of_pages,
                 current_page=current_page,
                 documents=documents,
                 officers=officers,
-                # query=query,
                 updated_date=updated_date,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
@@ -99,38 +85,8 @@ class Views(object):
 
         return response
 
-    def post_search_page(self, data):
-        '''Render updated informatino to insert into search results page.'''
-
-        number_of_documents = data['number_of_documents']
-        status = data['status']
-        number_of_pages = data['number_of_pages']
-        current_page = data['current_page']
-        docs = data['docs']
-        query = data['query']
-        vendor = data['vendor']
-
-        response = make_response(
-            render_template(
-                'search.html',
-                status=status,
-                docs=docs,
-                number_of_pages=number_of_pages,
-                current_page=current_page,
-                vendor=vendor,
-                number_of_documents=number_of_documents,
-                query=query,
-                lens_css=LENS_CSS,
-                banner_css=BANNER_CSS,
-                contracts_css=CONTRACTS_CSS,
-                lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS
-            )
-        )
-
-        return response
-
-    def get_contract(self, data):
+    @staticmethod
+    def get_contract(data):
         '''Render the single contract page.'''
 
         doc_cloud_id = data['doc_cloud_id']
