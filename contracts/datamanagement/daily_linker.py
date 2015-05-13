@@ -13,15 +13,12 @@ from address import AddressParser, Address
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import ConfigParser
 from ethics_classes import EthicsRecord
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from contracts.settings import Settings
+from contracts import CONNECTION_STRING
 
 Base = declarative_base()
-
-SETTINGS = Settings()
 
 
 last_names = [l.strip("\n").split(" ")[0] for l in tuple(
@@ -35,7 +32,7 @@ first_names = first_female + first_male
 ap = AddressParser()
 
 # an Engine, which the Session will use for connection
-engine = create_engine(SETTINGS.connection_string)
+engine = create_engine(CONNECTION_STRING)
 
 # create a configured "Session" class
 Session = sessionmaker(bind=engine)
@@ -150,7 +147,7 @@ def is_common_first_and_last_name_and_has_initial(name):
         return True
 
     condition2 = (
-        (name.split(" ")[0] in first_names) and
+        name.split(" ")[0] in first_names and
         name.split(" ")[2] in last_names
     )
     if condition2:
@@ -158,36 +155,44 @@ def is_common_first_and_last_name_and_has_initial(name):
             return True
 
         return True
+
     return False
 
 
 def is_on_list_of_known_people(name):
     if name in known_people:
         return True
+
     return False
 
 
 def is_on_list_of_known_companies(name):
     if name in known_companies:
         return True
+
     return False
 
 
 def is_this_a_person(name_of_thing):
     if has_known_person_suffix(name_of_thing):
         return True
+
     if is_common_first_and_last_name_and_has_initial(name_of_thing):
         return True
+
     if is_on_list_of_known_people(name_of_thing):
         return True
+
     return False
 
 
 def is_this_a_company(name_of_thing):
     if has_known_company_suffix(name_of_thing):
         return True
+
     if is_on_list_of_known_companies(name_of_thing):
         return True
+
     return False
 
 
@@ -255,11 +260,24 @@ def link(name, vendor):
     name = name.strip("\n").replace(".", "").strip()
 
     # get the vendor:
-    vendorindb = session.query(Vendor).filter(Vendor.name == vendor).first()
+    vendorindb = session.query(
+        Vendor
+    ).filter(
+        Vendor.name == vendor
+    ).first()
 
     # get the person:
-    personindb = session.query(Person).filter(Person.name == name).first()
-    co = session.query(Company).filter(Company.name == name)
+    personindb = session.query(
+        Person
+    ).filter(
+        Person.name == name
+    ).first()
+
+    co = session.query(
+        Company
+    ).filter(
+        Company.name == name
+    )
     companyindb = co.first()  # get the company
     if personindb is not None and companyindb is None:
         link = session.query(
@@ -276,6 +294,7 @@ def link(name, vendor):
             session.add(link)
             session.commit()
             return
+
     if companyindb is not None and personindb is None:
         link = session.query(
             VendorOfficerCompany
@@ -430,8 +449,9 @@ def pick_from_options(firm):
 
 def search_sos(vendor):
     '''
-    Search for a vendor
+    Search for a vendor.
     '''
+
     driver.get(
         "http://coraweb.sos.la.gov/commercialsearch/commercialsearch.aspx")
     driver.find_element_by_id(
@@ -439,12 +459,6 @@ def search_sos(vendor):
     driver.find_element_by_id("ctl00_cphContent_btnSearchEntity").click()
     page = driver.page_source
     return page
-
-
-def get_from_config(field):
-    config = ConfigParser.RawConfigParser()
-    config.read('app.cfg')
-    return config.get('Section1', field)
 
 
 def process_direct_hit(raw_html, vendor_name):
@@ -490,12 +504,6 @@ def try_to_link(vendor_name):
     if total_hits == 1:
         print "perfect hit for {}".format(vendor_name)
         process_direct_hit(search_results, vendor_name)
-
-
-# def get_from_config(field):
-#     config = ConfigParser.RawConfigParser()
-#     config.read(CONFIG_LOCATION)
-#     return config.get('Section1', field)
 
 
 def get_daily_contracts(

@@ -1,18 +1,19 @@
 #!/usr/bin/python
+
 """
-This script backs up a local file system
-with everything from the document cloud repo
+This script backs up a local file system with everything from the DocumentCloud
+repo.
 """
+
 import os
 import time
 import json
-import logging
 import argparse
 
 from contracts.datamanagement.lib.models import LensDatabase
-from documentcloud import DocumentCloud
-from contracts.settings import Settings
-from documentcloud.toolbox import DoesNotExistError
+from pythondocumentcloud import DocumentCloud
+from pythondocumentcloud.toolbox import DoesNotExistError
+from contracts import log, CORPUS_LOC
 
 parser = argparse.ArgumentParser(
     description='Synch the lens db to document cloud repo')
@@ -26,60 +27,59 @@ parser.set_defaults(feature=False)
 args = parser.parse_args()
 force = args.keep_synching
 
-SETTINGS = Settings()
-
 with LensDatabase() as lens_db:
     DOC_CLOUD_IDS = lens_db.get_all_contract_ids()
 
-CLIENT = DocumentCloud()
-
-BASEBACKUP = SETTINGS.corpus_loc
-
-logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
-
-logging.info(" {} | {}".format(time.strftime("%H:%M:%S"), "BACKUP START"))
+client = DocumentCloud()
 
 
 def get_path(doc_cloud_id, extension):
     '''
-    Return the appropriate path for a file
-    w/ a certain extension
+    Return the appropriate path for a file with a certain extension.
     '''
-    output = BASEBACKUP + "/" + doc_cloud_id.replace("/", "") + extension
+
+    output = CORPUS_LOC + "/" + doc_cloud_id.replace("/", "") + extension
     return output
 
 
 def get_meta_data(doc):
     '''
-    return the metadata associated with a
-    document cloud contract
+    Return the metadata associated with a DocumentCloud contract.
     '''
+
     metadata = {}
+
     try:
         metadata['vendor'] = doc.data['vendor']
     except KeyError:
         metadata['vendor'] = "unknown"
+
     try:
         metadata['department'] = doc.data['department']
     except KeyError:
         metadata['department'] = "unknown"
+
     try:
         metadata['contract number'] = doc.data['contract number']
     except KeyError:
         metadata['contract number'] = ""
+
     try:
         metadata['purchase order'] = doc.data['purchase order']
     except KeyError:
         metadata['purchase order'] = ""
+
     metadata['title'] = doc.title
     metadata['description'] = doc.description
+
     return metadata
 
 
 def needs_to_be_backed_up(doc_cloud_id):
     '''
-    Boolean value indicating if contract needs to be backed up
+    Boolean value indicating if contract needs to be backed up.
     '''
+
     if not os.path.exists(get_path(doc_cloud_id, ".pdf")):
         return True
 
@@ -94,12 +94,13 @@ def needs_to_be_backed_up(doc_cloud_id):
 
 def backup(doc_cloud_id):
     '''
-    Backup a contract
+    Backup a contract.
     '''
+
     if needs_to_be_backed_up(doc_cloud_id) or force:
-        logging.info(" {} | {}".format(
+        log.info(" {} | {}".format(
             time.strftime("%H:%M:%S"), "BACKUP " + doc_cloud_id))
-        doc = CLIENT.documents.get(doc_cloud_id)
+        doc = client.documents.get(doc_cloud_id)
         pdf = doc.pdf
         metadata = get_meta_data(doc)
         if not os.path.exists(get_path(doc_cloud_id, ".pdf")) or force:
@@ -115,7 +116,7 @@ def backup(doc_cloud_id):
             with open(get_path(doc_cloud_id, "_text.txt"), "wb") as outfile:
                 outfile.write(json.dumps(doc.full_text))
     else:
-        logging.info(" {} | {}".format(
+        log.info(" {} | {}".format(
             time.strftime("%H:%M:%S"),
             doc_cloud_id + " already is backed up"))
 
@@ -124,6 +125,6 @@ if __name__ == "__main__":
         try:
             backup(document_cloud_id)
         except DoesNotExistError:
-            logging.info(" {} | {}".format(
+            log.info(" {} | {}".format(
                 time.strftime("%H:%M:%S"),
                 document_cloud_id + " DoesNotExistError"))

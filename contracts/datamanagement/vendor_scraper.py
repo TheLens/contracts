@@ -2,8 +2,7 @@ import urllib2
 import os
 from time import sleep
 from random import randint
-
-vendor_loc = "/Volumes/bigone/lensdata/contracts/vendors/"
+from contracts import VENDORS_LOCATION
 
 
 def i_to_vendor_no(i):
@@ -20,7 +19,8 @@ def i_to_vendor_no(i):
 def download_vendor(vendor_no):
     response = urllib2.urlopen(
         'http://www.purchasing.cityofno.com/bso/external/vendor/' +
-        'vendorProfileOrgInfo.sdo?external=true&vendorId=' + vendor_no)
+        'vendorProfileOrgInfo.sdo?external=true&vendorId=' +
+        vendor_no)
     html = response.read()
     return html
 
@@ -33,7 +33,7 @@ def write_vendor(vendor_no, html):
 
 for i in range(1, 10000):
     vendor_no = i_to_vendor_no(i)
-    file_loc = vendor_loc + vendor_no
+    file_loc = VENDORS_LOCATION + vendor_no
     if not os.path.isfile(file_loc):
         print "getting {}".format(file_loc)
         html = download_vendor(vendor_no)

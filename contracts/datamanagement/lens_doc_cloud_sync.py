@@ -1,39 +1,37 @@
+
 '''
-Matches the lens db with document cloud
+Matches the Lens database with DocumentCloud.
 '''
 
-import logging
-import datetime
-
-from documentcloud import DocumentCloud
-from contracts.settings import Settings
+from pythondocumentcloud import DocumentCloud
 from contracts.datamanagement.lib.models import LensDatabase
-
-SETTINGS = Settings()
-logging.basicConfig(level=logging.DEBUG, filename=SETTINGS.log)
+from contracts import log
 
 client = DocumentCloud()
 
 
 def get_from_metadata(doc, field):
+    '''docstring'''
+
     try:
         output = doc.data[field]
         if len(output) == 0:
             output = "unknown"
     except:
         output = "unknown"
+
     return output
 
 
 def match_contract(doc):
     '''
-    Match a particular contract
+    Match a particular contract.
     '''
+
     keep_synching = True
-    log_string = '{} | Synching {}'.format(
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    log_string = 'Synching {}'.format(
         doc.id)
-    logging.info(log_string)
+    log.info(log_string)
     with LensDatabase() as lens_db:
         fields = {}
         fields['purchaseno'] = get_from_metadata(doc, "purchase order")
@@ -53,19 +51,16 @@ def match_contract(doc):
     return keep_synching
 
 
-def get_timestamp():
-    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return date_string
-
-
 def match_lens_db_to_document_cloud():
     '''
-    Match the Lens database to document cloud
+    Match the Lens database to DocumentCloud.
     '''
+
     with LensDatabase() as db:
         half_filled_contracts = db.get_half_filled_contracts()
-        logging.info('{} | {} half filled contracts need to be synched'.format(
-            get_timestamp(), len(half_filled_contracts)))
+        log.info(
+            '%d half filled contracts need to be synched',
+            len(half_filled_contracts))
         for contract in half_filled_contracts:
             try:
                 match_contract(client.documents.get(contract.doc_cloud_id))
@@ -75,10 +70,9 @@ def match_lens_db_to_document_cloud():
                 message = template.format(type(ex).__name__, ex.args)
                 print message
                 print contract.doc_cloud_id
-                log_string = '{} | {} | Error {}'.format(
-                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                log_string = '{} | Error {}'.format(
                     contract.doc_cloud_id, message)
-                logging.info(log_string)
+                log.info(log_string)
 
 if __name__ == '__main__':
     match_lens_db_to_document_cloud()

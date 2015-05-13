@@ -56,20 +56,20 @@ function prepareData() {
   // data.officer = encodeURIComponent($('#officers').val());
   data.current_page = document.querySelector('#pagination');
 
-  console.log(document.querySelector('#pagination'));
-  console.log(typeof document.querySelector('#pagination'));
+  // console.log(document.querySelector('#pagination'));
+  // console.log(typeof document.querySelector('#pagination'));
 
   if (data.current_page === null) {
-    console.log(data.current_page);
-    console.log(typeof data.current_page);
+    // console.log(data.current_page);
+    // console.log(typeof data.current_page);
     data.current_page = 1;
   } else {
-    console.log(data.current_page);
-    console.log(typeof data.current_page);
+    // console.log(data.current_page);
+    // console.log(typeof data.current_page);
     data.current_page = document.querySelector('#pagination').getAttribute('data-current-page');
   }
 
-  console.log(data);
+  // console.log(data);
 
   return data;
 }
@@ -130,12 +130,12 @@ function setHandlers() {
   });
 
   $(".open-button").on("click", function() {
-    var id = $(this).parents(".contract-preview").attr("id");
+    var id = $(this).parents(".contract-row").attr("id");
     window.location.href = '/contracts/contract/' + id;
   });
 
   $(".download").on("click", function() {
-    var id = $(this).parents(".contract-preview").attr("id");
+    var id = $(this).parents(".contract-row").attr("id");
     downloadFile("/contracts/download/" + id);
   });
 }

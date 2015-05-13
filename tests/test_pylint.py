@@ -36,8 +36,8 @@ class TestPylint(TestCase):
         for root, dirnames, filenames in os.walk(
             '/Users/thomasthoren/projects/contracts'
         ):
-            if ignore(root):
-                continue
+            # if ignore(root):
+            #     continue
 
             for filename in fnmatch.filter(filenames, '*.py'):
                 files_list.append(os.path.join(root, filename))

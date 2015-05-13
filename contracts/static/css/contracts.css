@@ -2,51 +2,40 @@ html,
 body {
   height: 100%;
   position: relative;
-  font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
-}
-
-b {
-  background-color: #FFFF00;
+  font-family: "minion-pro", Georgia, "Times New Roman", Times, serif;
 }
 
 li {
   list-style-type: none;
 }
 
-div {
-  font-family: inherit; 
+h1 {
+  font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
 }
 
 select {
-	font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
 	background-color: white;
-  border: 1px solid #BBB;
+  border: 1px solid #c3c3c3;
   width: 100%;
   height: 40px;
 }
 
 input[type="input"]:active {
-  border: 1px solid #5897FB;
+  border: 1px solid #c3c3c3;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-input[type="text"]{
-  border: 1px solid #AAA;
-  border-radius: 0;
-  width: 100%;
-  height: 100%;
-}
-
-input[type="search"] {
-  border: 1px solid #AAA;
 }
 
 .text-box {
   width: 100%;
-  font-size: 14px;
   margin-bottom: 0;
   border-radius: 0;
-  min-height: 40px;
+}
+
+.fa-search:hover {
+    color: inherit;
+}
+.fa-search{
+    font-size: 1.1em;
 }
 
 .slim {
@@ -55,150 +44,81 @@ input[type="search"] {
 
 .filters {
   display: none;
-  /*background-color: #c3c3c3;*/
 }
 
-.nomargin{
-	margin: 0;
-}
-
-.attribution {
-  margin-top: 15px;
+.filters-wrapper {
+  background-color: #F0F0F0;
+  padding: 0.9375em;
+  overflow: hidden;
+  padding-bottom: 0;
   margin-bottom: 15px;
 }
 
-.search-button{
-  margin-bottom: 0;
+.open-button {
+  background-color: #c3c3c3;
 }
 
 .download {
   font-size: 0.8em;
+  padding: 0 0.625rem;
 }
 
-.padded-row {
-	margin-bottom: 1.5em;
-	margin-top: 1.5em;
-}
-
-.contract-preview {
+.contract-row {
   cursor: pointer;
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid #c3c3c3;
   padding-top: 7px;
   padding-bottom: 7px;
 }
-.contract-preview:hover {
+.contract-row:hover {
   background-color: #F5F5EF;
 }
 
-.pagination {
-  height: 20px;
-  line-height: 20px;
-  font-size: .9em;
-  margin-top: 15px;
-  margin-bottom: 15px;
+.advanced-search {
+  cursor: pointer;
+  color: #B33125;
+  font-size: 0.9em;
+  padding-top: 4px;
+  margin: 0 0 20px 0;
 }
 
-.contract-date {
-	cursor: pointer;
-  color: #191919;
-  font-size: .8em;
-  padding-left: 15px;
+.advanced-search:hover {
+  text-decoration: underline;
+}
+
+.search-button {
+  font-size: 0.9em;
+}
+
+.doc-list {
+  border: 1px solid #c3c3c3;
+  box-shadow: 0 0 1px #c3c3c3;
 }
 
 .contract-title {
-	cursor: pointer;
-  font-size: 12px;
+  cursor: pointer;
+  font-size: 0.8em;
   font-weight: bold;
-}
-
-.DV-container {
-  height: 1000px;
-  position: relative;
-}
-
-.DV-viewer {
-  height: auto;
-}
-
-.DC-search-embed .DC-title {
-  text-align: left;
-}
-
-.DV-docViewer {
-	padding-left: 0;
-}
-
-.search-query {
-  vertical-align: middle;
-  height: 30px;
-  font-family: Arial;
-  margin-top: 5px;
-  font-size: 13px;
-  font-weight: bold;
-  text-align: left;
-  padding-left: 20px;
-}
-
-.DC-search-embed.DC-skinny-width .DC-paginator .DC-paginator-enumeration {
-  font-size: 9px;
-}
-
-.DC-search-embed .DC-quiet-link {
-  font-size: 9px;
-}
-
-.DC-search-embed .DC-document-list {
-	overflow-y: auto;
-}
-
-.DC-search-embed .DC-paginator{
-	font-size: 8px;
 }
 
 .contract-description {
   font-size: 12px;
   color: #191919;
   cursor: pointer;
+}
+
+.contract-date {
+  cursor: pointer;
+  color: #191919;
+  font-size: 0.8em;
   padding-left: 15px;
 }
 
-.DC-document-title {
-	font-size: 12px;
-	width: 100%;
-}
-
-.DC-document-tile {
-	width: 100%;
-}
-
-.mention-page {
-	padding-left: 5px;
-	font-size: 11px;
-	font-weight: bold;
-	display: inline-block;
-}
-
-.mention-text {
-	padding-left: 20px;
-	font-size: 11px;
-	font-style: italic;
-	display: inline-block;
-}
-
-.advanced-search {
-  cursor: pointer;
-  color: #B33125;
-}
-.advanced-search:hover {
-  text-decoration: underline;
-}
-
-.contract-container {
-	border-bottom: thin solid #D3D3D3;
-}
-
-.mention-text {
-	color: #333333;
+.pagination {
+  height: 20px;
+  line-height: 20px;
+  font-size: 0.9em;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .page,
@@ -211,141 +131,84 @@ input[type="search"] {
   font-size: 1.2em;
 }
 
-.page-change {
+.page-change:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
-.hide {
-	visibility: hidden;
+.attribution {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 0.9em;
 }
 
-.docembed{
-  width: 100% !important;
-}
+/*.DC-search-embed.DC-skinny-width .DC-paginator .DC-paginator-enumeration {
+  font-size: 9px;
+}*/
 
-.contract-container{ 
-  cursor: pointer; 
+/*.DC-search-embed.DC-skinny-width .DC-paginator .DC-paginator-enumeration {
+  font-size: 9px;
+}*/
+
+.DV-docViewer {
+  padding-left: 0;
 }
 
 .DC-search-embed .DC-title {
-text-align: left !important;
-}
-
-.DV-docViewer{
-  padding-left:0px !important;
-}
-
-#search_query
-{
-vertical-align:middle;
-height:30px;
-font-family: Arial;
-margin-top:5px;
-font-size: 13px;
-font-weight:bold;
-text-align:left;
-padding-left: 20px;
-}
-
-#master-display
-{
- /*height:85%; */
-}
-
-.DC-search-embed.DC-skinny-width .DC-paginator .DC-paginator-enumeration {
-font-size: 9px !important;
+  text-align: left;
 }
 
 .DC-search-embed .DC-quiet-link {
-font-size: 9px !important;
-}
-
-#searchresults-container
-{
-float:left;
-height: 100%;
-width: 23% !important;
-padding-right:1%;
-overflow-y: auto;
-position: absolute;
-}
-
-.contract
-{
-font-family: Arial
-}
-
-.contract-title
-{
-font-size:13px;
+  font-size: 9px;
 }
 
 .DC-search-embed .DC-document-list {
-  overflow-y: auto !important;
+  overflow-y: auto;
 }
 
-.DC-search-embed .DC-paginator{
+.DC-search-embed .DC-paginator {
   font-size: 8px;
 }
 
-.contract-description
-{
-font-size:12px;
-color:#191919;
-}
-.contract-title
-{
-font-size:12px;
-font-weight:bold;
+.DC-document-title {
+  font-size: 12px;
+  width: 100%;
 }
 
-.DC-document-title{
-  font-size: 12px !important;
-  width: 100% !important;
+.DV-container {
+  height: 1000px;
+  position: relative;
 }
 
-.DC-document-tile{
-  width: 100% !important;
+.DV-viewer {
+  height: auto;
 }
 
-.mention-page{
-  padding-left:5px;
-  font-size:11px;
-  font-weight:bold;
-  display:inline-block;
+/***************
+
+ 8. Mobile view
+
+ ***************/
+
+@media screen and (max-width: 600px) {
+  .open-button {
+    margin-top: 15px;
+  }
+}
+/***************
+
+ 9. Medium-view
+
+ ***************/
+
+@media screen and (min-width: 601px) and (max-width: 1024px) {
 }
 
-.mention-text{
-  padding-left:20px;
-  font-size:11px;
-  font-style:italic;
-  display:inline-block;
-}
-b{
-  background-color: #FFFF00;
-}
+/****************
 
-li { /* styles all li elements*/
-    list-style-type: none;
-}
+ 10. Large width
 
-html, body {
-    height:100%;
-    position:relative;
-}
+ ****************/
 
-.contract-container{
-  border-bottom:thin solid #D3D3D3;
-}
-
-.mention-text{
-  color: #333333;
-}
-
-.page{
-  color: black;
-  font-style:normal;
-  text-decoration:underline;
-  display:inline-block;
+@media screen and (min-width: 1025px) { 
 }
