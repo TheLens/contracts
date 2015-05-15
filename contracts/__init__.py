@@ -32,6 +32,17 @@ if USER == 'ubuntu':  # Server
         os.environ.get('DATABASE_NAME'),
     )
     TEMPLATES = "%s/templates" % PROJECT_DIR
+
+    # Static assets
+    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/realestate"
+
+    LENS_CSS = '%s/css/lens.css' % S3_URL
+    BANNER_CSS = '%s/css/banner.css' % S3_URL
+    CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
+
+    LENS_JS = '%s/js/lens.js' % S3_URL
+    CONTRACTS_JS = '%s/js/contracts.js' % S3_URL
+
 else:  # Local
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
