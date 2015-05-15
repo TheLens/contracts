@@ -12,3 +12,14 @@ script:
 - coverage run tests/test*.py
 after_success:
 - coveralls
+deploy:
+  provider: s3
+  access_key_id: AKIAIWQKYAETOQ2N7CBQ
+  secret_access_key:
+    secure: PlDoe6znlyTyHx/mgVTnZ2l1zOoGnHn7d7Is8UEUml3Bu7MD68XrAAlDCHZPL8qfXGD2FADfaMCmu17dYs0zeJJPKVbuMpZgLljjqHPpJQwQC9frKEaRoxHKy+LXutujKu6nFG8yZbW0JnIYchoj8g1XCkcu437XKqK5eiW1Pa8=
+  bucket: lensnola
+  local-dir: contracts/static
+  upload-dir: contracts
+  acl: public_read
+  on:
+    repo: TheLens/contracts
