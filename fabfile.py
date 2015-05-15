@@ -13,7 +13,7 @@ APP_DIR = '%s/contracts' % PROJECT_DIR
 CONFS_DIR = '%s/confs' % PROJECT_DIR
 CSS_DIR = '%s/contracts/static/css' % PROJECT_DIR
 DATA_DIR = '%s/data' % PROJECT_DIR
-DATAMANAGEMENT_DIR = '%s/contracts/datamanagement' % PROJECT_DIR
+# DATAMANAGEMENT_DIR = '%s/contracts/datamanagement' % PROJECT_DIR
 DOCS_DIR = '%s/docs' % PROJECT_DIR
 IMAGES_DIR = '%s/contracts/static/css/images' % PROJECT_DIR
 JS_DIR = '%s/contracts/static/js' % PROJECT_DIR
@@ -79,32 +79,33 @@ def contracts():
     local('git add %s/views.py' % APP_DIR)
 
 
-def datamanagement():
-    '''/contracts/datamanagement'''
+# def datamanagement():
+#     '''/contracts/datamanagement'''
 
-    local('git add %s/__init__.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/backup.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/daily_linker.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/emailer.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/lens_doc_cloud_sync.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/main.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/vendor_scraper.py' % DATAMANAGEMENT_DIR)
-
-
-def datamanagement_lib():
-    '''/contracts/datamanagement/lib'''
-
-    local('git add %s/lib/__init__.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/lib/models.py' % DATAMANAGEMENT_DIR)
-    local('git add %s/lib/utilities.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/__init__.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/backup.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/daily_linker.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/emailer.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/lens_doc_cloud_sync.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/main.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/lib/models.py' % DATAMANAGEMENT_DIR)
+#     local('git add %s/vendor_scraper.py' % DATAMANAGEMENT_DIR)
 
 
 def lib():
     '''/contracts/lib'''
 
+    # local('git add %s/vaultclasses.py' % LIB_DIR)
+
     local('git add %s/__init__.py' % LIB_DIR)
+    local('git add %s/backup.py' % LIB_DIR)
+    local('git add %s/daily_linker.py' % LIB_DIR)
+    local('git add %s/emailer.py' % LIB_DIR)
+    local('git add %s/lens_doc_cloud_sync.py' % LIB_DIR)
+    local('git add %s/main.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
-    local('git add %s/vaultclasses.py' % LIB_DIR)
+    local('git add %s/models.py' % LIB_DIR)
+    local('git add %s/vendor_scraper.py' % LIB_DIR)
 
 
 def css():
@@ -127,7 +128,6 @@ def templates():
 
     local('git add %s/banner.html' % TEMPLATE_DIR)
     local('git add %s/contract.html' % TEMPLATE_DIR)
-    local('git add %s/email-template.html' % TEMPLATE_DIR)
     local('git add %s/footer.html' % TEMPLATE_DIR)
     local('git add %s/head.html' % TEMPLATE_DIR)
     local('git add %s/index.html' % TEMPLATE_DIR)
@@ -148,9 +148,9 @@ def tests():
     '''/tests/'''
 
     local('git add %s/__init__.py' % TESTS_DIR)
-    # local('git add %s/test_misc.py' % TESTS_DIR)
-    # local('git add %s/test_models.py' % TESTS_DIR)
-    # local('git add %s/test_parser.py' % TESTS_DIR)
+    local('git add %s/test_misc.py' % TESTS_DIR)
+    local('git add %s/test_models.py' % TESTS_DIR)
+    local('git add %s/test_parser.py' % TESTS_DIR)
     local('git add %s/test_pep8.py' % TESTS_DIR)
     local('git add %s/test_pylint.py' % TESTS_DIR)
 
@@ -172,8 +172,7 @@ def addthemall():
     data()
     docs()
     contracts()
-    datamanagement()
-    datamanagement_lib()
+    # datamanagement()
     lib()
     css()
     js()

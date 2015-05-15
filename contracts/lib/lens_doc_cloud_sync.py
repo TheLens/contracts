@@ -4,7 +4,7 @@ Matches the Lens database with DocumentCloud.
 '''
 
 from pythondocumentcloud import DocumentCloud
-from contracts.datamanagement.lib.models import LensDatabase
+from contracts.lib.models import LensDatabase
 from contracts import log
 
 client = DocumentCloud()

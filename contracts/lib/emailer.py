@@ -1,4 +1,5 @@
-#!/usr/bin/python
+
+'''docstring'''
 
 import os
 import time
@@ -6,10 +7,12 @@ import smtplib
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from contracts.datamanagement.lib.models import LensDatabase
+from contracts.lib.models import LensDatabase
 
 
 def send_email(title, message):
+    '''Sends the email.'''
+
     print os.environ.get('EMAIL_TO_LIST')
     for to in os.environ.get('EMAIL_TO_LIST').split(","):
         print to
@@ -40,6 +43,8 @@ def send_email(title, message):
 
 
 def get_message():
+    '''Includes the logic for what to show in the email.'''
+
     with LensDatabase() as lens_db:
         contracts = lens_db.get_daily_contracts()
         len_contracts = str(len(contracts))

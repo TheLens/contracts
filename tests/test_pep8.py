@@ -8,13 +8,13 @@ import os
 import fnmatch
 
 # ignore stuff in virtualenvs or version control directories
-ignore_patterns = ('logs')
+patterns = ('logs')
 
 
 def ignore(directory):
     '''Check if this directory should be ignored.'''
 
-    for pattern in ignore_patterns:
+    for pattern in patterns:
         if pattern in directory:
             return True
     return False
@@ -31,9 +31,8 @@ class TestPep8(TestCase):
 
         # Find all .py files
         files_list = []
-        for root, dirnames, filenames in os.walk(
-            '/Users/thomasthoren/projects/contracts'
-        ):
+        for root, dirnames, filenames in os.walk('/Users/thomasthoren/' +
+                                                 'projects/contracts'):
             # print root
             # print dirnames
             # print filenames
@@ -46,5 +45,5 @@ class TestPep8(TestCase):
 
         errors = pep8style.check_files(files_list).total_errors
 
-        self.assertEqual(errors, 0,
-                         'Found %s PEP8 errors (and warnings).' % errors)
+        self.assertEqual(
+            errors, 0, 'Found %s PEP8 errors (and warnings).' % errors)

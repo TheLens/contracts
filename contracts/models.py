@@ -182,8 +182,9 @@ class Models(object):
         speed things up.
         """
 
-        log.debug('query_document_cloud with search_term: ')
-        log.debug(search_term)
+        log.debug('search_term: "%s"', search_term)
+
+        log.debug('Page: %d', page)
 
         output = self.document_cloud_client.documents.search(
             search_term, page=page, per_page=self.pagelength)

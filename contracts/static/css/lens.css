@@ -72,6 +72,12 @@ button {
   padding-left: 0;
   padding-right: 0;
 }
+button:hover {
+  transition: 0s;
+  -moz-transition: 0s;
+  -o-transition: 0s;
+  -webkit-transition: 0s;
+}
 
 button.red-button {
     background-color: #B33125;
@@ -93,17 +99,13 @@ button.red-button:hover {
 button.white-button {
     background-color: #FFF;
     color: #000;
-    border: 1px solid #c3c3c3;
+    border: 1px solid #C3C3C3;
 }
 button.white-button:active,
 button.white-button:focus,
 button.white-button:hover {
     background-image: none;
-    background-color: #FFF;
-    /*outline: none;*/
-}
-button.white-button:hover {
-    background-color: #FFF;
+    background-color: #F5F5EF;
 }
 
 /*

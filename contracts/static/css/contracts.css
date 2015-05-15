@@ -63,20 +63,10 @@ input[type="input"]:active {
   padding: 0 0.625rem;
 }
 
-.contract-row {
-  cursor: pointer;
-  border-bottom: 1px solid #c3c3c3;
-  padding-top: 7px;
-  padding-bottom: 7px;
-}
-.contract-row:hover {
-  background-color: #F5F5EF;
-}
-
 .advanced-search {
   cursor: pointer;
   color: #B33125;
-  font-size: 0.9em;
+  font-size: 0.8em;
   padding-top: 4px;
   margin: 0 0 20px 0;
 }
@@ -89,10 +79,19 @@ input[type="input"]:active {
   font-size: 0.9em;
 }
 
-.doc-list {
-  border: 1px solid #c3c3c3;
-  box-shadow: 0 0 1px #c3c3c3;
+.contract-row-wrapper {
+  margin: 0 0.9375rem;
 }
+
+.contract-row {
+  cursor: pointer;
+  border: 1px solid #c3c3c3;
+  padding: 7px 0;
+}
+
+/*.contract-row:hover {
+  background-color: #F5F5EF;
+}*/
 
 .contract-title {
   cursor: pointer;

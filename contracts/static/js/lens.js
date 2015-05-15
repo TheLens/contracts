@@ -16,6 +16,12 @@ function changeBannerImage() {
     document.getElementById('banner-logo').style.width = '100px';
     document.getElementById('banner-logo').style.marginTop = '5px';
   }
+
+  if (screenWidth <= 600) {
+    document.getElementById('banner-title').innerHTML = 'City contracts';
+  } else {
+    document.getElementById('banner-title').innerHTML = 'City of New Orleans contracts';
+  }
 }
 
 var window_resize_timeout;
