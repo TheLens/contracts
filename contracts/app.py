@@ -7,7 +7,9 @@ from flask import Flask, request
 from contracts.models import Models
 from contracts.views import Views
 from contracts import (
-    log
+    log,
+    RELOADER,
+    DEBUG
 )
 
 app = Flask(__name__)  # , template_folder=templates)
@@ -89,7 +91,6 @@ def download(docid):
 
 if __name__ == '__main__':
     app.run(
-        port=5000,
-        use_reloader=True,
-        debug=True
+        use_reloader=RELOADER,
+        debug=DEBUG
     )

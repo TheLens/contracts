@@ -43,6 +43,10 @@ if USER == 'ubuntu':  # Server
     LENS_JS = '%s/js/lens.js' % S3_URL
     CONTRACTS_JS = '%s/js/contracts.js' % S3_URL
 
+    # app.py config
+    RELOADER = False
+    DEBUG = False
+
 else:  # Local
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
@@ -61,12 +65,17 @@ else:  # Local
     )
     TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
 
+    # Static assets
     LENS_CSS = '/static/css/lens.css'
     BANNER_CSS = '/static/css/banner.css'
     CONTRACTS_CSS = '/static/css/contracts.css'
 
     LENS_JS = '/static/js/lens.js'
     CONTRACTS_JS = '/static/js/contracts.js'
+
+    # app.py config
+    RELOADER = True
+    DEBUG = True
 
 # Logging
 if os.path.isfile(LOG_PATH):
