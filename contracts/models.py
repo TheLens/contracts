@@ -42,18 +42,23 @@ class Models(object):
         log.debug('get_home')
 
         data = {}
+        log.debug(data)
 
         # Get a list of vendors for dropdown
         data['vendors'] = self.get_vendors()
+        log.debug(data)
 
         # Get a list of departments for dropdown
         data['departments'] = self.get_departments()
+        log.debug(data)
 
         # Get a list of officers for dropdown
         data['officers'] = self.get_officers()
+        log.debug(data)
 
         # Find the last updated date for footer
         data['updated_date'] = time.strftime("%b %-d, %Y")
+        log.debug(data)
 
         log.debug('Done collecting home data')
 

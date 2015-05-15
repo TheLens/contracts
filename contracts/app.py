@@ -2,6 +2,7 @@
 The web app that runs at vault.thelensnola.org/contracts
 """
 
+import os
 from flask import Flask, request
 # from flask.ext.cache import Cache
 from contracts.models import Models
@@ -23,6 +24,8 @@ def intro():
     """
 
     log.debug('/')
+
+    log.debug(os.environ)
 
     data = Models().get_home()
 
