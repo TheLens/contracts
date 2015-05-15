@@ -8,7 +8,7 @@ from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
-from contracts.lib.vaultclasses import (
+from contracts.db import (
     Vendor,
     Department,
     Contract,
