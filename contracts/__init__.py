@@ -34,7 +34,7 @@ if USER == 'ubuntu':  # Server
     TEMPLATES = "%s/templates" % PROJECT_DIR
 
     # Static assets
-    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/realestate"
+    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
 
     LENS_CSS = '%s/css/lens.css' % S3_URL
     BANNER_CSS = '%s/css/banner.css' % S3_URL
