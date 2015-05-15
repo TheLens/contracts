@@ -75,6 +75,7 @@ def contracts():
 
     local('git add %s/__init__.py' % APP_DIR)
     local('git add %s/app.py' % APP_DIR)
+    local('git add %s/db.py' % APP_DIR)
     local('git add %s/models.py' % APP_DIR)
     local('git add %s/views.py' % APP_DIR)
 
@@ -148,9 +149,9 @@ def tests():
     '''/tests/'''
 
     local('git add %s/__init__.py' % TESTS_DIR)
-    local('git add %s/test_misc.py' % TESTS_DIR)
-    local('git add %s/test_models.py' % TESTS_DIR)
-    local('git add %s/test_parser.py' % TESTS_DIR)
+    # local('git add %s/test_misc.py' % TESTS_DIR)
+    # local('git add %s/test_models.py' % TESTS_DIR)
+    # local('git add %s/test_parser.py' % TESTS_DIR)
     local('git add %s/test_pep8.py' % TESTS_DIR)
     local('git add %s/test_pylint.py' % TESTS_DIR)
 

@@ -1,11 +1,15 @@
+# Directories
+
+venv/*
+datamanagement/pdfs
+datamanagement/html*
+docs/_build*
+
+# Files
+
+*.pyc
+*.pdf
+.DS_Store
+*.log
 app.conf
 app.cfg
-venv/*
-*pyc
-*pdf
-datamanagement/pdfs
-datamanagement/ghostdriver.log
-datamanagement/__init__.pyc
-datamanagement/html*
-contracts.log
-docs/_build*

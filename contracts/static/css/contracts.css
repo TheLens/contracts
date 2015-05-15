@@ -84,7 +84,7 @@ input[type="input"]:active {
 }
 
 .contract-row {
-  cursor: pointer;
+  /*cursor: pointer;*/
   border: 1px solid #c3c3c3;
   padding: 7px 0;
 }
