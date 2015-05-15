@@ -205,6 +205,10 @@ $("#advanced-search").on("click", function() {
   }
 });
 
+$(".search-button").on("click", function() {
+  getSearch();
+});
+
 function checkPagerButtons() {//current_page, number_of_pages) {
   var current_page;
   var number_of_pages;
@@ -236,17 +240,6 @@ function checkPagerButtons() {//current_page, number_of_pages) {
     document.getElementById('next').style.cursor = 'pointer';
   }
 }
-
-$(document).ready(function() {
-  $(document).keypress(function(e) {
-    if (e.which == 13) {
-      getSearch();  // todo: Need to have GET at first, POST afterward.
-    }
-  });
-
-  setHandlers();
-  checkPagerButtons();
-});
 
 window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;

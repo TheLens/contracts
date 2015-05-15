@@ -121,7 +121,9 @@ def js():
     '''/contracts/static/js'''
 
     local('git add %s/contracts.js' % JS_DIR)
+    local('git add %s/contract.js' % JS_DIR)
     local('git add %s/lens.js' % JS_DIR)
+    local('git add %s/search.js' % JS_DIR)
 
 
 def templates():

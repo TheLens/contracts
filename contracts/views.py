@@ -10,7 +10,9 @@ from contracts import (
     BANNER_CSS,
     CONTRACTS_CSS,
     LENS_JS,
-    CONTRACTS_JS
+    CONTRACTS_JS,
+    SEARCH_JS,
+    CONTRACT_JS
 )
 
 
@@ -77,7 +79,8 @@ class Views(object):
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS
+                contracts_js=CONTRACTS_JS,
+                search_js=SEARCH_JS
             )
         )
 
@@ -101,7 +104,8 @@ class Views(object):
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS
+                contracts_js=CONTRACTS_JS,
+                contract_js=CONTRACT_JS
             )
         )
 

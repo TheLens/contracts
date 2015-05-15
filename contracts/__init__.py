@@ -42,6 +42,8 @@ if USER == 'ubuntu':  # Server
 
     LENS_JS = '%s/js/lens.js' % S3_URL
     CONTRACTS_JS = '%s/js/contracts.js' % S3_URL
+    CONTRACT_JS = '%s/js/contract.js' % S3_URL
+    SEARCH_JS = '%s/js/search.js' % S3_URL
 
     # app.py config
     RELOADER = False
@@ -72,6 +74,8 @@ else:  # Local
 
     LENS_JS = '/static/js/lens.js'
     CONTRACTS_JS = '/static/js/contracts.js'
+    CONTRACT_JS = '/static/js/contract.js'
+    SEARCH_JS = '/static/js/search.js'
 
     # app.py config
     RELOADER = True
