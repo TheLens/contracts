@@ -1,0 +1,57 @@
+<div class="row">
+  <div class="small-12 small-centered columns">
+    <div class="row collapse">
+      <label>Search contracts</label>
+      <div class="small-11 columns slim input-div" id="input-div">
+        <input class="text-box" id="text-box" type="search" placeholder="e.g. Uniforms, Dillard University, Mitch Landrieu, Three-Fold Consultants" />
+      </div>
+      <div class="small-1 slim columns">
+        <button class="red-button search-button postfix"><i class="fa fa-search"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="small-12 small-centered text-right columns">
+    <a class="advanced-search" id="advanced-search">Show advanced search <i class="fa fa-caret-down"></i></a>
+  </div>
+</div>
+<div class="filters" id="filters">
+  <div class="row">
+    <div class="small-10 small-centered filters-wrapper columns">
+      <div class="row">
+        <div class="small-12 medium-4 columns">
+          <select id="vendors">
+            <option selected value="">Select vendor</option>
+            {% for vendor in vendors %}
+            	<option value="{{ vendor }}">{{ vendor }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="small-12 medium-4 columns">
+          <select id="departments">
+            <option selected value="">Select department</option>
+            {% for department in departments %}
+            	<option value="{{ department }}">{{ department }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="small-12 medium-4 columns">
+          <select id="officers">
+            <option selected value="">Select company officer</option>
+            {% for officer in officers %}
+            	<option value="{{ officer }}">{{ officer }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+<!-- <div class="row">
+  <div class="small-12 text-center columns">
+    <button class="small button search-button" id="search-button">
+      Search
+    </button> 
+  </div>
+</div> -->
