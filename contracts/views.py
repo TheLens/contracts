@@ -9,10 +9,10 @@ from contracts import (
     LENS_CSS,
     BANNER_CSS,
     CONTRACTS_CSS,
+    DOWNLOAD_JS,
     LENS_JS,
-    CONTRACTS_JS,
-    SEARCH_JS,
-    CONTRACT_JS
+    RESULTS_JS,
+    SEARCH_JS
 )
 
 
@@ -40,7 +40,7 @@ class Views(object):
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS
+                search_js=SEARCH_JS
             )
         )
 
@@ -79,8 +79,9 @@ class Views(object):
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
+                download_js=DOWNLOAD_JS,
                 lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS,
+                results_js=RESULTS_JS,
                 search_js=SEARCH_JS
             )
         )
@@ -104,9 +105,8 @@ class Views(object):
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
-                lens_js=LENS_JS,
-                contracts_js=CONTRACTS_JS,
-                contract_js=CONTRACT_JS
+                download_js=DOWNLOAD_JS,
+                lens_js=LENS_JS
             )
         )
 

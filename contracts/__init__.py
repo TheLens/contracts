@@ -40,9 +40,9 @@ if USER == 'ubuntu':  # Server
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
 
+    DOWNLOAD_JS = '%s/js/download.js' % S3_URL
     LENS_JS = '%s/js/lens.js' % S3_URL
-    CONTRACTS_JS = '%s/js/contracts.js' % S3_URL
-    CONTRACT_JS = '%s/js/contract.js' % S3_URL
+    RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
 
     # app.py config
@@ -72,9 +72,9 @@ else:  # Local
     BANNER_CSS = '/static/css/banner.css'
     CONTRACTS_CSS = '/static/css/contracts.css'
 
+    DOWNLOAD_JS = '/static/js/download.js'
     LENS_JS = '/static/js/lens.js'
-    CONTRACTS_JS = '/static/js/contracts.js'
-    CONTRACT_JS = '/static/js/contract.js'
+    RESULTS_JS = '/static/js/results.js'
     SEARCH_JS = '/static/js/search.js'
 
     # app.py config
