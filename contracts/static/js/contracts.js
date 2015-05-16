@@ -53,7 +53,7 @@ function prepareData() {
   data.search_input = encodeURIComponent($("#text-box").val());
   data.vendor = encodeURIComponent($('#vendors').val());
   data.department = encodeURIComponent($('#departments').val());
-  // data.officer = encodeURIComponent($('#officers').val());
+  data.officer = encodeURIComponent($('#officers').val());
   data.current_page = document.querySelector('#pagination');
 
   // console.log(document.querySelector('#pagination'));
@@ -69,7 +69,7 @@ function prepareData() {
     data.current_page = document.querySelector('#pagination').getAttribute('data-current-page');
   }
 
-  // console.log(data);
+  console.log(data);
 
   return data;
 }
@@ -95,12 +95,12 @@ function buildSearch(data) {
     query_string = query_string + "department=" + data.department;
   }
 
-  // if (data.officer !== '') {
-  //   if (query_string !== '?') {
-  //     query_string = query_string + '&';
-  //   }
-  //   query_string = query_string + "officer=" + data.officer;
-  // }
+  if (data.officer !== '') {
+    if (query_string !== '?') {
+      query_string = query_string + '&';
+    }
+    query_string = query_string + "officer=" + data.officer;
+  }
 
   if (data.current_page !== '' && data.current_page !== "1") {
     if (query_string !== '?') {

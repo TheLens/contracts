@@ -72,6 +72,8 @@ class Models(object):
         # Extract search parameters (text input and dropdown selections)
         data = self.parse_query_string(request)
 
+        incoming_data = data
+
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
@@ -123,7 +125,7 @@ class Models(object):
         log.debug('end of get_search_page')
         # log.debug('current_page: %d', output_data['current_page'])
 
-        return output_data
+        return output_data, incoming_data
 
     @staticmethod
     def get_contracts_page(doc_cloud_id):
@@ -163,7 +165,7 @@ class Models(object):
         data['search_input'] = request.args.get('query')
         data['vendor'] = request.args.get('vendor')
         data['department'] = request.args.get('department')
-        # data['officer'] = request.args.get('officer')
+        data['officer'] = request.args.get('officer')
         data['current_page'] = request.args.get('page')
 
         if data['current_page'] is None or data['current_page'] == '':

@@ -48,12 +48,12 @@ def query_docs():
     if request.method == 'GET':
         log.debug('/search/ GET')
 
-        data = Models().get_search_page(request)
+        data, parameter_data = Models().get_search_page(request)
 
         log.debug('/search/ data:')
         # log.debug(data)
 
-        view = Views().get_search_page(data)
+        view = Views().get_search_page(data, parameter_data)
 
         log.debug('/search/ view:')
 

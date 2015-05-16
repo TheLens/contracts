@@ -144,6 +144,7 @@ def scripts():
     '''/scripts/'''
 
     local('git add %s/main.sh' % SCRIPTS_DIR)
+    local('git add %s/sync_with_document_cloud.sh' % SCRIPTS_DIR)
     local('git add %s/updatebackup.sh' % SCRIPTS_DIR)
 
 

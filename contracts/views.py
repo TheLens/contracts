@@ -47,7 +47,7 @@ class Views(object):
         return response
 
     @staticmethod
-    def get_search_page(data):
+    def get_search_page(data, parameter_data):
         '''Render search results page.'''
 
         log.debug('start of get_search_page')
@@ -66,6 +66,7 @@ class Views(object):
         response = make_response(
             render_template(
                 'search.html',
+                parameter_data=parameter_data,
                 vendors=vendors,
                 departments=departments,
                 number_of_documents=number_of_documents,
