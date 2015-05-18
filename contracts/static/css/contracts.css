@@ -75,6 +75,10 @@ input[type="input"]:active {
   text-decoration: underline;
 }
 
+.results-status {
+  /**/
+}
+
 .search-button {
   font-size: 0.9em;
 }
@@ -113,6 +117,7 @@ input[type="input"]:active {
 }
 
 .pagination {
+  display: none;
   height: 20px;
   line-height: 20px;
   font-size: 0.9em;
@@ -120,11 +125,15 @@ input[type="input"]:active {
   margin-bottom: 15px;
 }
 
+.previous,
+.next {
+  display: none;
+}
+
 .page,
 .page-change {
   color: black;
   font-style: normal;
-  display: inline-block;
   padding-top: 3px;
   padding: 3px;
   font-size: 1.2em;

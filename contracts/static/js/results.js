@@ -66,10 +66,16 @@ function checkPagerButtons() {//current_page, number_of_pages) {
 
 function checkNumberOfResults() {
   var number_of_results = $('#pagination').attr('data-number-of-documents');
+  var number_of_pages = $('#pagination').attr('data-number-of-pages');
 
-  if (number_of_results === '0') {
+  if (number_of_results !== '0') {
+    document.getElementById('pagination').style.display = 'block';
+  }
+
+  if (number_of_pages !== '1') {
     // document.getElementById('results-status').innerHTML = 'No results found for your search.';  // TODO: replace with full-blown language from app
-    document.getElementById('pagination').style.display = 'none';
+    document.getElementById('previous').style.display = 'block';
+    document.getElementById('next').style.display = 'block';
   }
 }
 

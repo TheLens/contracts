@@ -1,5 +1,6 @@
 <div class="row">
-  <div id="results-status" class="small-10 small-centered slim columns">
+  <div id="results-status" class="small-12 slim results-status columns">
+    {{ results_language }}
   </div>
 </div>
 <div class="row">
@@ -32,8 +33,8 @@
 </div>
 <div class="row">
   <div class="small-12 small-centered text-center pagination columns" id="pagination" data-current-page="{{ current_page }}" data-number-of-documents="{{ number_of_documents }}" data-number-of-pages="{{ number_of_pages }}">
-    <span class="page-change left" id="previous"><i class="fa fa-arrow-left"></i> Previous</span>
+    <span class="page-change previous left" id="previous"><i class="fa fa-arrow-left"></i> Previous</span>
     <span class="page center" id="pages">Page {{ current_page }} of {{ number_of_pages }}</span>
-    <span class="page-change right" id="next">Next <i class="fa fa-arrow-right"></i></span>
+    <span class="page-change next right" id="next">Next <i class="fa fa-arrow-right"></i></span>
   </div>
 </div>
