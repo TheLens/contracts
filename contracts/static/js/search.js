@@ -81,15 +81,15 @@ function setHandlers() {
     getSearch();
   });
 
-  $(".open-button").on("click", function() {
-    var id = $(this).parents(".contract-row").attr("id");
-    window.location.href = '/contracts/contract/' + id;
-  });
+  // $(".open-button").on("click", function() {
+  //   var id = $(this).parents(".contract-row").attr("id");
+  //   window.location.href = '/contracts/contract/' + id;
+  // });
 
-  $(".download").on("click", function() {
-    var id = $(this).parents(".contract-row").attr("id");
-    downloadFile("/contracts/download/" + id);
-  });
+  // $(".download").on("click", function() {
+  //   var id = $(this).parents(".contract-row").attr("id");
+  //   downloadFile("/contracts/download/" + id);
+  // });
 
   $("#advanced-search").on("click", function() {
     var display = document.getElementById("filters").style.display;

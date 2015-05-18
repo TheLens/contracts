@@ -1,4 +1,7 @@
 window.downloadFile = function (sUrl) {
+
+  // debugger;
+
   console.log('downloadFile');
 
   // iOS devices do not support downloading.
@@ -50,8 +53,7 @@ window.downloadFile = function (sUrl) {
 window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
 
-$(".download").on("click", function() {
+$(".download").on("click", function(event) {
   // var id = $(this).parents(".contract-row").attr("id");
-  var id = document.querySelector('#download').getAttribute('data-id');
-  downloadFile("/contracts/download/" + id);
+  // downloadFile("/contracts/download/" + id);  // todo: turn back on
 });

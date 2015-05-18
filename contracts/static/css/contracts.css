@@ -75,10 +75,6 @@ input[type="input"]:active {
   text-decoration: underline;
 }
 
-.results-status {
-  /**/
-}
-
 .search-button {
   font-size: 0.9em;
 }
@@ -148,6 +144,11 @@ input[type="input"]:active {
   margin-top: 15px;
   margin-bottom: 15px;
   font-size: 0.9em;
+}
+
+.no-underline,
+.no-underline:hover {
+  text-decoration: none;
 }
 
 /*.DC-search-embed.DC-skinny-width .DC-paginator .DC-paginator-enumeration {

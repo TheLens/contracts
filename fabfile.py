@@ -106,6 +106,7 @@ def lib():
     local('git add %s/main.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
+    local('git add %s/results_language.py' % LIB_DIR)
     local('git add %s/vendor_scraper.py' % LIB_DIR)
 
 
