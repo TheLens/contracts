@@ -73,10 +73,14 @@ class Models(object):
         # Extract search parameters (text input and dropdown selections)
         data = self.parse_query_string(request)
 
+        log.debug(data)
+
         incoming_data = data
 
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
+
+        log.debug(search_term)
 
         if search_term == self.dc_query:  # If no search input
             log.debug('No search parameters entered.')
@@ -84,8 +88,12 @@ class Models(object):
             # Get a list of contracts from local DB, without any search filter:
             documents = self.get_contracts(limit=self.pagelength)
 
+            log.debug(documents)
+
             # Fixing IDs:
             documents = self.translate_to_doc_cloud_form(documents)
+
+            log.debug(documents)
         else:
             log.debug('Some search parameters entered.')
 
@@ -93,7 +101,11 @@ class Models(object):
             documents = self.query_document_cloud(
                 search_term, page=data['current_page'])
 
+            log.debug(documents)
+
         number_of_documents = self.find_number_of_documents(search_term)
+
+        log.debug(number_of_documents)
 
         number_of_pages = number_of_documents / self.pagelength
 
@@ -197,6 +209,9 @@ class Models(object):
             search_term, page=page, per_page=self.pagelength)
 
         log.debug('len(output): %d', len(output))
+
+        log.debug('query_document_cloud output:')
+        log.debug(output)
 
         return output
 
@@ -440,19 +455,17 @@ class Models(object):
         query_builder.add_term(
             self.dc_query.split(':')[0], self.dc_query.split(':')[1])
 
-        terms = ['vendor', 'department']  # , 'officer']
+        terms = ['vendor', 'department', 'officer']
 
         for term in terms:
             query_value = data[term]
             if query_value != "":
                 query_builder.add_term(term, query_value)
 
-        # officers = self.query_request('officer')
-
-        # if len(officers) > 0:
-        #     officers = [officers]
-        #     vendor = self.translate_to_vendor(officers[0])
-        #     query_builder.add_term("vendor", vendor)
+        if len(data['officer']) > 0:
+            officers = [data['officer']]
+            vendor = self.translate_to_vendor(officers[0])
+            query_builder.add_term("vendor", vendor)
 
         output = query_builder.get_query()
 

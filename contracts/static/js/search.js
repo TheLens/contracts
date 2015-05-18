@@ -194,6 +194,87 @@ $(document).ready(function() {
   setHandlers();
 });
 
+// /*
+//  * Start autocomplete
+//  */
+// $.widget( "custom.catcomplete", $.ui.autocomplete, {
+//   _create: function() {
+//     this._super();
+//     this.widget().menu( "option", "items", "> :not(.ui-autocomplete-category)" );
+//   },
+//   _renderMenu: function( ul, items ) {
+//     var that = this,
+//       currentCategory = "";
+//     $.each( items, function( index, item ) {
+//       var li;
+//       if ( item.category != currentCategory ) {
+//         ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
+//         currentCategory = item.category;
+//       }
+//       li = that._renderItemData( ul, item );
+//       if ( item.category ) {
+//         li.attr( "aria-label", item.category + " : " + item.label );
+//       }
+//     });
+//   },
+// });
+
+// /*
+//  * jQuery Autocomplete
+//  */
+// $('#text-box').catcomplete({//autocomplete({
+//   source: function (request, response) {
+//     $.ajax({
+//       type: 'POST',
+//       url: js_app_routing + "/input" + "?q=" + request.term,
+//       contentType: "application/json; charset=utf-8",
+//       success: function (info) {
+//         // console.log('success!');
+//         response(info.response);
+//       }
+//     });
+//   },
+//   select: function(event, ui) {
+//     dropdownFocus = 1;
+//     var thisCategory = ui.item.category;
+//     var thisValue = ui.item.value;
+
+//     // if (thisCategory === 'Neighborhoods') {
+//     //   document.getElementById('text-box').value = thisValue;
+//     //   document.activeElement.blur();
+//     //   doSearch('neighborhood');
+//     //   return false;
+//     // } else if (thisCategory === 'ZIP codes') {
+//     //   document.getElementById('text-box').value = thisValue;
+//     //   document.activeElement.blur();
+//     //   doSearch('zip_code');
+//     //   return false;
+//     // } else {
+//     document.getElementById('text-box').value = thisValue;
+//     document.activeElement.blur();
+//     doSearch();
+//     // }
+//   },
+//   minLength: 1,
+//   delay: 0,
+//   search: function() {
+//     $('#text-box').catcomplete("close");
+//     //Don't try blur here. It caused problems with down arrow. leave commented
+//   },
+//   open: function(event, ui) {
+//     var input_width = $('#input-div').width();//todo: 
+//     $('.ui-menu').width(input_width);
+//   }
+// }).keyup(function (event) {
+//   if (event.which === 13) {
+//     $('#text-box').catcomplete("close");
+//     document.activeElement.blur();
+//   }
+// });
+// /*
+//  * End autocomplete
+//  */
+
 // function checkForChanges() {
 //   if ($('.t402-elided').length > 0) {
 //     setTimeout(checkForChanges, 1000);

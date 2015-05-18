@@ -92,6 +92,26 @@ def download(docid):
     return data
 
 
+# @cache.memoize(timeout=5000)
+@app.route("/contracts/input", methods=['POST'])
+def searchbar_input():
+    '''
+    Receives a ___ call from the autocomplete dropdown and returns a dict
+    of suggestions.
+
+    :param query: The search bar input.
+    :type query: string
+    :returns: A dict of matching suggestions.
+    '''
+
+    term = request.args.get('q')
+
+    log.debug('term: %s', term)
+
+    data = Models().searchbar_input(term)
+
+    return data
+
 if __name__ == '__main__':
     app.run(
         use_reloader=RELOADER,
