@@ -12,7 +12,7 @@ function previous() {
   var new_current_page = parseInt($("#pagination").attr("data-current-page"), 10) - 1;
   document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
 
-  getSearch();
+  getSearch(1); // keep_current_page == 1 tells getSearch reset to page 1
 }
 
 function next() {
@@ -29,7 +29,7 @@ function next() {
   var new_current_page = parseInt($("#pagination").attr("data-current-page"), 10) + 1;
   document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
   
-  getSearch();
+  getSearch(1); // keep_current_page == 1 tells getSearch reset to page 1
 }
 
 function checkPagerButtons() {//current_page, number_of_pages) {
@@ -64,6 +64,16 @@ function checkPagerButtons() {//current_page, number_of_pages) {
   }
 }
 
+function checkNumberOfResults() {
+  var number_of_results = $('#pagination').attr('data-number-of-documents');
+
+  if (number_of_results === '0') {
+    // document.getElementById('results-status').innerHTML = 'No results found for your search.';  // TODO: replace with full-blown language from app
+    document.getElementById('pagination').style.display = 'none';
+  }
+}
+
 $(document).ready(function() {
   checkPagerButtons();
+  checkNumberOfResults();
 });

@@ -56,12 +56,12 @@ class Views(object):
         vendors = data['vendors']
         departments = data['departments']
         number_of_documents = data['number_of_documents']
-        status = data['status']
         number_of_pages = data['number_of_pages']
         current_page = data['current_page']
         documents = data['documents']
         officers = data['officers']
         updated_date = data['updated_date']
+        results_language = data['results_language']
 
         response = make_response(
             render_template(
@@ -70,7 +70,7 @@ class Views(object):
                 vendors=vendors,
                 departments=departments,
                 number_of_documents=number_of_documents,
-                status=status,
+                results_language=results_language,
                 number_of_pages=number_of_pages,
                 current_page=current_page,
                 documents=documents,

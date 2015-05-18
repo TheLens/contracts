@@ -8,6 +8,7 @@ from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
+from contracts.lib.results_language import ResultsLanguage
 from contracts.db import (
     Vendor,
     Department,
@@ -100,10 +101,6 @@ class Models(object):
         number_of_pages = number_of_pages + 1
         log.debug('number_of_pages: %d', number_of_pages)
 
-        # Create results language to tell user what they searched for:
-        status = self.get_status(
-            data['current_page'], number_of_pages, search_term)
-
         updated_date = time.strftime("%b %-d, %Y")
 
         vendors = self.get_vendors()
@@ -112,17 +109,20 @@ class Models(object):
 
         output_data = {}
 
+        output_data['search_input'] = data['search_input']
         output_data['vendors'] = vendors
         output_data['departments'] = departments
         output_data['officers'] = officers
         output_data['number_of_documents'] = number_of_documents
-        output_data['status'] = status
+        output_data['results_language'] = ResultsLanguage(
+            data, number_of_documents).main()
         output_data['number_of_pages'] = number_of_pages
         output_data['current_page'] = data['current_page']
         output_data['documents'] = documents
         output_data['updated_date'] = updated_date
 
         log.debug('end of get_search_page')
+        log.debug(output_data)
         # log.debug('current_page: %d', output_data['current_page'])
 
         return output_data, incoming_data
@@ -424,20 +424,6 @@ class Models(object):
             log.debug('else')
             # Get count for DocumentCloud output:
             return self.query_document_cloud_count(search_term)
-
-    def get_status(self, page, total, search_term):
-        """
-        Tells the user what search has returned.
-        """
-
-        output = str(total) + " results | Query: " + search_term.replace(
-            self.dc_query, "") + " | "
-
-        if search_term == self.dc_query:
-            return output + "All city contracts: page " + \
-                str(page) + " of " + str(total)
-        else:
-            return output + "Page " + str(page) + " of " + str(total)
 
     def translate_web_query_to_dc_query(self, data):
         """
