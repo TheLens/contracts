@@ -1,0 +1,6 @@
+include logs/contracts.log
+include requirements.txt
+include README.md
+include scripts/main.sh
+include scripts/sync_with_document_cloud.py
+include scripts/updatebackup.py
