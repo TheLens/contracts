@@ -38,7 +38,11 @@ class Models(object):
         self.document_cloud_client = DocumentCloud()
 
     def get_home(self):
-        '''docstring'''
+        '''
+        Gather data necessary for the homepage (/contracts/).
+
+        :returns: dict. A dict with data for dropdowns and dates.
+        '''
 
         log.debug('get_home')
 
@@ -66,7 +70,14 @@ class Models(object):
         return data
 
     def get_search_page(self, request):
-        '''docstring'''
+        '''
+        Gets the data necessary for the search page (/contracts/search/).
+
+        :param request: The search parameters supplied by the user.
+        :type request: dict
+        :returns: dict. Two dicts: one for newly gather data, and the other \
+        an altered version of the incoming search parameters.
+        '''
 
         log.debug('start get_search_page')
 
@@ -137,11 +148,18 @@ class Models(object):
         log.debug(output_data)
         # log.debug('current_page: %d', output_data['current_page'])
 
-        return output_data, incoming_data
+        return output_data, incoming_data  # TODO: consolidate this
 
     @staticmethod
     def get_contracts_page(doc_cloud_id):
-        '''docstring'''
+        '''
+        Get data necessary for the single contract page. This only gets the
+        updated date, so it is mostly a placeholder for now.
+
+        :param doc_cloud_id: The single contract's uniquey DocumentCloud ID.
+        :type doc_cloud_id: string
+        :returns: dict. A dict with the updated date.
+        '''
 
         data = {}
 
@@ -152,12 +170,19 @@ class Models(object):
 
         return data
 
-    def get_download(self, docid):
-        '''docstring'''
+    def get_download(self, doc_cloud_id):
+        '''
+        ???
 
-        docs = self.query_document_cloud("document:" + '"' + docid + '"')
+        :param doc_cloud_id: The unique ID for this contract in DocumentCloud.
+        :type doc_cloud_id: string
+        :returns: PDF. The PDF file for this contract (?).
+        '''
+
+        docs = self.query_document_cloud(
+            "document:" + '"' + doc_cloud_id + '"')
         response = make_response(docs.pop().pdf)
-        disposition_header = "attachment; filename=" + docid + ".pdf"
+        disposition_header = "attachment; filename=" + doc_cloud_id + ".pdf"
         response.headers["Content-Disposition"] = disposition_header
 
         return response
@@ -168,7 +193,8 @@ class Models(object):
         Receives URL query string parameters and returns as dict.
 
         :param request: A (Flask object?) containing query string.
-        :returns: A dict with the query string parameters.
+        :type request: dict?
+        :returns: dict. The query string parameters entered by the user.
         '''
 
         log.debug('parse_query_string')
@@ -197,8 +223,16 @@ class Models(object):
     # @cache.memoize(timeout=900)
     def query_document_cloud(self, search_term, page=1):
         """
+        Queries the DocumentCloud API.
         This is it's own method so that queries can be cached via @memoize to
         speed things up.
+
+        :param search_term: The query term to run against DocumentCloud API.
+        :type search_term: string
+        :param page: The page to receive in return. Useful for pagination. \
+        Default: 1.
+        :type page: string
+        :returns: dict. (?) The output that matches the query.
         """
 
         log.debug('search_term: "%s"', search_term)
@@ -218,7 +252,12 @@ class Models(object):
     # @cache.memoize(timeout=900)
     def query_document_cloud_count(self, search_term):
         """
-        Finds the number of documents in DocumentCloud matching this query.
+        Finds the number of documents in DocumentCloud project that
+        match this query.
+
+        :param search_term: The search term for DocumentCloud API query.
+        :type search_term: string
+        :returns: int. The number of records that match this query.
         """
 
         log.debug(
@@ -236,8 +275,12 @@ class Models(object):
         """
         In the database each row for contracts has an ID which is different
         from the doc_cloud_id on DocumentCloud. This just translates rows so
-        that their id is equal to the doc_cloud_id. It's a bit awkward and
+        that their ID is equal to the doc_cloud_id. It's a bit awkward and
         should probably be refactored away at some point.
+
+        :param documents: A list of documents (from where?).
+        :type documents: list
+        :returns: list. A list of documents, with corrected IDs (how?).
         """
 
         log.debug('translate_to_doc_cloud_form')
@@ -250,7 +293,14 @@ class Models(object):
     # @cache.memoize(timeout=900)
     def get_contracts(self, offset=0, limit=None):
         """
-        Simply query the newest contracts.
+        Query the database in reverse chronological order. Specify the number
+        of recent contracts with offset and limit values.
+
+        :param offset: The number of pages to offset database query.
+        :type offset: int
+        :param limit: The number of records to return.
+        :type limit: int
+        :returns: list. (?) The contracts that matched the query.
         """
 
         log.debug('get_contracts')
@@ -280,7 +330,9 @@ class Models(object):
     # @cache.memoize(timeout=100000)
     def get_contracts_count(self):
         """
-        Query the count of all contracts.
+        Query the count of all contracts in database.
+
+        :returns: int. The total number of contracts in the database.
         """
 
         log.debug('Start get_contracts_count')
@@ -302,6 +354,8 @@ class Models(object):
     def get_vendors(self):
         """
         Query all vendors in the database linked to a contract.
+
+        :returns: list. (?) The vendors that are linked to a contract.
         """
 
         sn = sessionmaker(bind=self.engine)
@@ -325,6 +379,8 @@ class Models(object):
     def get_departments(self):
         """
         Query all departments in the database.
+
+        :returns: list. All departments in our database.
         """
 
         sn = sessionmaker(bind=self.engine)
@@ -352,10 +408,16 @@ class Models(object):
     def get_officers(self, vendor=None):
         """
         Get officers for a given vendor.
+
+        :param vendor: The vendor to check on.
+        :type vendor: string
+        :returns: list. A list of officers listed under the vendor company in \
+        the Secretary of State's database.
         """
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
+
         if vendor is None:
             officers = session.query(
                 VendorOfficer,
@@ -394,16 +456,20 @@ class Models(object):
             return sorted(officers)
 
     # @cache.memoize(timeout=100000)
-    def translate_to_vendor(self, officerterm):
+    def translate_to_vendor(self, officer_term):
         """
         Translates a request for an officer to a request for a vendor
         associated with a given officer.
+
+        :param officer_term: The name of the officer.
+        :type officer_term: string
+        :returns: ???
         """
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
 
-        officerterm = officerterm.replace(
+        officer_term = officer_term.replace(
             '"', "").replace("officers:", "").strip()
 
         results = session.query(
@@ -411,7 +477,7 @@ class Models(object):
             VendorOfficer,
             Vendor
         ).filter(
-            Person.name == officerterm
+            Person.name == officer_term
         ).filter(
             Person.id == VendorOfficer.personid
         ).filter(
@@ -419,14 +485,19 @@ class Models(object):
         ).all()  # todo fix to get .first() working
 
         output = results.pop()[2].name
-        log.info("translating %s to %s", officerterm, output)
+        log.info("translating %s to %s", officer_term, output)
 
         return output
 
     # @cache.memoize(timeout=100000)
     def find_number_of_documents(self, search_term):
         """
-        Get the total number of relevant docs for a given search.
+        Redirect to the proper function for finding the total number of
+        relevant documents for a given search.
+
+        :param search_term: The query's search term.
+        :type search_term: string
+        :returns: int. The number of matching documents.
         """
 
         log.debug('find_number_of_documents')
@@ -443,9 +514,14 @@ class Models(object):
     def translate_web_query_to_dc_query(self, data):
         """
         Translates search input parameters into a request string for the
-        DocumentCloud API.
+        DocumentCloud API, which utilizes the Apache Lucene syntax.
+
         Use 'projectid:1542-city-of-new-orleans-contracts' to restrict search
         to our project.
+
+        :param data: The query parameters.
+        :type data: dict
+        :returns: string. The query string ready for the DocumentCloud API.
         """
 
         log.debug('translate_web_query_to_dc_query')

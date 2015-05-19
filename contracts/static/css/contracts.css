@@ -66,7 +66,7 @@ input[type="input"]:active {
 .advanced-search {
   cursor: pointer;
   color: #B33125;
-  font-size: 0.8em;
+  font-size: 0.9em;
   padding-top: 4px;
   margin: 0 0 20px 0;
 }

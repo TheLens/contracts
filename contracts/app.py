@@ -1,5 +1,5 @@
 """
-The web app that runs at vault.thelensnola.org/contracts
+The web app that runs at vault.thelensnola.org/contracts.
 """
 
 import os
@@ -20,7 +20,9 @@ app = Flask(__name__)  # , template_folder=templates)
 @app.route('/contracts/', methods=['GET'])
 def intro():
     """
-    Intro page for the web app
+    Intro page for the web app.
+
+    :returns: HTML. The homepage (/contracts/).
     """
 
     log.debug('/')
@@ -40,30 +42,33 @@ def intro():
 @app.route('/contracts/search/', methods=['GET'])
 def query_docs():
     """
-    The main contract search.
+    The main contract search page. Search parameters are specified in URL query
+    string.
+
+    :returns: HTML. The search page (/contracts/search/).
     """
 
     log.debug('/search/')
 
-    if request.method == 'GET':
-        log.debug('/search/ GET')
+    data, parameter_data = Models().get_search_page(request)
 
-        data, parameter_data = Models().get_search_page(request)
+    log.debug('/search/ data:')
+    # log.debug(data)
 
-        log.debug('/search/ data:')
-        # log.debug(data)
+    view = Views().get_search_page(data, parameter_data)
 
-        view = Views().get_search_page(data, parameter_data)
+    log.debug('/search/ view:')
 
-        log.debug('/search/ view:')
-
-        return view
+    return view
 
 
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
 def contract(doc_cloud_id):
     """
-    Request for a given contract.
+    The single contract page. The contract ID is specified in the URL.
+
+    :returns: HTML. The single contract page \
+    (/contracts/contract/<doc_cloud_id>).
     """
 
     log.debug('/contract/')
@@ -78,7 +83,9 @@ def contract(doc_cloud_id):
 @app.route('/contracts/download/<string:docid>', methods=['GET', 'POST'])
 def download(docid):
     """
-    Download a requested contract
+    Download a requested contract. This is triggered during 'download' clicks.
+
+    :returns: PDF. The contract's PDF file.
     """
 
     log.debug('/download')
@@ -96,11 +103,11 @@ def download(docid):
 @app.route("/contracts/input", methods=['POST'])
 def searchbar_input():
     '''
-    Receives a ___ call from the autocomplete dropdown and returns a dict
-    of suggestions.
+    Receives a POST call from the autocomplete dropdown and returns a dict
+    of suggestions. Query is stored in q={} part of URL.
 
-    :param query: The search bar input.
-    :type query: string
+    :param q: The search bar input.
+    :type q: string
     :returns: A dict of matching suggestions.
     '''
 

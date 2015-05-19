@@ -25,9 +25,9 @@ from contracts.db import (
 )
 from contracts import (
     log,
+    PROJECT_DIR,
     VENDORS_LOCATION,
     CORPUS_LOC,
-    ROOT_FOLDER,
     DOC_CLOUD_USERNAME,
     DOC_CLOUD_PASSWORD,
     PURCHASE_ORDER_LOCATION,
@@ -45,24 +45,23 @@ class PurchaseOrder(object):
     A PO number is used to track a contract in the city's purchasing system.
     """
 
-    def __init__(self, tt, download_attachments=True):
+    def __init__(self, purchase_order_no, download_attachments=True):
         '''
-        A purchase order number
+        A purchase order number.
         '''
 
         # this is a uuid that is unique to a given run of the program.
         # Grep for it in the log file to see a certain run
         self.run_id = " " + str(uuid.uuid1())
 
-        purchaseorderno = tt
-        if not valid_purchase_order(purchaseorderno):
+        if not valid_purchase_order(purchase_order_no):
             # log.info(
             #     '{} | {} | Skipping. Not a valid purchaseorder | {}'.format(
             #         run_id, get_timestamp(), purchaseorderno
             #     )
             # )
             return
-        html = self.get_html(purchaseorderno)
+        html = self.get_html(purchase_order_no)
         self.soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
         self.download_vendor_profile(self.vendor_id_city)
@@ -88,14 +87,15 @@ class PurchaseOrder(object):
         self.data = self.get_data()
         self.title = self.vendor_name + " : " + self.description
 
-    def get_vendor_id_city(self):
-        '''docstring'''
-
-        return self.vendor_id_city
-
-    def check_invalid(self, html):
+    @staticmethod
+    def check_invalid(html):
         """
-        Sometimes invalid POs are posted.
+        Sometimes invalid purchase orders are posted. Check if this is one of
+        those.
+
+        :param html: The (contract page's) HTML.
+        :type html: string
+        :returns: boolean. True if an invalid contract page, False if valid.
         """
 
         no_vendor_string = "There are no vendor distributors found " + \
@@ -108,7 +108,9 @@ class PurchaseOrder(object):
 
     def get_data(self):
         """
-        Return metadata as a dictionary (for DocumentCloud).
+        Return metadata (from DocumentCloud).
+
+        :returns: dict. The metadata for this contract page's HTML.
         """
 
         output = {}
@@ -117,17 +119,22 @@ class PurchaseOrder(object):
         output['contract number'] = self.k_number
         output['department'] = self.department
         output['vendor'] = self.vendor_name
+
         return output
 
-    def download_attachment(self, attachment):
+    @staticmethod
+    def download_attachment(attachment):
         """
-        Download an attachemnt associated with a purchase order.
+        Download an attachment associated with a purchase order.
+
+        :param attachment: ???
+        :type attachment: ???
         """
 
         bidnumber = re.search('[0-9]+', attachment.get('href')).group()
-        bidfilelocation = BIDS_LOCATION + bidnumber + ".pdf"
-        if not os.path.isfile(bidfilelocation):
-            download_attachment_file(bidnumber, bidfilelocation)
+        bid_file_location = BIDS_LOCATION + bidnumber + ".pdf"
+        if not os.path.isfile(bid_file_location):
+            download_attachment_file(bidnumber, bid_file_location)
             # log.info(
             #     '{} | {} | Downloaded bid {} associated with purchase ' +
             #     'order {} | {}'.format(
@@ -145,25 +152,35 @@ class PurchaseOrder(object):
             #     )
             # )
 
-    def get_html(self, purchaseorderno):
+    def get_html(self, purchase_order_no):
         """
-        Check to see if the purchase order should be downloaded; download it.
+        Check to see if the purchase order should be downloaded.
+        If so, then download it.
+
+        :param purchase_order_no: The contract's unique ID on DocumentCloud.
+        :type purchase_order_no: string
+        :returns: ???
         """
 
-        if os.path.isfile(PURCHASE_ORDER_LOCATION + purchaseorderno):
+        if os.path.isfile(PURCHASE_ORDER_LOCATION + purchase_order_no):
             # log.info(
             #     '{} | {} | Already have purchase order | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno
+            #         run_id, get_timestamp(), purchase_order_no
             #     )
             # )
             return "".join([i.replace("\n", "") for i in open(
-                PURCHASE_ORDER_LOCATION + purchaseorderno)])
+                PURCHASE_ORDER_LOCATION + purchase_order_no)])
         else:
-            self.download_purchaseorder(purchaseorderno)
+            self.download_purchaseorder(purchase_order_no)
 
-    def download_purchaseorder(self, purchaseorderno):
+    @staticmethod
+    def download_purchaseorder(purchaseorderno):
         """
         Download the HTML associated with a purchase order.
+
+        :param purchaseorderno: The contract's unique ID on DocumentCloud.
+        :type purchaseorderno: string
+        :returns: ???
         """
 
         if not valid_purchase_order(purchaseorderno):
@@ -189,10 +206,14 @@ class PurchaseOrder(object):
                 #     )
                 # )
 
-    def download_vendor_profile(self, vendor_id_city):
+    @staticmethod
+    def download_vendor_profile(vendor_id_city):
         """
         Download the vendor page associated with a purchase order, if we don't
         have the vendor page already.
+
+        :param vendor_id_city: ???.
+        :type vendor_id_city: ???
         """
 
         vendor_file_location = VENDORS_LOCATION + vendor_id_city
@@ -225,9 +246,14 @@ class PurchaseOrder(object):
             #     )
             # )
 
-    def get_attachments(self, soup):
+    @staticmethod
+    def get_attachments(soup):
         """
         Find the attachments to download from the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page's HTML.
+        :type soup: BeautifulSoup object
+        :returns: ???
         """
 
         try:
@@ -251,12 +277,17 @@ class PurchaseOrder(object):
             return []  # sometimes the city does not include them
         return todownload
 
-    def get_vendor_id(self, html):
+    @staticmethod
+    def get_vendor_id(html):
         '''
         Find the vendor id in the HTML.
+
+        :param html: The contract page HTML
+        :type html: string
+        :returns: string. The vendor ID, or an empty string if none found.
         '''
 
-        pattern = "(?<=ExternalVendorProfile\(')\d+"
+        pattern = r"(?<=ExternalVendorProfile\(')\d+"
         vendorids = re.findall(pattern, html)
         if len(vendorids) == 0:
             return ""
@@ -269,9 +300,14 @@ class PurchaseOrder(object):
             # sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
             return vendorids[0]
 
-    def get_description(self, soup):
+    @staticmethod
+    def get_description(soup):
         '''
         Find the description in the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page HTML.
+        :type soup: BeautifulSoup object.
+        :returns: string. The (contract) description.
         '''
 
         try:
@@ -287,6 +323,10 @@ class PurchaseOrder(object):
     def get_vendor_name(self, soup):
         '''
         Find the vendor name in the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page HTML.
+        :type soup: BeautifulSoup object.
+        :returns: string. The contract vendor's name.
         '''
 
         try:
@@ -307,9 +347,14 @@ class PurchaseOrder(object):
             vendor_name = str(header).replace("Vendor Profile - ", "")
             return vendor_name
 
-    def get_knumber(self, soup):
+    @staticmethod
+    def get_knumber(soup):
         '''
         Find the k number in the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page HTML.
+        :type soup: BeautifulSoup object.
+        :returns: string. The contract's K number.
         '''
 
         main_table = soup.select('.table-01').pop()
@@ -332,24 +377,45 @@ class PurchaseOrder(object):
             ).replace("m", '').strip().replace("M", "")
         except:
             knumber = "unknown"
+
         if len(knumber) == 0:
             knumber = "unknown"
+
         return knumber
 
-    def get_purchase_order(self, soup):
+    @staticmethod
+    def get_purchase_order(soup):
         '''
         Find the purchase order in the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page HTML.
+        :type soup: BeautifulSoup object.
+        :returns: string. The contract's purchase order number.
         '''
 
         main_table = soup.select('.table-01').pop()
-        po = main_table.findChildren(['tr'])[2].findChildren(
-            ['td'])[0].findChildren(['table'])[0].findChildren(
-            ['tr'])[1].findChildren(['td'])[1].contents.pop().strip()
-        return po
+        purchase_order = main_table.findChildren(
+            ['tr']
+        )[2].findChildren(
+            ['td']
+        )[0].findChildren(
+            ['table']
+        )[0].findChildren(
+            ['tr']
+        )[1].findChildren(
+            ['td']
+        )[1].contents.pop().strip()
 
-    def get_department(self, soup):
+        return purchase_order
+
+    @staticmethod
+    def get_department(soup):
         '''
         Find the department in the HTML.
+
+        :param soup: A BeautifulSoup object for the contract page HTML.
+        :type soup: BeautifulSoup object.
+        :returns: string. The contract's department.
         '''
 
         main_table = soup.select('.table-01').pop()
@@ -357,6 +423,7 @@ class PurchaseOrder(object):
             ['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
         department = metadatarow[5].findChildren(
             ['td'])[1].contents.pop().strip()
+
         return department
 
     def __str__(self):
@@ -379,74 +446,97 @@ class LensRepository(object):
         self.skiplist = self.get_skip_list()
         self.purchaseorders_location = CORPUS_LOC + "/purchaseorders/"
 
-    def download_purchaseorder(self, purchaseorderno):
-        '''docstring'''
+    def download_purchaseorder(self, purchase_order_no):
+        '''
+        Download (the contract matching this purchase order number?).
 
-        if purchaseorderno in self.skiplist:
+        :param purchase_order_no: The contract's unique ID for DocumentCloud.
+        :type purchase_order_no: string.
+        :returns: ???
+        '''
+
+        if purchase_order_no in self.skiplist:
             # log.warning(
             #     '{} | {} | Contract is in the skiplist | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno)
+            #         run_id, get_timestamp(), purchase_order_no)
             # )
             return
-        if not valid_purchase_order(purchaseorderno):
+        if not valid_purchase_order(purchase_order_no):
             # log.warning(
             #     '{} | {} | Invalid purchase order | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno)
+            #         run_id, get_timestamp(), purchase_order_no)
             # )
             return
-        file_loc = self.purchaseorders_location + purchaseorderno
+        file_loc = self.purchaseorders_location + purchase_order_no
         if not os.path.isfile(file_loc):
             response = urllib2.urlopen(
                 'http://www.purchasing.cityofno.com/bso/external/' +
-                'purchaseorder/poSummary.sdo?docId=' + purchaseorderno +
+                'purchaseorder/poSummary.sdo?docId=' + purchase_order_no +
                 '&releaseNbr=0&parentUrl=contract')
             html = response.read()
             self.write_pos(html, file_loc)
 
-    def write_pos(self, html, file_loc):
-        '''docstring'''
+    @staticmethod
+    def write_pos(html, file_location):
+        '''
+        docstring
 
-        with open(file_loc, 'w') as f:
+        :param html: The contract's unique ID for DocumentCloud.
+        :type html: string.
+        :param file_location: The contract's unique ID for DocumentCloud.
+        :type file_location: string.
+        :returns: ???
+        '''
+
+        with open(file_location, 'w') as f:
             # log.warning(
-            #     '{} | {} | Writing purchaseorderno to file | {}'.format(
-            #         run_id, get_timestamp(), file_loc)
+            #     '{} | {} | Writing purchase_order_no to file | {}'.format(
+            #         run_id, get_timestamp(), file_location)
             # )
             f.write(html)  # python will convert \n to os.linesep
 
-    def sync(self, purchaseorderno):
-        '''docstring'''
+    def sync(self, purchase_order_no):
+        '''
+        docstring
 
-        if purchaseorderno in self.skiplist:
+        :param purchase_order_no: The contract's unique ID for DocumentCloud.
+        :type purchase_order_no: string.
+        :returns: ???
+        '''
+
+        if purchase_order_no in self.skiplist:
             # log.warning(
             #     '{} | {} | Contract is in the skiplist | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno
+            #         run_id, get_timestamp(), purchase_order_no
             #     )
             # )
             return
-        file_loc = self.purchaseorders_location + purchaseorderno
+        file_loc = self.purchaseorders_location + purchase_order_no
         if not os.path.isfile(file_loc):
-            self.download_purchaseorder(purchaseorderno)
+            self.download_purchaseorder(purchase_order_no)
         else:
             pass
             # log.warning(
             #     '{} | {} | The Lens repo already has this ' +
-            #     'purchaseorderno | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno)
+            #     'purchase_order_no | {}'.format(
+            #         run_id, get_timestamp(), purchase_order_no)
             # )
 
-    def get_skip_list(self):
+    @staticmethod
+    def get_skip_list():
         """
         Some contracts are not posted on the city's site even though they are
         included in the city's contract inventory. We put these contracts on a
         skip list so they are ignored in code.
+
+        :returns: list. Includes the contract codes to skip.
         """
 
         # TODO: skip list should not be hard coded
-        skiplist_loc = (
-            ROOT_FOLDER +
-            "/contracts/datamanagement/scrapers/skiplist.txt")
+        skiplist_loc = PROJECT_DIR + '/data/skiplist.txt'
         skiplist = open(skiplist_loc)
         skiplist = [l.replace("\n", "") for l in skiplist]
+
         return skiplist
 
 
@@ -466,75 +556,103 @@ class DocumentCloudProject(object):
     # searchterm = '\'purchase order\':' + "'" + po + "'"
     # searchterm = '\'contract number\':' + "'" + k_no + "'"
     def get_contract(self, field, value):
-        '''docstring'''
+        '''
+        Fetches the contract with the specified field and value.
 
-        searchterm = '\'' + field + '\':' + "'" + value + "'"
+        :param field: The key for searching through the DocumentCloud API.
+        :type field: string.
+        :param value: The key's value.
+        :type value: string.
+        :returns: ???. The matching contract(s).
+        '''
+
+        searchterm = "'" + field + "':" + "'" + value + "'"
         doc = self.client.documents.search(searchterm).pop()
+
         return doc
 
     def has_contract(self, field, value):
-        '''docstring'''
+        '''
+        Checks if there is a contract for this field and value.
 
-        searchterm = '\'' + field + '\':' + "'" + value + "'"
+        :param field: The key for searching through the DocumentCloud API.
+        :type field: string.
+        :param value: The key's value.
+        :type value: string.
+        :returns: boolean. True if there is a contract found, False if not.
+        '''
+
+        searchterm = "'" + field + "':" + "'" + value + "'"
+
         if len(self.client.documents.search(searchterm)) < 1:
             return False  # it is a new contract
+
         return True  # it is an existing contract. We know the k-number
 
-    def add_contract(self, ponumber):
-        '''docstring'''
+    def add_contract(self, purchase_order_no):
+        '''
+        docstring
 
-        po_re = '[A-Z]{2}\d+'
-        po_regex = re.compile(po_re)
+        :param purchase_order_no: The contract's unique ID in DocumentCloud.
+        :type purchase_order_no: string.
+        :returns: ???
+        '''
+
+        purchase_order_regex = re.compile(r'[A-Z]{2}\d+')
         # log.info(
         #     '{} | {} | Attempting to add {} to DocumentCloud | {}'.format(
-        #         run_id, get_timestamp(), ponumber, ponumber
+        #         run_id, get_timestamp(), purchase_order_no, purchase_order_no
         #     )
         # )
-        if not po_regex.match(ponumber):
+        if not purchase_order_regex.match(purchase_order_no):
             # log.info(
             #     "{} doesn't look like a valid purchase order. " +
-            #     "Skipping for now".format(ponumber)
+            #     "Skipping for now".format(purchase_order_no)
             # )
             return
-        if ponumber in self.skiplist:
+        if purchase_order_no in self.skiplist:
             # log.info(
             #     '{} | {} | Not adding {} to DocumentCloud. In skiplist ' +
             #     '| {}'.format(
-            #         run_id, get_timestamp(), ponumber, ponumber
+            #         run_id, get_timestamp(), purchase_order_no,
+            #         purchase_order_no
             #     )
             # )
             return
-        if not self.has_contract("purchase order", ponumber):
+        if not self.has_contract("purchase order", purchase_order_no):
             try:
-                po = PurchaseOrder(ponumber)
+                purchase_order = PurchaseOrder(purchase_order_no)
             except IndexError:
                 # log.info(
                 #     '{} | {} | Something looks wrong with the format on ' +
                 #     'this one. Skipping for now | {}'.format(
-                #         run_id, get_timestamp(), ponumber, ponumber
+                #         run_id, get_timestamp(),
+                #         purchase_order_no, purchase_order_no
                 #     )
                 # )
                 return
             # log.info(
             #     '{} | {} | Adding {} to DocumentCloud | {}'.format(
-            #         run_id, get_timestamp(), ponumber, ponumber
+            #         run_id, get_timestamp(),
+            #         purchase_order_no, purchase_order_no
             #     )
             # )
-            if len(po.attachments) > 0:
+            if len(purchase_order.attachments) > 0:
                 counter = 1
-                for a in po.attachments:
-                    bidnumber = re.search('[0-9]+', a.get('href')).group()
-                    bidfilelocation = BIDS_LOCATION + \
+                for attachment in purchase_order.attachments:
+                    bidnumber = re.search(
+                        '[0-9]+', attachment.get('href')).group()
+                    bid_file_location = BIDS_LOCATION + \
                         bidnumber + ".pdf"
                     extra_string = ""
                     if counter > 1:
                         extra_string = str(counter) + " of " + \
-                            str(len(po.attachments))
+                            str(len(purchase_order.attachments))
                     self.upload_contract(
-                        bidfilelocation,
-                        po.data,
-                        po.description + extra_string,
-                        po.title + extra_string
+                        bid_file_location,
+                        purchase_order.data,
+                        purchase_order.description + extra_string,
+                        purchase_order.title + extra_string
                     )
                     counter += 1
         else:
@@ -542,23 +660,37 @@ class DocumentCloudProject(object):
             # log.info(
             #     '{} | {} | Not adding {} to DocumentCloud. Already up ' +
             #     'there | {}'.format(
-            #         run_id, get_timestamp(), ponumber, ponumber
+            #         run_id, get_timestamp(),
+            #         purchase_order_no, purchase_order_no
             #     )
             # )
 
     def get_all_docs(self):
-        '''docstring'''
+        '''
+        Runs a query for all of the contracts in our DocumentCloud project.
+
+        :returns: list. A list of all of the project's contracts.
+        '''
 
         if self.docs is None:
             self.docs = self.client.documents.search(
                 'projectid: 1542-city-of-new-orleans-contracts')
-            return self.docs
-        else:
-            return self.docs
 
-    def upload_contract(self, file, data, description, title):
+        return self.docs
+
+    def upload_contract(self, fname, data, description, title):
         '''
         This uploads a contract onto DcoumentCloud.
+
+        :param file: The contract PDF file?
+        :type file: PDF
+        :param data: The contract's (metadata).
+        :type data: dict. ???
+        :param description: The contract's description.
+        :type description: string.
+        :param title: The contract's title.
+        :type title: string.
+        :returns: ???
         '''
 
         if len(data['contract number']) < 1:
@@ -573,7 +705,7 @@ class DocumentCloudProject(object):
             # )
             return  # do not upload. There is a problem
         newcontract = self.client.documents.upload(
-            file,
+            fname,
             title.replace("/", ""),
             'City of New Orleans',
             description,
@@ -595,8 +727,36 @@ class DocumentCloudProject(object):
         with LensDatabase() as db:
             db.add_contract(c)
 
+    def get_metadata(self, doc_cloud_id, meta_field):
+        '''
+        Fetches the metadata associated with a contract on DocumentCloud.
+        Needs to get for departments and vendors, then uppercase them and
+        then update them in DC.
+
+        :param doc_cloud_id: The contract's unique ID in DocumentCloud.
+        :type doc_cloud_id: string
+        :param meta_field: The specific metadata field for this contract.
+        :type meta_field: string
+        :returns: ???
+        '''
+
+        contract = self.client.documents.get(doc_cloud_id)
+        # contract.data[meta_field] = new_meta_data_value
+        # contract.put()
+
+        return contract
+
     def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
-        '''docstring'''
+        '''
+        Updates the metadata associated with the contracts on DocumentCloud.
+
+        :param doc_cloud_id: The contract's unique ID in DocumentCloud.
+        :type doc_cloud_id: string
+        :param meta_field: The specific metadata field for this contract.
+        :type meta_field: string
+        :param new_meta_data_value: The new metadata value for this field.
+        :type new_meta_data_value: string
+        '''
 
         # log.info(
         #     '{} | {} | updating {} on DocumentCloud. ' +
@@ -611,16 +771,6 @@ class DocumentCloudProject(object):
         contract = self.client.documents.get(doc_cloud_id)
         contract.data[meta_field] = new_meta_data_value
         contract.put()
-
-    @staticmethod
-    def get_skip_list():
-        '''docstring'''
-
-        skiplist_loc = ROOT_FOLDER + \
-            "/contracts/datamanagement/scrapers/skiplist.txt"
-        skiplist = open(skiplist_loc)
-        skiplist = [l.replace("\n", "") for l in skiplist]
-        return skiplist
 
 
 class LensDatabase(object):
@@ -644,6 +794,8 @@ class LensDatabase(object):
     def get_officers(self):
         """
         Returns a list of all company officers in the database
+
+        :returns: ???
         """
 
         pass
@@ -652,7 +804,10 @@ class LensDatabase(object):
     # refactor to take a type
     def add_vendor(self, vendor):
         """
-        Add vendor to the Lens db.
+        Add vendor to the Lens database.
+
+        :param vendor: The vendor to add to our database.
+        :type vendor: string
         """
 
         indb = self.session.query(
@@ -667,7 +822,10 @@ class LensDatabase(object):
 
     def add_department(self, department):
         """
-        Add department to the Lens db.
+        Add department to the Lens database.
+
+        :param meta_field: The department to add to our database.
+        :type meta_field: string
         """
 
         indb = self.session.query(
@@ -675,6 +833,7 @@ class LensDatabase(object):
         ).filter(
             Department.name == department
         ).count()
+
         if indb == 0:
             department = Department(department)
             self.session.add(department)
@@ -682,7 +841,10 @@ class LensDatabase(object):
 
     def add_contract(self, contract):
         """
-        Add a contract to the Lens db.
+        Add a contract to the Lens database.
+
+        :param meta_field: The contract to add to our database.
+        :type meta_field: string
         """
 
         indb = self.session.query(
@@ -690,24 +852,38 @@ class LensDatabase(object):
         ).filter(
             Contract.doc_cloud_id == contract.doc_cloud_id
         ).count()
+
         if indb == 0:
             self.session.add(contract)
             self.session.flush()
             self.session.commit()
 
     def get_all_contract_ids(self):
-        '''docstring'''
+        '''
+        Fetches a list of all of the contract IDs in DocumentCloud project.
 
-        dcids = [i[0] for i in self.session.query(
+        :returns: list. A list of all IDs in DocumentCloud project.
+        '''
+
+        doc_id_query = self.session.query(
             Contract.doc_cloud_id
         ).order_by(
             desc(Contract.dateadded)
-        ).all()]
+        ).all()
+
+        dcids = [i[0] for i in doc_id_query]
+
         return dcids
 
     def update_contract_from_doc_cloud_doc(self, doc_cloud_id, fields):
         """
-        Add a contract to the Lens db.
+        Update an existing contract in the Lens database.
+        TODO: compare to add_contract()
+
+        :param doc_cloud_id: The unique ID in DocumentCloud.
+        :type doc_cloud_id: string
+        :param fields: The metadata fields to add along with the contract?
+        :type fields: dict
         """
 
         contract = self.session.query(
@@ -727,88 +903,124 @@ class LensDatabase(object):
         self.session.flush()
         self.session.commit()
 
-    def has_contract(self, purchaseorderno):
+    def has_contract(self, purchase_order_no):
         """
-        Add department to the Lens database.
+        Checks if the database (?) already has this contract.
+
+        :param purchase_order_no: The unique ID in the city's website.
+        :type purchase_order_no: string
+        :returns: boolean. True if the contract is present, False if not.
         """
 
         indb = self.session.query(
             Contract
         ).filter(
-            Contract.purchaseordernumber == purchaseorderno
+            Contract.purchaseordernumber == purchase_order_no
         ).count()
+
         if indb == 1:
             return True
         else:
             return False
 
-    def get_contract(self, purchaseorderno):
+    def get_contract(self, purchase_order_no):
         """
         Get a contract from the database.
+
+        :param purchase_order_no: The unique ID in the city's website.
+        :type purchase_order_no: string
+        :returns: dict. A dict (?) for the matching contract.
         """
 
-        return self.session.query(
+        query = self.session.query(
             Contract
         ).filter(
-            Contract.purchaseordernumber == purchaseorderno
+            Contract.purchaseordernumber == purchase_order_no
         ).first()
+
+        return query
 
     def get_contract_doc_cloud_id(self, doc_cloud_id):
         """
-        Get a contract from the database.
+        Get a contract from the DocumentCloud project.
+
+        :param doc_cloud_id: The unique ID in the DocumentCloud project.
+        :type doc_cloud_id: string
+        :returns: dict. A dict (?) for the matching contract.
         """
 
-        return self.session.query(
+        query = self.session.query(
             Contract
         ).filter(
             Contract.doc_cloud_id == doc_cloud_id
         ).first()
 
+        return query
+
     def get_lens_vendor_id(self, vendor):
         """
-        Get a vendor in the database.
+        Get a vendor's ID from our database.
         TODO: refactor
+
+        :param vendor: The vendor.
+        :type vendor: string
+        :returns: string. The ID for the vendor.
         """
 
         self.session.flush()
+
         vendor = self.session.query(
             Vendor
         ).filter(
             Vendor.name == vendor
         ).first()
+
         return vendor.id
 
     def get_department_id(self, department):
         """
-        Get a department in the database.
+        Get the department's ID from our database.
         TODO: refactor
+
+        :param department: The department.
+        :type department: string
+        :returns: string. The ID for the department.
         """
 
-        return self.session.query(
+        department_id = self.session.query(
             Department
         ).filter(
             Department.name == department
         ).first().id
 
+        return department_id
+
     def get_half_filled_contracts(self):
         """
-        DocCloud doesn't give immediate access to all document properties.
+        DocumentCloud doesn't give immediate access to all document properties.
         This pulls out the contracts in the database added during upload but
         that still need to have their details filled in.
+
+        :returns: SQLAlchemy query result.
         """
 
-        return self.session.query(
+        query = self.session.query(
             Contract
         ).filter(
             Contract.purchaseordernumber is None
         ).all()
 
+        return query
+
     def get_daily_contracts(self):  # defaults to today
         """
         Get today's contracts (and the vendors) for the daily email.
+
+        :returns: A list of dicts (?) for the daily contracts.
         """
 
         today_string = datetime.datetime.today().strftime('%Y-%m-%d')
+
         contracts = self.session.query(
             Contract.doc_cloud_id,
             Vendor.name
@@ -817,11 +1029,16 @@ class LensDatabase(object):
         ).filter(
             Contract.vendorid == Vendor.id
         ).all()
+
         return contracts
 
     def get_people_associated_with_vendor(self, name):
         """
-        Get people assiciated with vendor.
+        Get a list of people associated with the vendor.
+
+        :param name: The vendor name.
+        :type name: string
+        :returns: list. The people who are associated with this vendor.
         """
 
         recccs = self.session.query(
@@ -833,15 +1050,26 @@ class LensDatabase(object):
         ).filter(
             Vendor.name == name
         ).all()
+
         return [str(i[0]) for i in recccs]
 
     def get_state_contributions(self, name):
+        '''
+        Find the state contributions for this contributor.
+
+        :param name: The name.
+        :type name: string
+        :returns: list. The contributions associated with this name.
+        '''
+
         recccs = self.session.query(
             EthicsRecord
         ).filter(
             EthicsRecord.contributorname == name
         ).all()
+
         recccs.sort(key=lambda x: dateutil.parser.parse(x.receiptdate))
+
         return recccs
 
     def __exit__(self, type, value, traceback):
@@ -855,50 +1083,62 @@ class LensDatabase(object):
 def check_page(page_no):
     '''
     Run the scraper. Need a class here? Just function?
+
+    :param page_no: The page to check (?).
+    :type page_no: string
     '''
 
     html = get_contract_index_page(page_no)
     output = get_po_numbers_from_index_page(html)
     for purchaseorderno in output:
-        log.info('Daily scraper found po {}'.format(purchaseorderno))
+        log.info('Daily scraper found po %s', purchaseorderno)
         try:
             LensRepository().sync(purchaseorderno)
             DocumentCloudProject().add_contract(purchaseorderno)
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
-                'Contract not posted publically. Purchase order={}'.format(
-                    purchaseorderno
-                )
+                'Contract not posted publically. ' +
+                'Purchase order=%s', purchaseorderno
             )
 
 
-def download_attachment_file(bidno, bidfilelocation):
-        if not os.path.exists(bidno):
-            p = subprocess.Popen([
-                'curl',
-                '-o',
-                bidfilelocation,
-                'http://www.purchasing.cityofno.com/bso/external/document/' +
-                'attachments/attachmentFileDetail.sdo',
-                '-H',
-                'Pragma: no-cache',
-                '-H',
-                'Origin: null',
-                '-H',
-                'Accept-Encoding: gzip,deflate,sdch',
-                '-H',
-                'Accept-Language: en-US,en;q=0.8',
-                '-H',
-                'Content-Type: multipart/form-data; ' +
-                'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
-                '-H',
-                'Accept: text/html,application/xhtml+xml,' +
-                'application/xml;q=0.9,image/webp,*/*;q=0.8',
-                '-H',
-                'Connection: keep-alive',
-                '--data-binary',
-                '''------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+def download_attachment_file(bid_no, bid_file_location):
+    '''
+    Download the attachment file found on contract page.
+
+    :param bid_no: ???
+    :type bid_no: ???
+    :param bid_file_location: ???
+    :type bid_file_location: ???
+    :returns: ???
+    '''
+
+    if not os.path.exists(bid_no):
+        process = subprocess.Popen([
+            'curl',
+            '-o',
+            bid_file_location,
+            'http://www.purchasing.cityofno.com/bso/external/document/' +
+            'attachments/attachmentFileDetail.sdo',
+            '-H',
+            'Pragma: no-cache',
+            '-H',
+            'Origin: null',
+            '-H',
+            'Accept-Encoding: gzip,deflate,sdch',
+            '-H',
+            'Accept-Language: en-US,en;q=0.8',
+            '-H',
+            'Content-Type: multipart/form-data; ' +
+            'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
+            '-H',
+            'Accept: text/html,application/xhtml+xml,' +
+            'application/xml;q=0.9,image/webp,*/*;q=0.8',
+            '-H',
+            'Connection: keep-alive',
+            '--data-binary',
+            '''------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="mode"\r
 \r
 download\r
@@ -913,7 +1153,7 @@ Content-Disposition: form-data; name="parentId"\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="fileNbr"\r
 \r
-''' + bidno + '''\r
+''' + bid_no + '''\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="workingDir"\r
 \r
@@ -937,7 +1177,7 @@ Content-Disposition: form-data; name="releaseNbr"\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="downloadFileNbr"\r
 \r
-''' + bidno + '''\r
+''' + bid_no + '''\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
 Content-Disposition: form-data; name="itemNbr"\r
 \r
@@ -988,9 +1228,9 @@ Content-Disposition: form-data; name="displayName"\r
 Grainger Inc. Februaryl 2008.pdf\r
 ------WebKitFormBoundaryP4a4C1okQYkBGBSG--\r
 ''',
-                '--compressed'
-            ])
-            p.wait()
+            '--compressed'
+        ])
+        process.wait()
 
 
 def get_po_numbers_from_index_page(html):

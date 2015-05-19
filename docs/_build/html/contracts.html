@@ -1,0 +1,873 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contracts &mdash; City of New Orleans contracts 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="City of New Orleans contracts 0.0.1 documentation" href="index.html"/>
+        <link rel="next" title="Lib" href="lib.html"/>
+        <link rel="prev" title="City of New Orleans contracts" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> City of New Orleans contracts
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Contracts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lib.html">Lib</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">City of New Orleans contracts</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Contracts</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/contracts.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="contracts">
+<span id="id1"></span><h1>Contracts<a class="headerlink" href="#contracts" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-contracts.app"></span><p>The web app that runs at vault.thelensnola.org/contracts.</p>
+<dl class="function">
+<dt id="contracts.app.contract">
+<code class="descclassname">contracts.app.</code><code class="descname">contract</code><span class="sig-paren">(</span><em>doc_cloud_id</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.contract" title="Permalink to this definition">¶</a></dt>
+<dd><p>The single contract page. The contract ID is specified in the URL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">HTML. The single contract page     (/contracts/contract/&lt;doc_cloud_id&gt;).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.app.download">
+<code class="descclassname">contracts.app.</code><code class="descname">download</code><span class="sig-paren">(</span><em>docid</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a requested contract. This is triggered during &#8216;download&#8217; clicks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">PDF. The contract&#8217;s PDF file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.app.intro">
+<code class="descclassname">contracts.app.</code><code class="descname">intro</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.intro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intro page for the web app.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">HTML. The homepage (/contracts/).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.app.query_docs">
+<code class="descclassname">contracts.app.</code><code class="descname">query_docs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.query_docs" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main contract search page. Search parameters are specified in URL query
+string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">HTML. The search page (/contracts/search/).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.app.searchbar_input">
+<code class="descclassname">contracts.app.</code><code class="descname">searchbar_input</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.searchbar_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives a POST call from the autocomplete dropdown and returns a dict
+of suggestions. Query is stored in q={} part of URL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>q</strong> (<em>string</em>) &#8211; The search bar input.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dict of matching suggestions.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-contracts.db"></span><p>These classes that map to tables in the underlying database.</p>
+<dl class="class">
+<dt id="contracts.db.Address">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Address</code><span class="sig-paren">(</span><em>street</em>, <em>city</em>, <em>state</em>, <em>zipcode</em>, <em>sourcefile</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Companies or people can have addresses.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>street</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>city</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>state</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>zipcode</strong> (<em>int</em>) &#8211; <p>???</p>
+</li>
+<li><strong>sourcefile</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.Company">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Company</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Company" title="Permalink to this definition">¶</a></dt>
+<dd><p>A company does business with the city.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.CompanyAddress">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">CompanyAddress</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.CompanyAddress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Links addresses to companies.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>personID</strong> (<em>int</em>) &#8211; ???, foreign key points to companies.id.</li>
+<li><strong>companyID</strong> (<em>int</em>) &#8211; ???, foreign key points to addresses.id.</li>
+<li><strong>primaryaddress</strong> (<em>boolean</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.Contract">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Contract</code><span class="sig-paren">(</span><em>ponumber=None</em>, <em>contractnumber=None</em>, <em>vendor_id=None</em>, <em>department_id=None</em>, <em>dcid=None</em>, <em>descript=None</em>, <em>name=None</em>, <em>added=None</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Contract" title="Permalink to this definition">¶</a></dt>
+<dd><p>A contract is any piece of paper that gets posted on the city&#8217;s public
+purchasing portal. Sometimes the city posts &#8220;contracts&#8221; that are really
+film permits or MOUs. The doc_cloud_id links the contract to DocumentCloud.
+The URL for the contract on DocumentCloud will be
+<a class="reference external" href="https://www.documentcloud.org/documents">https://www.documentcloud.org/documents</a>/{{doc_cloud_id}}}.html</p>
+<p>The city uses two ID numbers to track contracts: k numbers and PO numbers.</p>
+<p>To buy anything, the city must go through an internal approval process that
+generates a purchase order. This purchase order number gets associated with
+the final contract.</p>
+<p>Each contract that goes to the law department also gets assigned a
+k number. But some contracts are rejected by the law department and are
+resubmitted. If this happens, the k number is retired. So there will be
+gaps in the k numbers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>departmentid</strong> (<em>int</em>) &#8211; ???, foreign key points to departments.id.</li>
+<li><strong>vendorid</strong> (<em>int</em>) &#8211; ???, foreign key points to vendors.id.</li>
+<li><strong>contractnumber</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>purchaseordernumber</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>doc_cloud_id</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>description</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>title</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>dateadded</strong> (<em>date</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.Department">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Department</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Department" title="Permalink to this definition">¶</a></dt>
+<dd><p>A department is a part of city government. Ex: Blight or Sanitation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.EthicsRecord">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">EthicsRecord</code><span class="sig-paren">(</span><em>last</em>, <em>first</em>, <em>reportno</em>, <em>form</em>, <em>schedule</em>, <em>contributiontype</em>, <em>contributorname</em>, <em>address1</em>, <em>address2</em>, <em>city</em>, <em>state</em>, <em>zipcode</em>, <em>receiptdate</em>, <em>receiptamount</em>, <em>description</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.EthicsRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>It goes in datamanagement instead of lib/models because it doesn&#8217;t really
+concern the public web app.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>primary_key</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>last</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>first</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>reportno</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>form</strong> &#8211; <p>???</p>
+</li>
+<li><strong>schedule</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>contributiontype</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>contributorname</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>address1</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>address2</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>city</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>state</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>zipcode</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>receiptdate</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>receiptamount</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>description</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.Person">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Person" title="Permalink to this definition">¶</a></dt>
+<dd><p>A person is an officer of a company.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.PersonAddress">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">PersonAddress</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.PersonAddress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Links people to addresses.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>personID</strong> (<em>int</em>) &#8211; ???, foreign key points to people.id.</li>
+<li><strong>companyID</strong> (<em>int</em>) &#8211; ???, foreign key points to address.id.</li>
+<li><strong>primaryaddress</strong> (<em>boolean</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.Vendor">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">Vendor</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.Vendor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A vendor sells goods or services to the city. [*] vendor_id_city is city&#8217;s
+ID number for the vendor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+<li><strong>vendor_id_city</strong> (<em>string</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.VendorOfficer">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">VendorOfficer</code><span class="sig-paren">(</span><em>vendorid</em>, <em>personid</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.VendorOfficer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Links a vendor to people who are its officers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>vendorid</strong> (<em>int</em>) &#8211; ???, foreign key points to vendors.id.</li>
+<li><strong>personid</strong> (<em>int</em>) &#8211; ???, foreign key points to people.id.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.db.VendorOfficerCompany">
+<em class="property">class </em><code class="descclassname">contracts.db.</code><code class="descname">VendorOfficerCompany</code><span class="sig-paren">(</span><em>vendor_id</em>, <em>company_id</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.VendorOfficerCompany" title="Permalink to this definition">¶</a></dt>
+<dd><p>Links a vendor (from the city&#8217;s system) with a company.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>int</em>) &#8211; The table&#8217;s primary key.</li>
+<li><strong>vendorid</strong> (<em>int</em>) &#8211; ???, foreign key points to vendors.id.</li>
+<li><strong>companiesid</strong> (<em>int</em>) &#8211; ???, foreign key points to companies.id.</li>
+<li><strong>primaryaddress</strong> (<em>boolean</em>) &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.db.remake_db">
+<code class="descclassname">contracts.db.</code><code class="descname">remake_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.db.remake_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the database via SQLAlchemy (?).</p>
+</dd></dl>
+
+<span class="target" id="module-contracts.models"></span><p>The web app that runs at vault.thelensnola.org/contracts.</p>
+<dl class="class">
+<dt id="contracts.models.Models">
+<em class="property">class </em><code class="descclassname">contracts.models.</code><code class="descname">Models</code><a class="headerlink" href="#contracts.models.Models" title="Permalink to this definition">¶</a></dt>
+<dd><p>doctstring</p>
+<dl class="method">
+<dt id="contracts.models.Models.find_number_of_documents">
+<code class="descname">find_number_of_documents</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.find_number_of_documents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redirect to the proper function for finding the total number of
+relevant documents for a given search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> (<em>string</em>) &#8211; The query&#8217;s search term.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int. The number of matching documents.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_contracts">
+<code class="descname">get_contracts</code><span class="sig-paren">(</span><em>offset=0</em>, <em>limit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_contracts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the database in reverse chronological order. Specify the number
+of recent contracts with offset and limit values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>offset</strong> (<em>int</em>) &#8211; The number of pages to offset database query.</li>
+<li><strong>limit</strong> (<em>int</em>) &#8211; The number of records to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list. (?) The contracts that matched the query.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_contracts_count">
+<code class="descname">get_contracts_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_contracts_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the count of all contracts in database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">int. The total number of contracts in the database.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="contracts.models.Models.get_contracts_page">
+<em class="property">static </em><code class="descname">get_contracts_page</code><span class="sig-paren">(</span><em>doc_cloud_id</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_contracts_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get data necessary for the single contract page. This only gets the
+updated date, so it is mostly a placeholder for now.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>doc_cloud_id</strong> (<em>string</em>) &#8211; The single contract&#8217;s uniquey DocumentCloud ID.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict. A dict with the updated date.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_departments">
+<code class="descname">get_departments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_departments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query all departments in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list. All departments in our database.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_download">
+<code class="descname">get_download</code><span class="sig-paren">(</span><em>doc_cloud_id</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_download" title="Permalink to this definition">¶</a></dt>
+<dd><p>???</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>doc_cloud_id</strong> (<em>string</em>) &#8211; The unique ID for this contract in DocumentCloud.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">PDF. The PDF file for this contract (?).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_home">
+<code class="descname">get_home</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gather data necessary for the homepage (/contracts/).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">dict. A dict with data for dropdowns and dates.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_officers">
+<code class="descname">get_officers</code><span class="sig-paren">(</span><em>vendor=None</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_officers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get officers for a given vendor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vendor</strong> (<em>string</em>) &#8211; The vendor to check on.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list. A list of officers listed under the vendor company in         the Secretary of State&#8217;s database.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_search_page">
+<code class="descname">get_search_page</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_search_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the data necessary for the search page (/contracts/search/).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>dict</em>) &#8211; The search parameters supplied by the user.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict. Two dicts: one for newly gather data, and the other         an altered version of the incoming search parameters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.get_vendors">
+<code class="descname">get_vendors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.get_vendors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query all vendors in the database linked to a contract.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list. (?) The vendors that are linked to a contract.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="contracts.models.Models.parse_query_string">
+<em class="property">static </em><code class="descname">parse_query_string</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.parse_query_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives URL query string parameters and returns as dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>dict?</em>) &#8211; A (Flask object?) containing query string.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict. The query string parameters entered by the user.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.query_document_cloud">
+<code class="descname">query_document_cloud</code><span class="sig-paren">(</span><em>search_term</em>, <em>page=1</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.query_document_cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries the DocumentCloud API.
+This is it&#8217;s own method so that queries can be cached via &#64;memoize to
+speed things up.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>search_term</strong> (<em>string</em>) &#8211; The query term to run against DocumentCloud API.</li>
+<li><strong>page</strong> (<em>string</em>) &#8211; The page to receive in return. Useful for pagination.         Default: 1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict. (?) The output that matches the query.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.query_document_cloud_count">
+<code class="descname">query_document_cloud_count</code><span class="sig-paren">(</span><em>search_term</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.query_document_cloud_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the number of documents in DocumentCloud project that
+match this query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_term</strong> (<em>string</em>) &#8211; The search term for DocumentCloud API query.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int. The number of records that match this query.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="contracts.models.Models.translate_to_doc_cloud_form">
+<em class="property">static </em><code class="descname">translate_to_doc_cloud_form</code><span class="sig-paren">(</span><em>documents</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.translate_to_doc_cloud_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>In the database each row for contracts has an ID which is different
+from the doc_cloud_id on DocumentCloud. This just translates rows so
+that their ID is equal to the doc_cloud_id. It&#8217;s a bit awkward and
+should probably be refactored away at some point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>documents</strong> (<em>list</em>) &#8211; A list of documents (from where?).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list. A list of documents, with corrected IDs (how?).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.translate_to_vendor">
+<code class="descname">translate_to_vendor</code><span class="sig-paren">(</span><em>officer_term</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.translate_to_vendor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translates a request for an officer to a request for a vendor
+associated with a given officer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>officer_term</strong> (<em>string</em>) &#8211; The name of the officer.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">???</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.Models.translate_web_query_to_dc_query">
+<code class="descname">translate_web_query_to_dc_query</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.Models.translate_web_query_to_dc_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translates search input parameters into a request string for the
+DocumentCloud API, which utilizes the Apache Lucene syntax.</p>
+<p>Use &#8216;projectid:1542-city-of-new-orleans-contracts&#8217; to restrict search
+to our project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>dict</em>) &#8211; The query parameters.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string. The query string ready for the DocumentCloud API.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="contracts.models.QueryBuilder">
+<em class="property">class </em><code class="descclassname">contracts.models.</code><code class="descname">QueryBuilder</code><a class="headerlink" href="#contracts.models.QueryBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a query for the DocumentCloud API.</p>
+<dl class="method">
+<dt id="contracts.models.QueryBuilder.add_term">
+<code class="descname">add_term</code><span class="sig-paren">(</span><em>term</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.QueryBuilder.add_term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a term to the dictionary. If term is updated it will just
+re-write the dictionary value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.QueryBuilder.add_text">
+<code class="descname">add_text</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.QueryBuilder.add_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a freetext component to the query (ex. &#8216;playground&#8217;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="contracts.models.QueryBuilder.get_query">
+<code class="descname">get_query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.models.QueryBuilder.get_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate the dictionary into a DocumentCloud query.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-contracts.views"></span><p>The web app that runs at vault.thelensnola.org/contracts.</p>
+<dl class="class">
+<dt id="contracts.views.Views">
+<em class="property">class </em><code class="descclassname">contracts.views.</code><code class="descname">Views</code><a class="headerlink" href="#contracts.views.Views" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render views.</p>
+<dl class="staticmethod">
+<dt id="contracts.views.Views.get_contract">
+<em class="property">static </em><code class="descname">get_contract</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.views.Views.get_contract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render the single contract page.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="contracts.views.Views.get_home">
+<em class="property">static </em><code class="descname">get_home</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.views.Views.get_home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render home page.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="contracts.views.Views.get_search_page">
+<em class="property">static </em><code class="descname">get_search_page</code><span class="sig-paren">(</span><em>data</em>, <em>parameter_data</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.views.Views.get_search_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render search results page.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="lib.html" class="btn btn-neutral float-right" title="Lib" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="City of New Orleans contracts" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, The Lens.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

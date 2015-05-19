@@ -15,6 +15,13 @@ class Vendor(Base):
     """
     A vendor sells goods or services to the city. [*] vendor_id_city is city's
     ID number for the vendor.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param name: ???
+    :type name: string
+    :param vendor_id_city: ???
+    :type vendor_id_city: string
     """
 
     __tablename__ = 'vendors'
@@ -33,6 +40,11 @@ class Vendor(Base):
 class Department(Base):
     """
     A department is a part of city government. Ex: Blight or Sanitation.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param name: ???
+    :type name: string
     """
 
     __tablename__ = 'departments'
@@ -50,6 +62,11 @@ class Department(Base):
 class Person(Base):
     """
     A person is an officer of a company.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param name: ???
+    :type name: string
     """
 
     __tablename__ = 'people'
@@ -67,6 +84,11 @@ class Person(Base):
 class Company(Base):
     """
     A company does business with the city.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param name: ???
+    :type name: string
     """
 
     __tablename__ = 'companies'
@@ -84,6 +106,19 @@ class Company(Base):
 class Address(Base):
     """
     Companies or people can have addresses.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param street: ???
+    :type street: string
+    :param city: ???
+    :type city: string
+    :param state: ???
+    :type state: string
+    :param zipcode: ???
+    :type zipcode: int
+    :param sourcefile: ???
+    :type sourcefile: string
     """
 
     __tablename__ = 'addresses'
@@ -126,6 +161,25 @@ class Contract(Base):
     k number. But some contracts are rejected by the law department and are
     resubmitted. If this happens, the k number is retired. So there will be
     gaps in the k numbers.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param departmentid: ???, foreign key points to departments.id.
+    :type departmentid: int
+    :param vendorid: ???, foreign key points to vendors.id.
+    :type vendorid: int
+    :param contractnumber: ???
+    :type contractnumber: string
+    :param purchaseordernumber: ???
+    :type purchaseordernumber: string
+    :param doc_cloud_id: ???
+    :type doc_cloud_id: string
+    :param description: ???
+    :type description: string
+    :param title: ???
+    :type title: string
+    :param dateadded: ???
+    :type dateadded: date
     """
 
     __tablename__ = 'contracts'
@@ -172,6 +226,15 @@ class Contract(Base):
 class CompanyAddress(Base):
     """
     Links addresses to companies.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param personID: ???, foreign key points to companies.id.
+    :type personID: int
+    :param companyID: ???, foreign key points to addresses.id.
+    :type companyID: int
+    :param primaryaddress: ???
+    :type primaryaddress: boolean
     """
 
     __tablename__ = 'companiesaddresses'
@@ -196,6 +259,15 @@ class CompanyAddress(Base):
 class PersonAddress(Base):
     """
     Links people to addresses.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param personID: ???, foreign key points to people.id.
+    :type personID: int
+    :param companyID: ???, foreign key points to address.id.
+    :type companyID: int
+    :param primaryaddress: ???
+    :type primaryaddress: boolean
     """
 
     __tablename__ = 'peopleaddresses'
@@ -215,6 +287,13 @@ class PersonAddress(Base):
 class VendorOfficer(Base):
     """
     Links a vendor to people who are its officers.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param vendorid: ???, foreign key points to vendors.id.
+    :type vendorid: int
+    :param personid: ???, foreign key points to people.id.
+    :type personid: int
     """
 
     __tablename__ = 'vendorsofficers'
@@ -234,6 +313,15 @@ class VendorOfficer(Base):
 class VendorOfficerCompany(Base):
     """
     Links a vendor (from the city's system) with a company.
+
+    :param id: The table's primary key.
+    :type id: int
+    :param vendorid: ???, foreign key points to vendors.id.
+    :type vendorid: int
+    :param companiesid: ???, foreign key points to companies.id.
+    :type companiesid: int
+    :param primaryaddress: ???
+    :type primaryaddress: boolean
     """
 
     __tablename__ = 'vendorsofficerscompanies'
@@ -255,6 +343,39 @@ class EthicsRecord(Base):
     """
     It goes in datamanagement instead of lib/models because it doesn't really
     concern the public web app.
+
+    :param primary_key: The table's primary key.
+    :type primary_key: int
+    :param last: ???
+    :type last: string
+    :param first: ???
+    :type first: string
+    :param reportno: ???
+    :type reportno: string
+    :param form: ???
+    :type from: string
+    :param schedule: ???
+    :type schedule: string
+    :param contributiontype: ???
+    :type contributiontype: string
+    :param contributorname: ???
+    :type contributorname: string
+    :param address1: ???
+    :type address1: string
+    :param address2: ???
+    :type address2: string
+    :param city: ???
+    :type city: string
+    :param state: ???
+    :type state: string
+    :param zipcode: ???
+    :type zipcode: string
+    :param receiptdate: ???
+    :type receiptdate: string
+    :param receiptamount: ???
+    :type receiptamount: string
+    :param description: ???
+    :type description: string
     """
 
     __tablename__ = 'ethics_records'
@@ -318,7 +439,9 @@ class EthicsRecord(Base):
 
 
 def remake_db():
-    '''docstring'''
+    '''
+    Creates the database via SQLAlchemy (?).
+    '''
 
     engine = create_engine(CONNECTION_STRING)
     Base.metadata.create_all(engine)

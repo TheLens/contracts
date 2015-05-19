@@ -1,12 +1,19 @@
 # Directories
 
+.idea/
 venv/*
+tests/misc
+tests/misc/*
 datamanagement/pdfs
 datamanagement/html*
-docs/_build*
+# docs/_build*
 
 # Files
 
+tests/test_models.py
+*.xml
+*.iml
+*.name
 *.pyc
 *.pdf
 .DS_Store

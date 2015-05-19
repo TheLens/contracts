@@ -22,7 +22,13 @@ class Views(object):
 
     @staticmethod
     def get_home(data):
-        '''Render home page.'''
+        '''
+        Renders the homepage (/contracts/).
+
+        :param data: Data for the homepage.
+        :type data: dict
+        :returns: HTML. Rendered and ready for display to the user.
+        '''
 
         vendors = data['vendors']
         departments = data['departments']
@@ -48,7 +54,15 @@ class Views(object):
 
     @staticmethod
     def get_search_page(data, parameter_data):
-        '''Render search results page.'''
+        '''
+        Renders the search results page (/contracts/search/).
+
+        :param data: Data in response to the search request.
+        :type data: dict
+        :param parameter_data: Search parameter that was originally sent.
+        :type parameter_data: dict
+        :returns: HTML. Rendered and ready for display.
+        '''
 
         log.debug('start of get_search_page')
         log.debug('current_page: %d', data['current_page'])
@@ -93,7 +107,13 @@ class Views(object):
 
     @staticmethod
     def get_contract(data):
-        '''Render the single contract page.'''
+        '''
+        Renders the single contract page (/contracts/contract/).
+
+        :param data: Data for the page.
+        :type data: dict
+        :returns: HTML. Rendered and ready for display.
+        '''
 
         doc_cloud_id = data['doc_cloud_id']
         updated_date = data['updated_date']
