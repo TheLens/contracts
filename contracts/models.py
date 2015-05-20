@@ -531,7 +531,7 @@ class Models(object):
         query_builder.add_term(
             self.dc_query.split(':')[0], self.dc_query.split(':')[1])
 
-        terms = ['vendor', 'department', 'officer']
+        terms = ['vendor', 'department']  # , 'officer']
 
         for term in terms:
             query_value = data[term]

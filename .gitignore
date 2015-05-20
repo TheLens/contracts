@@ -10,7 +10,6 @@ datamanagement/html*
 
 # Files
 
-tests/test_models.py
 *.xml
 *.iml
 *.name
