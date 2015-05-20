@@ -49,6 +49,40 @@ if USER == 'ubuntu':  # Server
     RELOADER = False
     DEBUG = False
 
+if USER == 'abe':  # Server
+    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
+    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
+    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
+    ROOT_FOLDER = "/home/%s" % USER
+    LOG_PATH = "/home/%s/lens/contracts/logs/contracts.log" % USER
+
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
+    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+        os.environ.get('DATABASE_USERNAME'),
+        os.environ.get('DATABASE_PASSWORD'),
+        os.environ.get('DATABASE_SERVER'),
+        os.environ.get('DATABASE_NAME'),
+    )
+    TEMPLATES = "%s/templates" % PROJECT_DIR
+
+    # Static assets
+    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
+
+    LENS_CSS = '%s/css/lens.css' % S3_URL
+    BANNER_CSS = '%s/css/banner.css' % S3_URL
+    CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
+
+    DOWNLOAD_JS = '%s/js/download.js' % S3_URL
+    LENS_JS = '%s/js/lens.js' % S3_URL
+    RESULTS_JS = '%s/js/results.js' % S3_URL
+    SEARCH_JS = '%s/js/search.js' % S3_URL
+
+    # app.py config
+    RELOADER = False
+    DEBUG = False
+
 else:  # Local
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
