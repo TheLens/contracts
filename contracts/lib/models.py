@@ -335,6 +335,11 @@ class PurchaseOrder(object):
                 ['a'])[0].contents.pop().strip()
             # Vno periods in vendor names:
             vendor = vendorlinktext.split('-')[1].strip().replace(".", "")
+
+            # Convert to uppercase for DocumentCloud. Search queries are also
+            # converted to uppercase so we can find matches.
+            vendor = vendor.upper()
+
             return vendor
         except IndexError:
             # in cases of index error, go ahead and downlaod the vendor page
@@ -345,6 +350,11 @@ class PurchaseOrder(object):
             new_soup = BeautifulSoup(html)
             header = new_soup.select(".sectionheader-01")[0]
             vendor_name = str(header).replace("Vendor Profile - ", "")
+
+            # Convert to uppercase for DocumentCloud. Search queries are also
+            # converted to uppercase so we can find matches.
+            vendor_name = vendor_name.upper()
+
             return vendor_name
 
     @staticmethod
@@ -423,6 +433,10 @@ class PurchaseOrder(object):
             ['td'])[0].findChildren(['table'])[0].findChildren(['tr'])
         department = metadatarow[5].findChildren(
             ['td'])[1].contents.pop().strip()
+
+        # Convert to uppercase for DocumentCloud. Search queries are also
+        # converted to uppercase so we can find matches.
+        department = department.upper()
 
         return department
 
