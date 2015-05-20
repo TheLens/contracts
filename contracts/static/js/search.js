@@ -21,7 +21,7 @@ function prepareData() {
     data.current_page = parseInt(current_page, 10);
   }
 
-  console.log('Parameters collected:', data);
+  // console.log('Parameters collected:', data);
 
   return data;
 }
@@ -112,7 +112,7 @@ function setHandlers() {
 
 function populateSearchParameters(data) {
 
-  console.log('Parameter data returned:', data);
+  // console.log('Parameter data returned:', data);
 
   document.getElementById('text-box').value = data.search_input;
   document.getElementById('vendors').value = data.vendor;
@@ -179,7 +179,7 @@ function getSearch(keep_current_page) {
 
   var query_string = buildSearch(data);
   
-  console.log('Query string:', query_string);
+  // console.log('Query string:', query_string);
   
   window.location.href = '/contracts/search/' + query_string;
 }

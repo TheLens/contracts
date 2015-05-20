@@ -2,11 +2,11 @@ window.downloadFile = function (sUrl) {
 
   // debugger;
 
-  console.log('downloadFile');
+  // console.log('downloadFile');
 
   // iOS devices do not support downloading.
   if (/(iP)/g.test(navigator.userAgent)) {
-    console.log('iOS alert');
+    // console.log('iOS alert');
 
     alert('Your device does not support files downloading. Please try again in desktop browser.');
     return false;
@@ -14,14 +14,14 @@ window.downloadFile = function (sUrl) {
 
   // If in Chrome or Safari - download via virtual link click
   if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
-    console.log('In Chrome or Safari');
+    // console.log('In Chrome or Safari');
 
     // Creating new link node.
     var link = document.createElement('a');
     link.href = sUrl;
 
     if (link.download !== undefined) {
-      console.log('Link is undefined');
+      // console.log('Link is undefined');
 
       // Set HTML5 download attribute. This will prevent file from opening if supported.
       var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
@@ -30,7 +30,7 @@ window.downloadFile = function (sUrl) {
 
     // Dispatching click event.
     if (document.createEvent) {
-      console.log('Dispatching click event');
+      // console.log('Dispatching click event');
 
       var e = document.createEvent('MouseEvents');
       e.initEvent('click', true, true);
@@ -41,7 +41,7 @@ window.downloadFile = function (sUrl) {
 
   // Force file download (whether supported by server).
   if (sUrl.indexOf('?') === -1) {
-    console.log('Force file download');
+    // console.log('Force file download');
 
     sUrl += '?download';
   }
