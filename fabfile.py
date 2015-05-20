@@ -32,11 +32,11 @@ def repo():
     local('git add %s/.gitignore' % PROJECT_DIR)
     # local('git add %s/.pylintrc' % PROJECT_DIR)
     local('git add %s/.travis.yml' % PROJECT_DIR)
-    # local('git add %s/MANIFEST.in' % PROJECT_DIR)
+    local('git add %s/MANIFEST.in' % PROJECT_DIR)
     local('git add %s/README.md' % PROJECT_DIR)
     local('git add %s/fabfile.py' % PROJECT_DIR)
     local('git add %s/requirements.txt' % PROJECT_DIR)
-    # local('git add %s/setup.py' % PROJECT_DIR)
+    local('git add %s/setup.py' % PROJECT_DIR)
 
 
 def confs():
