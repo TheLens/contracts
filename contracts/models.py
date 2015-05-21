@@ -2,8 +2,10 @@
 The web app that runs at vault.thelensnola.org/contracts.
 """
 
-# import re
+import os
 import time
+import json
+import urllib2
 from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +22,10 @@ from pythondocumentcloud import DocumentCloud
 from contracts import (
     CONNECTION_STRING,
     log
+)
+from contracts.lib.parserator_utils import (
+    get_document_page,
+    spanify
 )
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -187,6 +193,19 @@ class Models(object):
         tags = {'doc_cloud_id': doc_cloud_id}
 
         return tags
+
+    def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
+        url = "https://s3-us-west-2.amazonaws.com/lensnola/contracts/contract_amounts/computer_labels/" + doc_cloud_id
+
+        page = request.args.get('page')
+        response = urllib2.urlopen(url)
+        computer_generated_tags = response.read()
+        page_text = get_document_page(doc_cloud_id, page)
+        return spanify(page_text, page, computer_generated_tags)
+
+        # request to s3
+        # convert to json
+        # and return
 
     def get_download(self, doc_cloud_id):
         '''

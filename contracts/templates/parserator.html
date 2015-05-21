@@ -6,7 +6,7 @@
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    
+
 
   </head>
   <body>
@@ -32,8 +32,8 @@
           {{doc_cloud_id}}
         </div>
       </div>
-      <div class="large-10 medium-10 small-10 columns">
-          <div id="DV-viewer-{{doc_cloud_id}}" class="DV-container"></div>
+      <div class="small-10 columns">
+          <div id="DV-container" class="DV-container"></div>
           <script src="//s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"></script>
       </div>
       <div id='right' class="large-2 columns">
@@ -47,9 +47,9 @@
          DV.load("//www.documentcloud.org/documents/{{doc_cloud_id}}.js", {
           sidebar: false,
           pdf: false,
-          width: $("body").width() * .4 ,
-          height: $("body").height() * .9 ,
-          container: "#DV-viewer-{{doc_cloud_id}}",
+          // width: $("body").width(),
+          // height: $("body").height(),
+          container: "#DV-container",
           afterLoad: viewer_has_loaded 
         });
     </script>

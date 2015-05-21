@@ -103,6 +103,25 @@ def parserator(doc_cloud_id):
     return view
 
 
+@app.route('/contracts/admin/tags/<string:doc_cloud_id>', methods=['POST'])
+def tags(doc_cloud_id):
+    """
+    The UI is requesting tags for the doc_cloud_id
+
+    :returns: HTML. The single contract page \
+    (/contracts/contract/<doc_cloud_id>).
+    """
+
+    log.debug('/contract/admin/tags')
+
+    # to do : deal with cases when there are no tags yet. parserator takes 15 minutes.
+    tags = Models().get_tags_for_doc_cloud_id(doc_cloud_id)
+
+    view = Views().get_parserator(tags)
+
+    return view
+
+
 @app.route('/contracts/download/<string:docid>', methods=['GET', 'POST'])
 def download(docid):
     """
