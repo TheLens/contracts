@@ -16,7 +16,7 @@ PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
 
 if USER == 'ubuntu':  # Server
-    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
+    CORPUS_LOC = "/backups/contracts"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
