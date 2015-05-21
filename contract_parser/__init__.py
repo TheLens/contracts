@@ -20,9 +20,9 @@ CURRENCY_REG = money = re.compile('|'.join([
 
 #  _____________________
 # |1. CONFIGURE LABELS! |
-# |_____________________| 
-#     (\__/) || 
-#     (•ㅅ•) || 
+# |_____________________|
+#     (\__/) ||
+#     (•ㅅ•) ||
 #     / 　 づ
 
 LABELS = ["amendment_amount", "amendment_amount_padding", "contract_amount", "contract_amount_padding", "other_amount", "other_amount_padding", "amount_alphabetic", "skip", "post_amended_amount", "post_amended_amount_padding"] # The labels should be a list of strings
@@ -43,9 +43,9 @@ MODEL_FILE    = 'learned_settings.crfsuite'   # filename for the crfsuite settin
 try :
     TAGGER = pycrfsuite.Tagger()
     TAGGER.open(os.path.split(os.path.abspath(__file__))[0]+'/'+MODEL_FILE)
-except IOError :
+except IOError:
     TAGGER = None
-    warnings.warn('You must train the model (parserator train [traindata] [modulename]) to create the %s file before you can use the parse and tag methods' %MODEL_FILE)
+    warnings.warn('You must train the model (parserator train [traindata] [modulename]) to create the %s file before you can use the parse and tag methods' % MODEL_FILE)
 
 def parse(raw_string):
     if not TAGGER:
@@ -61,9 +61,9 @@ def parse(raw_string):
     return zip(tokens, tags)
 
 
-def tag(raw_string) :
+def tag(raw_string):
     tagged = OrderedDict()
-    for token, label in parse(raw_string) :
+    for token, label in parse(raw_string):
         tagged.setdefault(label, []).append(token)
 
     for token in tagged :
@@ -76,12 +76,12 @@ def tag(raw_string) :
 
 #  _____________________
 # |2. CONFIGURE TOKENS! |
-# |_____________________| 
-#     (\__/) || 
-#     (•ㅅ•) || 
+# |_____________________|
+#     (\__/) ||
+#     (•ㅅ•) ||
 #     / 　 づ
-def tokenize(raw_string, offsets = False):
-    if not offsets: # standard run of tokenization
+def tokenize(raw_string, offsets=False):
+    if not offsets:  # standard run of tokenization
         tokenizer = RegexpTokenizer('\$[\d]+(\.\d)? billion|\w+|\$[\d\,]+(.\d\d)?')
         tokens = tokenizer.tokenize(raw_string)
         if not tokens :
@@ -93,11 +93,12 @@ def tokenize(raw_string, offsets = False):
             output.append((i.start(), i.end()))
         return output
 
+
 #  _______________________
 # |3. CONFIGURE FEATURES! |
-# |_______________________| 
-#     (\__/) || 
-#     (•ㅅ•) || 
+# |_______________________|
+#     (\__/) ||
+#     (•ㅅ•) ||
 #     / 　 づ
 def tokens2features(tokens):
     # this should call tokenFeatures to get features for individual tokens,

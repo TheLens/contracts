@@ -4,6 +4,7 @@ A few utility functions to support the web app
 import json
 import logging
 import importlib
+import pdb
 from pythondocumentcloud import DocumentCloud
 
 from contract_parser import tokenize
@@ -79,6 +80,7 @@ def spanify(page_text, page_no, labels=None):
             in_between = page_text[last_index_mem: start]
         last_index_mem = end
         spanid = str(page_no) + "-" + str(token_no)
+        pdb.set_trace()
         if labels:
             try:
                 correct_label = [l for l\
