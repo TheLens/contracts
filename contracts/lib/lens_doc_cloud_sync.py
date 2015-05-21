@@ -54,6 +54,12 @@ def match_contract(doc):
 def match_lens_db_to_document_cloud():
     '''
     Match the Lens database to DocumentCloud.
+
+    DocumentCloud can take anywhere from one minute to 30 minutes to cache new
+    uploads and reflect their changes in its API.
+
+    This checks DocumentCloud to make sure that the latest changes have been
+    synched.
     '''
 
     with LensDatabase() as db:

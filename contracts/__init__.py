@@ -83,8 +83,8 @@ if USER == 'abe':  # Server
     RELOADER = False
     DEBUG = False
 
-else:  # Local
-    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
+if USER == 'thomasthoren':  # Tom's Local
+    CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/Users/%s" % USER
@@ -93,6 +93,7 @@ else:  # Local
     VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
     PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
     BIDS_LOCATION = CORPUS_LOC + "/bids/"
+
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),

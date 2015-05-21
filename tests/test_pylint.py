@@ -2,7 +2,7 @@
 
 # todo: everything
 
-'''Tests that all Python files in project pass pylint tests.'''
+'''Tests that all Python files in project pass pylint tests without errors.'''
 
 from unittest import TestCase
 import os

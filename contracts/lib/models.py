@@ -7,12 +7,13 @@ import os
 import subprocess
 import re
 import urllib2
-import datetime
+from datetime import datetime, date
 import uuid
 import dateutil
 from bs4 import BeautifulSoup
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
+import pdb
 
 from pythondocumentcloud import DocumentCloud
 from contracts.db import (
@@ -470,17 +471,24 @@ class LensRepository(object):
         '''
 
         if purchase_order_no in self.skiplist:
+            '''skip non-public contracts'''
+
             # log.warning(
             #     '{} | {} | Contract is in the skiplist | {}'.format(
             #         run_id, get_timestamp(), purchase_order_no)
             # )
             return
+
         if not valid_purchase_order(purchase_order_no):
+            '''
+            Checks regex to make sure that this is a feasible purchase order.
+            '''
             # log.warning(
             #     '{} | {} | Invalid purchase order | {}'.format(
             #         run_id, get_timestamp(), purchase_order_no)
             # )
             return
+
         file_loc = self.purchaseorders_location + purchase_order_no
         if not os.path.isfile(file_loc):
             response = urllib2.urlopen(
@@ -488,10 +496,10 @@ class LensRepository(object):
                 'purchaseorder/poSummary.sdo?docId=' + purchase_order_no +
                 '&releaseNbr=0&parentUrl=contract')
             html = response.read()
-            self.write_pos(html, file_loc)
+            self.write_purchase_order(html, file_loc)
 
     @staticmethod
-    def write_pos(html, file_location):
+    def write_purchase_order(html, file_location):
         '''
         docstring
 
@@ -503,13 +511,17 @@ class LensRepository(object):
         '''
 
         with open(file_location, 'w') as f:
+            '''
+            Save the HTML for an individual purchase order page.
+            '''
+
             # log.warning(
             #     '{} | {} | Writing purchase_order_no to file | {}'.format(
             #         run_id, get_timestamp(), file_location)
             # )
             f.write(html)  # python will convert \n to os.linesep
 
-    def sync(self, purchase_order_no):
+    def check_if_public_and_need_to_download(self, purchase_order_no):
         '''
         docstring
 
@@ -519,13 +531,21 @@ class LensRepository(object):
         '''
 
         if purchase_order_no in self.skiplist:
+            '''
+            If this contract is not posted publicly, then skip it.
+            The skip list stores the private contracts that we know about but
+            are not posted online by the city.
+            '''
+
             # log.warning(
             #     '{} | {} | Contract is in the skiplist | {}'.format(
             #         run_id, get_timestamp(), purchase_order_no
             #     )
             # )
             return
+
         file_loc = self.purchaseorders_location + purchase_order_no
+
         if not os.path.isfile(file_loc):
             self.download_purchaseorder(purchase_order_no)
         else:
@@ -565,7 +585,7 @@ class DocumentCloudProject(object):
         self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
         # sometimes won't need all the docs, so dont do the search on init
         self.docs = None
-        self.skiplist = self.get_skip_list()
+        self.skiplist = LensRepository().get_skip_list()
 
     # searchterm = '\'purchase order\':' + "'" + po + "'"
     # searchterm = '\'contract number\':' + "'" + k_no + "'"
@@ -603,9 +623,9 @@ class DocumentCloudProject(object):
 
         return True  # it is an existing contract. We know the k-number
 
-    def add_contract(self, purchase_order_no):
+    def add_contract_to_document_cloud(self, purchase_order_no):
         '''
-        docstring
+        Add a contract to our DocumentCloud project.
 
         :param purchase_order_no: The contract's unique ID in DocumentCloud.
         :type purchase_order_no: string.
@@ -651,9 +671,13 @@ class DocumentCloudProject(object):
             #         purchase_order_no, purchase_order_no
             #     )
             # )
+
+            # Checks if there is at least one attachment. Some don't have any.
             if len(purchase_order.attachments) > 0:
                 counter = 1
                 for attachment in purchase_order.attachments:
+                    # Loop through each attachment
+
                     bidnumber = re.search(
                         '[0-9]+', attachment.get('href')).group()
                     bid_file_location = BIDS_LOCATION + \
@@ -662,10 +686,12 @@ class DocumentCloudProject(object):
                     if counter > 1:
                         extra_string = str(counter) + " of " + \
                             str(len(purchase_order.attachments))
+                    temp = purchase_order.description + extra_string
+                    # pdb.set_trace()
                     self.upload_contract(
                         bid_file_location,
                         purchase_order.data,
-                        purchase_order.description + extra_string,
+                        temp,
                         purchase_order.title + extra_string
                     )
                     counter += 1
@@ -694,7 +720,8 @@ class DocumentCloudProject(object):
 
     def upload_contract(self, fname, data, description, title):
         '''
-        This uploads a contract onto DcoumentCloud.
+        This uploads a contract onto DocumentCloud.
+        It also adds this contract to the Lens database.
 
         :param file: The contract PDF file?
         :type file: PDF
@@ -718,9 +745,11 @@ class DocumentCloudProject(object):
             #     )
             # )
             return  # do not upload. There is a problem
+
+        title = title.replace("/", "")
         newcontract = self.client.documents.upload(
             fname,
-            title.replace("/", ""),
+            title,
             'City of New Orleans',
             description,
             None,
@@ -736,10 +765,24 @@ class DocumentCloudProject(object):
         #     newcontract.id,
         #     data['purchase order']
         # ))
-        c = Contract()
-        c.doc_cloud_id = newcontract.id
+        contract = Contract()
+        contract.doc_cloud_id = newcontract.id
         with LensDatabase() as db:
-            db.add_contract(c)
+            contract.contractnumber = data['contract number']
+            contract.purchaseordernumber = data['purchase order']
+            contract.description = description
+            contract.title = title
+            contract.dateadded = date.today()
+
+            with LensDatabase() as lens_db:
+                lens_db.add_department(data['department'])
+                lens_db.add_vendor(data['vendor'], vendor_id_city=data['vendor_id'])
+
+                contract.departmentid = lens_db.get_department_id(
+                    data['department'])
+                contract.vendorid = lens_db.get_lens_vendor_id(data['vendor'])
+
+            db.add_contract_to_lens_database(contract)
 
     def get_metadata(self, doc_cloud_id, meta_field):
         '''
@@ -816,7 +859,7 @@ class LensDatabase(object):
         # to do Tom Thoren
 
     # refactor to take a type
-    def add_vendor(self, vendor):
+    def add_vendor(self, vendor, vendor_id_city=None):
         """
         Add vendor to the Lens database.
 
@@ -831,6 +874,7 @@ class LensDatabase(object):
         ).count()
         if indb == 0:
             vendor = Vendor(vendor)
+            vendor.vendor_id_city = vendor_id_city
             self.session.add(vendor)
             self.session.commit()
 
@@ -853,7 +897,7 @@ class LensDatabase(object):
             self.session.add(department)
             self.session.commit()
 
-    def add_contract(self, contract):
+    def add_contract_to_lens_database(self, contract):
         """
         Add a contract to the Lens database.
 
@@ -867,6 +911,8 @@ class LensDatabase(object):
             Contract.doc_cloud_id == contract.doc_cloud_id
         ).count()
 
+        # Checking for the absence of this contract, meaning this contract is
+        # not in our DB.
         if indb == 0:
             self.session.add(contract)
             self.session.flush()
@@ -1011,6 +1057,10 @@ class LensDatabase(object):
 
     def get_half_filled_contracts(self):
         """
+        A half-filled contract is where we know DC ID but don't know PO number
+        or any of the other metadata in the city's PO system because when we
+        upload the contract to DC...
+
         DocumentCloud doesn't give immediate access to all document properties.
         This pulls out the contracts in the database added during upload but
         that still need to have their details filled in.
@@ -1021,7 +1071,7 @@ class LensDatabase(object):
         query = self.session.query(
             Contract
         ).filter(
-            Contract.purchaseordernumber is None
+            Contract.departmentid is None
         ).all()
 
         return query
@@ -1096,7 +1146,8 @@ class LensDatabase(object):
 
 def check_page(page_no):
     '''
-    Run the scraper. Need a class here? Just function?
+    Run the downloader helper for this page on the purchasing site.
+    Need a class here? Just function?
 
     :param page_no: The page to check (?).
     :type page_no: string
@@ -1107,14 +1158,17 @@ def check_page(page_no):
     for purchaseorderno in output:
         log.info('Daily scraper found po %s', purchaseorderno)
         try:
-            LensRepository().sync(purchaseorderno)
-            DocumentCloudProject().add_contract(purchaseorderno)
+            LensRepository().check_if_public_and_need_to_download(
+                purchaseorderno)
+            DocumentCloudProject().add_contract_to_document_cloud(
+                purchaseorderno)
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
                 'Contract not posted publically. ' +
                 'Purchase order=%s', purchaseorderno
             )
+        pdb.set_trace()
 
 
 def download_attachment_file(bid_no, bid_file_location):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''Tests that all Python files in project meet PEP8 style.'''
+'''Tests that all Python files in project meet PEP8 coding style standards.'''
 
 from unittest import TestCase
 import pep8

@@ -1,5 +1,10 @@
 """
 The web app that runs at vault.thelensnola.org/contracts.
+
+It lets the public search City of New Orleans contracts that are posted to the
+city's purchasing portal. It's just a Flask application, and it follows the
+structure from the Flask tutorials. The front end is built with Foundation.
+It uses SQLAlchemy to connect to a PostgreSQL database.
 """
 
 import os

@@ -16,11 +16,11 @@ class Vendor(Base):
     A vendor sells goods or services to the city. [*] vendor_id_city is city's
     ID number for the vendor.
 
-    :param id: The table's primary key.
+    :param id: The table's primary key, which is also our internal vendor ID.
     :type id: int
     :param name: ???
     :type name: string
-    :param vendor_id_city: ???
+    :param vendor_id_city: The city's vendor ID.
     :type vendor_id_city: string
     """
 
