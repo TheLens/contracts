@@ -8,7 +8,8 @@ It uses SQLAlchemy to connect to a PostgreSQL database.
 """
 
 import os
-from flask import Flask, request
+from flask import Flask, request, Response
+from functools import wraps
 # from flask.ext.cache import Cache
 from contracts.models import Models
 from contracts.views import Views
@@ -85,24 +86,6 @@ def contract(doc_cloud_id):
     return view
 
 
-@app.route('/contracts/admin/<string:doc_cloud_id>', methods=['GET'])
-def parserator(doc_cloud_id):
-    """
-    The parserator data entry page. The contract ID is specified in the URL.
-
-    :returns: HTML. The single contract page \
-    (/contracts/contract/<doc_cloud_id>).
-    """
-
-    log.debug('/contract/admin/')
-
-    tags = Models().get_parserator_page(doc_cloud_id)
-
-    view = Views().get_parserator(tags)
-
-    return view
-
-
 @app.route('/contracts/admin/tags/<string:doc_cloud_id>', methods=['POST'])
 def tags(doc_cloud_id):
     """
@@ -114,7 +97,8 @@ def tags(doc_cloud_id):
 
     log.debug('/contract/admin/tags')
 
-    # to do : deal with cases when there are no tags yet. parserator takes 15 minutes.
+    # TODO: deal with cases when there are no tags yet.
+    # Parserator takes 15 minutes.
     tags = Models().get_tags_for_doc_cloud_id(doc_cloud_id, request)
 
     view = Views().get_parserator(tags)
@@ -141,6 +125,53 @@ def download(docid):
     return data
 
 
+def check_auth(username, password):
+    """
+    Checks if given username and password match correct credentials.
+
+    :param username: The entered username.
+    :type username: string
+    :param password: The entered password.
+    :type password: string
+    :returns: bool. True if username and password are correct, False otherwise.
+    """
+
+    return (username == os.environ.get('CONTRACTS_ADMIN_USERNAME') and
+            password == os.environ.get('CONTRACTS_ADMIN_PASSWORD'))
+
+
+def authenticate():
+    """
+    Return error message.
+    """
+
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'}
+    )
+
+
+def requires_auth(f):
+    """
+    Authorization process.
+    """
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        '''docstring'''
+
+        auth = request.authorization
+
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+
 # @cache.memoize(timeout=5000)
 @app.route("/contracts/input", methods=['POST'])
 def searchbar_input():
@@ -160,6 +191,26 @@ def searchbar_input():
     data = Models().searchbar_input(term)
 
     return data
+
+
+@app.route('/contracts/admin/<string:doc_cloud_id>', methods=['GET'])
+@requires_auth
+def parserator(doc_cloud_id):
+    """
+    The parserator data entry page. The contract ID is specified in the URL.
+
+    :returns: HTML. The single contract page \
+    (/contracts/contract/<doc_cloud_id>).
+    """
+
+    log.debug('/contract/admin/')
+
+    tags = Models().get_parserator_page(doc_cloud_id)
+
+    view = Views().get_parserator(tags)
+
+    return view
+
 
 if __name__ == '__main__':
     app.run(
