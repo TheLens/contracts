@@ -6,6 +6,7 @@ These models gather and organize published contracts from the city.
 import os
 import subprocess
 import re
+import time
 import urllib2
 from datetime import datetime, date
 import uuid
@@ -1166,6 +1167,7 @@ def check_page(page_no):
                 'Contract not posted publically. ' +
                 'Purchase order=%s', purchaseorderno
             )
+        time.sleep(10)
 
 
 def download_attachment_file(bid_no, bid_file_location):

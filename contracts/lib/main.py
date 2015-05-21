@@ -3,6 +3,7 @@
 This script runs the daily downloader.
 """
 
+import time
 from contracts.lib.models import check_page
 
 if __name__ == '__main__':
@@ -10,3 +11,4 @@ if __name__ == '__main__':
 
     for page in pages:
         check_page(page)
+        time.sleep(60)

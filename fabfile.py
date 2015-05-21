@@ -80,19 +80,6 @@ def contracts():
     local('git add %s/views.py' % APP_DIR)
 
 
-# def datamanagement():
-#     '''/contracts/datamanagement'''
-
-#     local('git add %s/__init__.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/backup.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/daily_linker.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/emailer.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/lens_doc_cloud_sync.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/main.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/lib/models.py' % DATAMANAGEMENT_DIR)
-#     local('git add %s/vendor_scraper.py' % DATAMANAGEMENT_DIR)
-
-
 def lib():
     '''/contracts/lib'''
 
@@ -102,7 +89,6 @@ def lib():
     local('git add %s/backup.py' % LIB_DIR)
     local('git add %s/daily_linker.py' % LIB_DIR)
     local('git add %s/emailer.py' % LIB_DIR)
-    local('git add %s/lens_doc_cloud_sync.py' % LIB_DIR)
     local('git add %s/main.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
