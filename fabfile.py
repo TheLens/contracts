@@ -122,6 +122,7 @@ def templates():
     local('git add %s/head.html' % TEMPLATE_DIR)
     local('git add %s/index.html' % TEMPLATE_DIR)
     local('git add %s/js.html' % TEMPLATE_DIR)
+    local('git add %s/parserator.html' % TEMPLATE_DIR)
     local('git add %s/search.html' % TEMPLATE_DIR)
     local('git add %s/search-area.html' % TEMPLATE_DIR)
     local('git add %s/table.html' % TEMPLATE_DIR)

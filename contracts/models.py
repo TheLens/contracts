@@ -170,6 +170,24 @@ class Models(object):
 
         return data
 
+    def get_parserator_page(self, doc_cloud_id):
+        '''
+        This is a page that shows a contract. If this contract has been
+        parsed then the tags will be on s3. If the contract has not been
+        parsed then there will be no prefilled tags visible
+
+        :param doc_cloud_id: The single contract's uniquey DocumentCloud ID.
+        :type doc_cloud_id: string
+        :returns: dict. A dict with the updated date.
+        '''
+
+        # check s3 for the tags for a given contract
+        # return those tags to the view.
+
+        tags = {'doc_cloud_id': doc_cloud_id}
+
+        return tags
+
     def get_download(self, doc_cloud_id):
         '''
         ???

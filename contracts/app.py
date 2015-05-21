@@ -85,6 +85,24 @@ def contract(doc_cloud_id):
     return view
 
 
+@app.route('/contracts/admin/<string:doc_cloud_id>', methods=['GET'])
+def parserator(doc_cloud_id):
+    """
+    The parserator data entry page. The contract ID is specified in the URL.
+
+    :returns: HTML. The single contract page \
+    (/contracts/contract/<doc_cloud_id>).
+    """
+
+    log.debug('/contract/admin/')
+
+    tags = Models().get_parserator_page(doc_cloud_id)
+
+    view = Views().get_parserator(tags)
+
+    return view
+
+
 @app.route('/contracts/download/<string:docid>', methods=['GET', 'POST'])
 def download(docid):
     """
