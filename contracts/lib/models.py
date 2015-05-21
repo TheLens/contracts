@@ -13,7 +13,6 @@ import dateutil
 from bs4 import BeautifulSoup
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
-import pdb
 
 from pythondocumentcloud import DocumentCloud
 from contracts.db import (
@@ -687,7 +686,6 @@ class DocumentCloudProject(object):
                         extra_string = str(counter) + " of " + \
                             str(len(purchase_order.attachments))
                     temp = purchase_order.description + extra_string
-                    # pdb.set_trace()
                     self.upload_contract(
                         bid_file_location,
                         purchase_order.data,
@@ -1168,7 +1166,6 @@ def check_page(page_no):
                 'Contract not posted publically. ' +
                 'Purchase order=%s', purchaseorderno
             )
-        pdb.set_trace()
 
 
 def download_attachment_file(bid_no, bid_file_location):
