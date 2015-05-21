@@ -5,4 +5,4 @@
 # -v: verbose
 # -z: compress file data during the transfer
 # -h: help?
-rsync -avzh tom@projects.thelensnola.org:/backups/contracts /Volumes/External\ HDD/contracts-backup
+rsync -avzh ubuntu@vault.thelensnola.org:/backups/contracts /Volumes/External\ HDD/contracts-backup
