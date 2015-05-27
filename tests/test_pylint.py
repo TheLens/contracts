@@ -8,6 +8,7 @@ from unittest import TestCase
 import os
 import fnmatch
 from subprocess import call
+from contracts import PROJECT_DIR
 
 # ignore stuff in virtualenvs or version control directories
 patterns = ('tests')
@@ -34,8 +35,7 @@ class TestPylint(TestCase):
 
         # Find all .py files
         files_list = []
-        for root, dirnames, filenames in os.walk('/Users/thomasthoren/' +
-                                                 'projects/contracts'):
+        for root, dirnames, filenames in os.walk(PROJECT_DIR):
             # if ignore(root):
             #     continue
 

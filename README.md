@@ -18,7 +18,6 @@ Testing coverage: https://coveralls.io/r/TheLens/contracts
 
 * Python 2.7
 * PostgreSQL 9.3+
-* PostGIS 2.1
 * Flask
 * SQLAlchemy
 * Virtualenvwrapper/virtualenv

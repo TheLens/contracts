@@ -14,13 +14,13 @@ import getpass
 USER = getpass.getuser()
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
+LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
 
 if USER == 'ubuntu':  # Server
     CORPUS_LOC = "/backups/contracts"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
-    LOG_PATH = "/home/%s/contracts/logs/contracts.log" % USER
 
     VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
     PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
@@ -54,7 +54,6 @@ if USER == 'abe':  # Server
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
-    LOG_PATH = "/home/%s/lens/contracts/logs/contracts.log" % USER
 
     VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
     PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
@@ -84,11 +83,11 @@ if USER == 'abe':  # Server
     DEBUG = False
 
 if USER == 'thomasthoren':  # Tom's Local
+    NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/Users/%s" % USER
-    LOG_PATH = "/Users/%s/projects/contracts/logs/contracts.log" % USER
 
     VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
     PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
