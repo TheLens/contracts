@@ -48,8 +48,7 @@ if USER == 'ubuntu':  # Server
     # app.py config
     RELOADER = False
     DEBUG = False
-
-if USER == 'abe':  # Server
+elif USER == 'abe':  # Server
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
@@ -81,8 +80,8 @@ if USER == 'abe':  # Server
     # app.py config
     RELOADER = False
     DEBUG = False
-
-if USER == 'thomasthoren':  # Tom's Local
+else:
+    # USER == 'thomasthoren':  # Tom's Local
     NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
