@@ -6,6 +6,7 @@ from unittest import TestCase
 import pep8
 import os
 import fnmatch
+from contracts import PROJECT_DIR
 
 # ignore stuff in virtualenvs or version control directories
 patterns = ('logs')
@@ -31,8 +32,7 @@ class TestPep8(TestCase):
 
         # Find all .py files
         files_list = []
-        for root, dirnames, filenames in os.walk('/Users/thomasthoren/' +
-                                                 'projects/contracts'):
+        for root, dirnames, filenames in os.walk(PROJECT_DIR):
             # print root
             # print dirnames
             # print filenames
