@@ -16,7 +16,7 @@ setup(
     ),
     data_files=[
         (".", ["README.md", "requirements.txt"]),
-        ("logs", ["logs/contracts.log"]),
+        # ("logs", ["logs/contracts.log"]),
         ("scripts", [
             "scripts/main.sh",
             "scripts/sync_with_document_cloud.sh",
