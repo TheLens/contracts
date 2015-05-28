@@ -26,6 +26,7 @@ setup(
         "": ['logs/contracts.log']
     },
     include_package_data=True,
+    zip_safe=False,
     license='MIT',
     description=(
         "A package for scraping and publishing " +
@@ -35,6 +36,9 @@ setup(
     url='http://vault.thelensnola.org/contracts/',
     author='The Lens',
     author_email='tthoren@thelensnola.org',
+    setup_requires=(
+        'requests',
+    ),
     install_requires=(
         'alabaster',
         'astroid',
