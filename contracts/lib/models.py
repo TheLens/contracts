@@ -765,6 +765,8 @@ class DocumentCloudProject(object):
         #     data['purchase order']
         # ))
         contract = Contract()
+
+        # TODO: "Instance of 'Document' has no 'id' member":
         contract.doc_cloud_id = newcontract.id
         with LensDatabase() as db:
             contract.contractnumber = data['contract number']
@@ -775,7 +777,9 @@ class DocumentCloudProject(object):
 
             with LensDatabase() as lens_db:
                 lens_db.add_department(data['department'])
-                lens_db.add_vendor(data['vendor'], vendor_id_city=data['vendor_id'])
+                lens_db.add_vendor(
+                    data['vendor'],
+                    vendor_id_city=data['vendor_id'])
 
                 contract.departmentid = lens_db.get_department_id(
                     data['department'])
@@ -1082,7 +1086,7 @@ class LensDatabase(object):
         :returns: A list of dicts (?) for the daily contracts.
         """
 
-        today_string = datetime.datetime.today().strftime('%Y-%m-%d')
+        today_string = datetime.today().strftime('%Y-%m-%d')
 
         contracts = self.session.query(
             Contract.doc_cloud_id,

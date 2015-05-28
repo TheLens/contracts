@@ -381,81 +381,85 @@ class DailyLinker(object):
                 "ctl00_cphContent_btnBackToSearchResults").click()
         return pages
 
-    def pick_from_options(self, firm):
-        if "ctl00_cphContent_lblTotalResults" in self.driver.page_source:
-            # results listing page
+    # def pick_from_options(self, firm):
+    #     if "ctl00_cphContent_lblTotalResults" in self.driver.page_source:
+    #         # results listing page
 
-            text = self.driver.find_element_by_id(
-                "ctl00_cphContent_lblTotalResults").text
-            if str(text) == "0":  # no hits
-                self.driver.find_element_by_id(
-                    "ctl00_cphContent_btnNewSearch").click()
-                return "Zero results"
-            if int(text) > 0:  # more than one hits
-                potential_vendors = set([unicode(v.split("\t")[
-                    1].upper()) for v in vendors if v.split("\t")[1] == firm])
-                options = self.get_options(
-                    BeautifulSoup(self.driver.page_source))
-                direct_hits = [
-                    o.name for o in options if o.name.upper() == firm.upper()]
-                if len(direct_hits) == 1:
-                    # one of the rows matches perfectly so pick that one
+    #         text = self.driver.find_element_by_id(
+    #             "ctl00_cphContent_lblTotalResults").text
+    #         if str(text) == "0":  # no hits
+    #             self.driver.find_element_by_id(
+    #                 "ctl00_cphContent_btnNewSearch").click()
+    #             return "Zero results"
+    #         if int(text) > 0:  # more than one hits
+    #             potential_vendors = set([unicode(v.split("\t")[
+    #                 1].upper()) for v in vendors if v.split(
+    #                     "\t")[1] == firm])
+    #             options = self.get_options(
+    #                 BeautifulSoup(self.driver.page_source))
+    #             direct_hits = [
+    #                 o.name for o in options if \
+    #                 o.name.upper() == firm.upper()]
+    #             if len(direct_hits) == 1:
+    #                 # one of the rows matches perfectly so pick that one
 
-                    try:
-                        id = self.find_button_to_click(direct_hits.pop())
-                    except:
-                        return "Ambiguous results"
-                    self.driver.find_element_by_id(id).click()
-                    page = self.driver.page_source.encode('utf8')
-                    self.driver.find_element_by_id(
-                        "ctl00_cphContent_btnNewSearch").click()
-                    return page
-                ignore_periods_commas_hits = [o.name.replace(".", "").replace(
-                    ",", "") for o in options if o.name.upper().replace(
-                    ".", "").replace(",", "") == firm.upper().replace(
-                    ".", "").replace(",", "")]
-                # one matches perfectly without periods and commas so pick it:
-                if len(ignore_periods_commas_hits) == 1:
-                    try:
-                        id = self.find_button_to_click(
-                            ignore_periods_commas_hits.pop())
-                    except:
-                        return "Ambiguous results"
-                    self.driver.find_element_by_id(id).click()
-                    page = self.driver.page_source.encode('utf8')
-                    self.driver.find_element_by_id(
-                        "ctl00_cphContent_btnNewSearch").click()
-                    return page
-                if len(direct_hits) == 0:
-                    potential_vendors = list(set([
-                        (
-                            v.split("\t")[1],
-                            v.split("\t")[2],
-                            v.split("\t")[3],
-                            v.split("\t")[4],
-                            v.split("\t")[5]
-                        ) for v in vendors if v.split("\t")[1] == firm]))
-                    if len(potential_vendors) == 1:
-                        potential_vendors = potential_vendors.pop()
-                        potential_hits = self.get_rows_in_city(
-                            potential_vendors[3])
-                        pages = self.get_pages_for_potential_hits(
-                            potential_hits)
-                        if len(pages) == 1:
-                            pass  # check that it is correct
-                        else:
-                            self.driver.find_element_by_id(
-                                "ctl00_cphContent_btnNewSearch").click()
-                            return "Ambiguous results"
-                    else:
-                        self.driver.find_element_by_id(
-                            "ctl00_cphContent_btnNewSearch").click()
-                        return "Ambiguous results"
-                self.driver.find_element_by_id(
-                    "ctl00_cphContent_btnNewSearch").click()
-                return "Ambiguous results"
-        self.driver.find_element_by_id("btnNewSearch").click()
-        return "It's complicated"
+    #                 try:
+    #                     id = self.find_button_to_click(direct_hits.pop())
+    #                 except:
+    #                     return "Ambiguous results"
+    #                 self.driver.find_element_by_id(id).click()
+    #                 page = self.driver.page_source.encode('utf8')
+    #                 self.driver.find_element_by_id(
+    #                     "ctl00_cphContent_btnNewSearch").click()
+    #                 return page
+    #             ignore_periods_commas_hits = [o.name.replace(
+    #                 ".", "").replace(
+    #                 ",", "") for o in options if o.name.upper().replace(
+    #                 ".", "").replace(",", "") == firm.upper().replace(
+    #                 ".", "").replace(",", "")]
+    #             # one matches perfectly without
+    #               periods and commas so pick it:
+    #             if len(ignore_periods_commas_hits) == 1:
+    #                 try:
+    #                     id = self.find_button_to_click(
+    #                         ignore_periods_commas_hits.pop())
+    #                 except:
+    #                     return "Ambiguous results"
+    #                 self.driver.find_element_by_id(id).click()
+    #                 page = self.driver.page_source.encode('utf8')
+    #                 self.driver.find_element_by_id(
+    #                     "ctl00_cphContent_btnNewSearch").click()
+    #                 return page
+    #             if len(direct_hits) == 0:
+    #                 potential_vendors = list(set([
+    #                     (
+    #                         v.split("\t")[1],
+    #                         v.split("\t")[2],
+    #                         v.split("\t")[3],
+    #                         v.split("\t")[4],
+    #                         v.split("\t")[5]
+    #                     ) for v in vendors if v.split("\t")[1] == firm]))
+    #                 if len(potential_vendors) == 1:
+    #                     potential_vendors = potential_vendors.pop()
+    #                     potential_hits = self.get_rows_in_city(
+    #                         potential_vendors[3])
+    #                     pages = self.get_pages_for_potential_hits(
+    #                         potential_hits)
+    #                     if len(pages) == 1:
+    #                         pass  # check that it is correct
+    #                     else:
+    #                         self.driver.find_element_by_id(
+    #                             "ctl00_cphContent_btnNewSearch").click()
+    #                         return "Ambiguous results"
+    #                 else:
+    #                     self.driver.find_element_by_id(
+    #                         "ctl00_cphContent_btnNewSearch").click()
+    #                     return "Ambiguous results"
+    #             self.driver.find_element_by_id(
+    #                 "ctl00_cphContent_btnNewSearch").click()
+    #             return "Ambiguous results"
+    #     self.driver.find_element_by_id("btnNewSearch").click()
+    #     return "It's complicated"
 
     def search_sos(self, vendor):
         '''

@@ -15,13 +15,16 @@ USER = getpass.getuser()
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
 LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
+XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
+
+# this stores the json that describes the tags for parserator tokens
+TAGS_URL = PROJECT_DIR + "/data/tags.json"
 
 if USER == 'ubuntu':  # Server
     CORPUS_LOC = "/backups/contracts"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
-
     VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
     PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
     BIDS_LOCATION = CORPUS_LOC + "/bids/"

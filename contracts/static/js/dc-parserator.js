@@ -179,7 +179,7 @@ $("#xmlify").on("click", function() {
 
         url: post_url,
         success: function(ret) {
-            window.location.href = ret;
+            window.location.href = "/contracts/admin/";
         }
     });
 });

@@ -3,10 +3,9 @@ A few utility functions to support the web app
 """
 import json
 import logging
-import importlib
-import pdb
+from flask import request
 from pythondocumentcloud import DocumentCloud
-
+from contracts import TAGS_URL
 from contract_parser import tokenize
 
 logging.basicConfig(level=logging.DEBUG, filename="parserator.log")
@@ -17,7 +16,8 @@ def get_colors(tag):
     """
     Get the colors for a certain tag
     """
-    with open('/home/abe/research/documentparserator/webapp/static/json/tags.json') as data_file:
+
+    with open(TAGS_URL) as data_file:
         data = json.load(data_file)
     return [d for d in data if d['name'] == tag].pop()
 
@@ -60,6 +60,22 @@ def span_wrap(text, span_id, tag):
                ">" + text + "</span>"
 
 
+def get_labels():
+    """
+    Labeled tokens come back from the UI as JSON.
+    This method pulls them from the json and dumps
+    them out as tuples: (text, value) ex ("1.2 Million", contract_amount)
+    """
+    json_request = request.json  # get the json from the server
+    keys = sort_keys(json_request.keys())  # sort the keys (i.e. the token ids)
+    labels = []
+    for k in keys:
+        # get the labels that the user input to the UI
+        val = (json_request[k]['text'], json_request[k]['value'])
+        labels.append(val)
+    return labels
+
+
 def spanify(page_text, page_no, labels=None):
     """
     Take a page of text and wrap it in span tags
@@ -80,7 +96,6 @@ def spanify(page_text, page_no, labels=None):
             in_between = page_text[last_index_mem: start]
         last_index_mem = end
         spanid = str(page_no) + "-" + str(token_no)
-        pdb.set_trace()
         if labels:
             try:
                 correct_label = [l for l\
