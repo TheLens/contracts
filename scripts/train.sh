@@ -1,10 +1,11 @@
+#!/bin/bash
 workon contracts # start the venv
-rm -rf xml # remove the xml directory
-mkdir xml # create a new one
+rm -rf data/xml # remove the xml directory
+mkdir data/xml # create a new one
 
 #copy down all of the human labels
-aws s3 cp --recursive s3://lensnola/contracts/contract_amounts/human_labels/ xml --acl public-read
+aws s3 cp --recursive s3://lensnola/contracts/contract_amounts/human_labels/ data/xml --acl public-read
 
 # run parserator on the xml files, using the contract parser
-parserator train "./xml/*.xml" contract_parser
+parserator train "data/xml/*.xml" contract_parser/
 deactivate
