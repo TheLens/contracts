@@ -4,3 +4,6 @@ include README.md
 include scripts/main.sh
 include scripts/sync_with_document_cloud.sh
 include scripts/updatebackup.sh
+include contracts/*
+include contracts/lib/*
+include tests/*
