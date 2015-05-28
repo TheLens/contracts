@@ -22,9 +22,9 @@ setup(
             "scripts/sync_with_document_cloud.sh",
             "scripts/updatebackup.sh"])
     ],
-    # package_data={
-    #     "": ['contracts/*']
-    # },
+    package_data={
+        "": ['logs/contracts.log']
+    },
     include_package_data=True,
     license='MIT',
     description=(
