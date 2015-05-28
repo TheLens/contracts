@@ -23,7 +23,7 @@ setup(
             "scripts/updatebackup.sh"])
     ],
     package_data={
-        "logs": ['logs/contracts.log']
+        "": ['logs/contracts.log']
     },
     include_package_data=True,
     zip_safe=False,
