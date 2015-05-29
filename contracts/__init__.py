@@ -86,7 +86,7 @@ elif USER == 'abe':  # Server
     # app.py config
     RELOADER = False
     DEBUG = False
-elif USER == 'thomasthoren':  # Tom's Local
+else:  # USER == 'thomasthoren' or Read the Docs
     CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
