@@ -233,13 +233,13 @@ def parserator(doc_cloud_id):
     return view
 
 
-@app.route("/contracts/tokens/<string:docid>", methods=['POST'])
+@app.route("/contracts/admin/tokens/<string:docid>", methods=['POST'])
 def tokens_dump(docid):
     """
     The UI is sending tagged tokens back to the server.
     Save them to train parserator
     """
-    log.debug('/tokens')
+    log.debug('/contracts/admin/tokens')
     tagged_strings = set()
     labels = get_labels()
     tagged_sequence = labels
