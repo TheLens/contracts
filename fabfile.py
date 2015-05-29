@@ -119,6 +119,7 @@ def js():
 def templates():
     '''/contracts/templates'''
 
+    local('git add %s/admin.html' % TEMPLATE_DIR)
     local('git add %s/banner.html' % TEMPLATE_DIR)
     local('git add %s/contract.html' % TEMPLATE_DIR)
     local('git add %s/footer.html' % TEMPLATE_DIR)
