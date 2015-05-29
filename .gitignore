@@ -10,12 +10,15 @@ datamanagement/html*
 
 # Files
 
+*.crfsuite
 *.xml
 *.iml
 *.name
 *.pyc
 *.pdf
-.DS_Store
+*.DS_Store
 *.log
-app.conf
-app.cfg
+*.conf
+*.cfg
+*.secret
+

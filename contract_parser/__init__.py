@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+'''docstring'''
+
 import pycrfsuite
 import os
 import warnings

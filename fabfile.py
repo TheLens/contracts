@@ -53,6 +53,7 @@ def data():
     local('git add %s/dist.female.first.txt' % DATA_DIR)
     local('git add %s/dist.male.first.txt' % DATA_DIR)
     local('git add %s/skiplist.txt' % DATA_DIR)
+    local('git add %s/tags.json' % DATA_DIR)
 
 
 def docs():
@@ -133,6 +134,7 @@ def scripts():
 
     local('git add %s/main.sh' % SCRIPTS_DIR)
     local('git add %s/sync_with_document_cloud.sh' % SCRIPTS_DIR)
+    local('git add %s/train.sh' % SCRIPTS_DIR)
     local('git add %s/updatebackup.sh' % SCRIPTS_DIR)
 
 
