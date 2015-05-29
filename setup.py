@@ -12,6 +12,7 @@ setup(
     packages=(
         'contracts',
         'contracts.lib',
+        'parser',
         'tests',
     ),
     data_files=[
