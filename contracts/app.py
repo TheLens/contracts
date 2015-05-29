@@ -251,7 +251,7 @@ def tokens_dump(docid):
     except OSError:
         pass
     appendListToXMLfile(tagged_strings,
-                        importlib.import_module('contract_parser'),
+                        importlib.import_module('parser'),
                         outfile)
     log.debug("wrote xml file")
     output = "".join([i for i in open(outfile, "r")])
