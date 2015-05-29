@@ -525,7 +525,7 @@ class Models(object):
             ).all()
             session.close()
             officers = list(set([o[1].name for o in officers]))
-            print officers
+            # print officers
             return sorted(officers)
 
     # @cache.memoize(timeout=100000)

@@ -70,7 +70,7 @@ class Views(object):
 
         vendors = data['vendors']
         departments = data['departments']
-        print departments
+        # print departments
         number_of_documents = data['number_of_documents']
         number_of_pages = data['number_of_pages']
         current_page = data['current_page']
