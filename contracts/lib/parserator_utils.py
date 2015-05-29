@@ -7,7 +7,7 @@ import json
 from flask import request
 from pythondocumentcloud import DocumentCloud
 from contracts import TAGS_URL, log
-from contract_parser import tokenize
+from parser import tokenize
 
 CLIENT = DocumentCloud()
 
