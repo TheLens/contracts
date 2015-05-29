@@ -53,8 +53,7 @@ if USER == 'ubuntu':  # Server
     # app.py config
     RELOADER = False
     DEBUG = False
-
-if USER == 'abe':  # Server
+elif USER == 'abe':  # Server
     NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     ROOT_FOLDER = "/home/%s" % USER
