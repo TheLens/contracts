@@ -251,9 +251,12 @@ def tokens_dump(docid):
     except OSError:
         pass
     log.debug("about to append")
-    appendListToXMLfile(tagged_strings,
+    try:
+        appendListToXMLfile(tagged_strings,
                         importlib.import_module('parser'),
                         outfile)
+    except Exception,e:
+        print log.debug(str(e))
     log.debug("wrote xml file")
     output = "".join([i for i in open(outfile, "r")])
     conn = S3Connection()
