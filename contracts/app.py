@@ -250,6 +250,7 @@ def tokens_dump(docid):
         os.remove(outfile)
     except OSError:
         pass
+    log.debug("about to append")
     appendListToXMLfile(tagged_strings,
                         importlib.import_module('parser'),
                         outfile)
@@ -260,8 +261,8 @@ def tokens_dump(docid):
     k = Key(bucket)
     k.key = 'contracts/contract_amounts/human_labels/' + docid + ".xml"
     k.set_contents_from_string(output)
-
-    return None
+    log.debug("wrote to s3")
+    return "wrote to s3"
 
 
 if __name__ == '__main__':
