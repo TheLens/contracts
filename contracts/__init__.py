@@ -16,6 +16,7 @@ PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
 LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
 XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
+NUMBER_WORDS_LOCATION = PROJECT_DIR + '/contract_parser/number_words.txt'
 
 # this stores the json that describes the tags for parserator tokens
 TAGS_URL = PROJECT_DIR + "/data/tags.json"
