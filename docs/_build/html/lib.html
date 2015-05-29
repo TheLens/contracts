@@ -145,6 +145,10 @@ repo.</p>
 <dt id="contracts.lib.lens_doc_cloud_sync.match_lens_db_to_document_cloud">
 <code class="descclassname">contracts.lib.lens_doc_cloud_sync.</code><code class="descname">match_lens_db_to_document_cloud</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.lens_doc_cloud_sync.match_lens_db_to_document_cloud" title="Permalink to this definition">¶</a></dt>
 <dd><p>Match the Lens database to DocumentCloud.</p>
+<p>DocumentCloud can take anywhere from one minute to 30 minutes to cache new
+uploads and reflect their changes in its API.</p>
+<p>This checks DocumentCloud to make sure that the latest changes have been
+synched.</p>
 </dd></dl>
 
 <span class="target" id="module-contracts.lib.main"></span><p>This script runs the daily downloader.</p>
@@ -154,9 +158,9 @@ repo.</p>
 <em class="property">class </em><code class="descclassname">contracts.lib.models.</code><code class="descname">DocumentCloudProject</code><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represents the collection of contracts on DocumentCloud.</p>
 <dl class="method">
-<dt id="contracts.lib.models.DocumentCloudProject.add_contract">
-<code class="descname">add_contract</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.add_contract" title="Permalink to this definition">¶</a></dt>
-<dd><p>docstring</p>
+<dt id="contracts.lib.models.DocumentCloudProject.add_contract_to_document_cloud">
+<code class="descname">add_contract_to_document_cloud</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.add_contract_to_document_cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a contract to our DocumentCloud project.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -186,7 +190,7 @@ repo.</p>
 <dl class="method">
 <dt id="contracts.lib.models.DocumentCloudProject.get_contract">
 <code class="descname">get_contract</code><span class="sig-paren">(</span><em>field</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.get_contract" title="Permalink to this definition">¶</a></dt>
-<dd><p>docstring</p>
+<dd><p>Fetches the contract with the specified field and value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -228,24 +232,10 @@ then update them in DC.</p>
 </table>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="contracts.lib.models.DocumentCloudProject.get_skip_list">
-<em class="property">static </em><code class="descname">get_skip_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.get_skip_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch the list of (purchase order numbers) to skip.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list. The (purchase order numbers) to exclude.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="contracts.lib.models.DocumentCloudProject.has_contract">
 <code class="descname">has_contract</code><span class="sig-paren">(</span><em>field</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.has_contract" title="Permalink to this definition">¶</a></dt>
-<dd><p>docstring</p>
+<dd><p>Checks if there is a contract for this field and value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -284,8 +274,9 @@ then update them in DC.</p>
 
 <dl class="method">
 <dt id="contracts.lib.models.DocumentCloudProject.upload_contract">
-<code class="descname">upload_contract</code><span class="sig-paren">(</span><em>file</em>, <em>data</em>, <em>description</em>, <em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.upload_contract" title="Permalink to this definition">¶</a></dt>
-<dd><p>This uploads a contract onto DcoumentCloud.</p>
+<code class="descname">upload_contract</code><span class="sig-paren">(</span><em>fname</em>, <em>data</em>, <em>description</em>, <em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.DocumentCloudProject.upload_contract" title="Permalink to this definition">¶</a></dt>
+<dd><p>This uploads a contract onto DocumentCloud.
+It also adds this contract to the Lens database.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -313,8 +304,8 @@ then update them in DC.</p>
 <em class="property">class </em><code class="descclassname">contracts.lib.models.</code><code class="descname">LensDatabase</code><a class="headerlink" href="#contracts.lib.models.LensDatabase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represents the Lens database that tracks contracts.</p>
 <dl class="method">
-<dt id="contracts.lib.models.LensDatabase.add_contract">
-<code class="descname">add_contract</code><span class="sig-paren">(</span><em>contract</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensDatabase.add_contract" title="Permalink to this definition">¶</a></dt>
+<dt id="contracts.lib.models.LensDatabase.add_contract_to_lens_database">
+<code class="descname">add_contract_to_lens_database</code><span class="sig-paren">(</span><em>contract</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensDatabase.add_contract_to_lens_database" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a contract to the Lens database.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -342,7 +333,7 @@ then update them in DC.</p>
 
 <dl class="method">
 <dt id="contracts.lib.models.LensDatabase.add_vendor">
-<code class="descname">add_vendor</code><span class="sig-paren">(</span><em>vendor</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensDatabase.add_vendor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_vendor</code><span class="sig-paren">(</span><em>vendor</em>, <em>vendor_id_city=None</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensDatabase.add_vendor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add vendor to the Lens database.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -434,7 +425,10 @@ TODO: refactor</p>
 <dl class="method">
 <dt id="contracts.lib.models.LensDatabase.get_half_filled_contracts">
 <code class="descname">get_half_filled_contracts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensDatabase.get_half_filled_contracts" title="Permalink to this definition">¶</a></dt>
-<dd><p>DocumentCloud doesn&#8217;t give immediate access to all document properties.
+<dd><p>A half-filled contract is where we know DC ID but don&#8217;t know PO number
+or any of the other metadata in the city&#8217;s PO system because when we
+upload the contract to DC...</p>
+<p>DocumentCloud doesn&#8217;t give immediate access to all document properties.
 This pulls out the contracts in the database added during upload but
 that still need to have their details filled in.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -555,6 +549,22 @@ purchase. It gets associated with a city contract once the authorization
 goes through.</p>
 <p>A PO number is used to track a contract in the city&#8217;s purchasing system.</p>
 <dl class="method">
+<dt id="contracts.lib.models.LensRepository.check_if_public_and_need_to_download">
+<code class="descname">check_if_public_and_need_to_download</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.check_if_public_and_need_to_download" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>purchase_order_no</strong> (<em>string.</em>) &#8211; The contract&#8217;s unique ID for DocumentCloud.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">???</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="contracts.lib.models.LensRepository.download_purchaseorder">
 <code class="descname">download_purchaseorder</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.download_purchaseorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download (the contract matching this purchase order number?).</p>
@@ -570,9 +580,9 @@ goes through.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.LensRepository.get_skip_list">
-<code class="descname">get_skip_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.get_skip_list" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_skip_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.get_skip_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Some contracts are not posted on the city&#8217;s site even though they are
 included in the city&#8217;s contract inventory. We put these contracts on a
 skip list so they are ignored in code.</p>
@@ -586,25 +596,9 @@ skip list so they are ignored in code.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="contracts.lib.models.LensRepository.sync">
-<code class="descname">sync</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.sync" title="Permalink to this definition">¶</a></dt>
-<dd><p>docstring</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>purchase_order_no</strong> (<em>string.</em>) &#8211; The contract&#8217;s unique ID for DocumentCloud.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">???</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="contracts.lib.models.LensRepository.write_pos">
-<code class="descname">write_pos</code><span class="sig-paren">(</span><em>html</em>, <em>file_location</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.write_pos" title="Permalink to this definition">¶</a></dt>
+<dl class="staticmethod">
+<dt id="contracts.lib.models.LensRepository.write_purchase_order">
+<em class="property">static </em><code class="descname">write_purchase_order</code><span class="sig-paren">(</span><em>html</em>, <em>file_location</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.LensRepository.write_purchase_order" title="Permalink to this definition">¶</a></dt>
 <dd><p>docstring</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -633,10 +627,11 @@ skip list so they are ignored in code.</p>
 purchase. It gets associated with a city contract once the authorization
 goes through.</p>
 <p>A PO number is used to track a contract in the city&#8217;s purchasing system.</p>
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.check_invalid">
-<code class="descname">check_invalid</code><span class="sig-paren">(</span><em>html</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.check_invalid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sometimes invalid POs are posted. Check if this is one of those.</p>
+<em class="property">static </em><code class="descname">check_invalid</code><span class="sig-paren">(</span><em>html</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.check_invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sometimes invalid purchase orders are posted. Check if this is one of
+those.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -649,9 +644,9 @@ goes through.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.download_attachment">
-<code class="descname">download_attachment</code><span class="sig-paren">(</span><em>attachment</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_attachment" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">download_attachment</code><span class="sig-paren">(</span><em>attachment</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_attachment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download an attachment associated with a purchase order.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -664,9 +659,9 @@ goes through.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.download_purchaseorder">
-<code class="descname">download_purchaseorder</code><span class="sig-paren">(</span><em>purchaseorderno</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_purchaseorder" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">download_purchaseorder</code><span class="sig-paren">(</span><em>purchaseorderno</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_purchaseorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download the HTML associated with a purchase order.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -680,9 +675,9 @@ goes through.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.download_vendor_profile">
-<code class="descname">download_vendor_profile</code><span class="sig-paren">(</span><em>vendor_id_city</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_vendor_profile" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">download_vendor_profile</code><span class="sig-paren">(</span><em>vendor_id_city</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.download_vendor_profile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download the vendor page associated with a purchase order, if we don&#8217;t
 have the vendor page already.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -695,9 +690,9 @@ have the vendor page already.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_attachments">
-<code class="descname">get_attachments</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_attachments" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_attachments</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_attachments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the attachments to download from the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -725,9 +720,9 @@ have the vendor page already.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_department">
-<code class="descname">get_department</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_department" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_department</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_department" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the department in the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -741,9 +736,9 @@ have the vendor page already.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_description">
-<code class="descname">get_description</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_description" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_description</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_description" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the description in the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -774,9 +769,9 @@ If so, then download it.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_knumber">
-<code class="descname">get_knumber</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_knumber" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_knumber</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_knumber" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the k number in the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -790,9 +785,9 @@ If so, then download it.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_purchase_order">
-<code class="descname">get_purchase_order</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_purchase_order" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_purchase_order</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_purchase_order" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the purchase order in the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -806,9 +801,9 @@ If so, then download it.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="contracts.lib.models.PurchaseOrder.get_vendor_id">
-<code class="descname">get_vendor_id</code><span class="sig-paren">(</span><em>html</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_vendor_id" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">get_vendor_id</code><span class="sig-paren">(</span><em>html</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.PurchaseOrder.get_vendor_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the vendor id in the HTML.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -843,7 +838,8 @@ If so, then download it.</p>
 <dl class="function">
 <dt id="contracts.lib.models.check_page">
 <code class="descclassname">contracts.lib.models.</code><code class="descname">check_page</code><span class="sig-paren">(</span><em>page_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.check_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the scraper. Need a class here? Just function?</p>
+<dd><p>Run the downloader helper for this page on the purchasing site.
+Need a class here? Just function?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
