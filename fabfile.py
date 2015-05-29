@@ -94,6 +94,7 @@ def lib():
     local('git add %s/main.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
     local('git add %s/models.py' % LIB_DIR)
+    local('git add %s/parserator_utils.py' % LIB_DIR)
     local('git add %s/results_language.py' % LIB_DIR)
     local('git add %s/vendor_scraper.py' % LIB_DIR)
 
@@ -134,7 +135,7 @@ def parser():
     '''/parser/'''
 
     local('git add %s/__init__.py' % PARSER_DIR)
-    local('git add %s/number_words.xt' % PARSER_DIR)
+    local('git add %s/number_words.txt' % PARSER_DIR)
 
 
 def scripts():
@@ -179,6 +180,7 @@ def addthemall():
     css()
     js()
     templates()
+    parser()
     scripts()
     tests()
     pythondocumentcloud()
