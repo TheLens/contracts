@@ -169,7 +169,7 @@ Parserator-formatted XML
  */
 $("#xmlify").on("click", function() {
     var json = JSON.stringify(values);
-    var post_url = '/tokens/' + $("#doc_cloud_id").attr("data-docid");
+    var post_url = 'tokens/' + $("#doc_cloud_id").attr("data-docid");
     $.ajax({
         type: 'POST',
         // Provide correct Content-Type, so that Flask will know how to process it.

@@ -233,24 +233,27 @@ def parserator(doc_cloud_id):
     return view
 
 
-@app.route("/tokens/<string:docid>", methods=['POST'])
+@app.route("/contracts/admin/tokens/<string:docid>", methods=['POST'])
 def tokens_dump(docid):
     """
     The UI is sending tagged tokens back to the server.
     Save them to train parserator
     """
+    log.debug('/contracts/admin/tokens')
     tagged_strings = set()
     labels = get_labels()
     tagged_sequence = labels
     tagged_strings.add(tuple(tagged_sequence))
     outfile = XML_LOCATION + "/" + docid + ".xml"
+    log.debug(outfile)
     try:
         os.remove(outfile)
     except OSError:
         pass
     appendListToXMLfile(tagged_strings,
-                        importlib.import_module('contract_parser'),
+                        importlib.import_module('parser'),
                         outfile)
+    log.debug("wrote xml file")
     output = "".join([i for i in open(outfile, "r")])
     conn = S3Connection()
     bucket = conn.get_bucket('lensnola')
