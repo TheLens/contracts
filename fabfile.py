@@ -18,6 +18,7 @@ DOCS_DIR = '%s/docs' % PROJECT_DIR
 IMAGES_DIR = '%s/contracts/static/css/images' % PROJECT_DIR
 JS_DIR = '%s/contracts/static/js' % PROJECT_DIR
 LIB_DIR = '%s/contracts/lib' % PROJECT_DIR
+PARSER_DIR = '%s/parser' % PROJECT_DIR
 PICTURES_DIR = '%s' % PROJECT_DIR + '/contracts/static/pictures'
 SCRIPTS_DIR = '%s/scripts' % PROJECT_DIR
 TEMPLATE_DIR = '%s/contracts/templates' % PROJECT_DIR
@@ -127,6 +128,13 @@ def templates():
     local('git add %s/search.html' % TEMPLATE_DIR)
     local('git add %s/search-area.html' % TEMPLATE_DIR)
     local('git add %s/table.html' % TEMPLATE_DIR)
+
+
+def parser():
+    '''/parser/'''
+
+    local('git add %s/__init__.py' % PARSER_DIR)
+    local('git add %s/number_words.xt' % PARSER_DIR)
 
 
 def scripts():

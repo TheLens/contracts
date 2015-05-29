@@ -16,7 +16,7 @@ PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
 LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
 XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
-NUMBER_WORDS_LOCATION = PROJECT_DIR + '/contract_parser/number_words.txt'
+NUMBER_WORDS_LOCATION = PROJECT_DIR + '/parser/number_words.txt'
 
 # this stores the json that describes the tags for parserator tokens
 TAGS_URL = PROJECT_DIR + "/data/tags.json"
@@ -85,7 +85,6 @@ elif USER == 'abe':  # Server
     RELOADER = False
     DEBUG = False
 elif USER == 'thomasthoren':  # Tom's Local
-    NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
