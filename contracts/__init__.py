@@ -54,6 +54,7 @@ if USER == 'ubuntu':  # Server
     DEBUG = False
 
 if USER == 'abe':  # Server
+    NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     ROOT_FOLDER = "/home/%s" % USER
 

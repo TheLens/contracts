@@ -5,6 +5,7 @@ The web app that runs at vault.thelensnola.org/contracts.
 import time
 import json
 import urllib2
+import httplib
 from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -211,6 +212,19 @@ class Models(object):
 
         return tags
 
+    def do_tags_exist(self, doc_cloud_id):
+        url = (
+            "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
+            "contract_amounts/computer_labels/" + doc_cloud_id
+        )
+
+        c = httplib.HTTPConnection('www.abc.com')
+        c.request("HEAD", '')
+        if c.getresponse().status == 200:
+            return True
+        else:
+            return False
+
     def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
         url = (
             "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
@@ -218,15 +232,16 @@ class Models(object):
         )
 
         page = request.args.get('page')
-        response = urllib2.urlopen(url)
-        computer_generated_tags = response.read()
-        computer_generated_tags = json.loads(computer_generated_tags)
         page_text = get_document_page(doc_cloud_id, page)
+        
+        try:  
+            response = urllib2.urlopen(url)
+            computer_generated_tags = response.read()
+            computer_generated_tags = json.loads(computer_generated_tags)
+        except urllib2.HTTPError, e:
+            log.debug("HTTPError error " + str(e.code))
+            computer_generated_tags = None
         return spanify(page_text, page, computer_generated_tags)
-
-        # request to s3
-        # convert to json
-        # and return
 
     def get_download(self, doc_cloud_id):
         '''
