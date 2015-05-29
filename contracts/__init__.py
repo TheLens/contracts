@@ -53,6 +53,7 @@ if USER == 'ubuntu':  # Server
     DEBUG = False
 
 if USER == 'abe':  # Server
+    NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
