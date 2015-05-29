@@ -48,6 +48,7 @@ if USER == 'ubuntu':  # Server
     LENS_JS = '%s/js/lens.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
+    PARSERATOR_JS = '%s/js/dc-parserator.js' % S3_URL
 
     # app.py config
     RELOADER = False
@@ -80,6 +81,7 @@ elif USER == 'abe':  # Server
     LENS_JS = '%s/js/lens.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
+    PARSERATOR_JS = '%s/js/dc-parserator.js' % S3_URL
 
     # app.py config
     RELOADER = False
@@ -111,6 +113,7 @@ elif USER == 'thomasthoren':  # Tom's Local
     LENS_JS = '/static/js/lens.js'
     RESULTS_JS = '/static/js/results.js'
     SEARCH_JS = '/static/js/search.js'
+    PARSERATOR_JS = '/static/js/dc-parserator.js'
 
     # app.py config
     RELOADER = True
