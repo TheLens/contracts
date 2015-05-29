@@ -151,7 +151,8 @@ class Views(object):
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 download_js=DOWNLOAD_JS,
-                lens_js=LENS_JS
+                lens_js=LENS_JS,
+                parserator_js=PARSERATOR_JS
             )
         )
 
