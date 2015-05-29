@@ -239,6 +239,7 @@ def tokens_dump(docid):
     The UI is sending tagged tokens back to the server.
     Save them to train parserator
     """
+    log.debug('/tokens')
     tagged_strings = set()
     labels = get_labels()
     tagged_sequence = labels
