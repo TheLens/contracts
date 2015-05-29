@@ -233,7 +233,7 @@ def parserator(doc_cloud_id):
     return view
 
 
-@app.route("/tokens/<string:docid>", methods=['POST'])
+@app.route("/contracts/tokens/<string:docid>", methods=['POST'])
 def tokens_dump(docid):
     """
     The UI is sending tagged tokens back to the server.
