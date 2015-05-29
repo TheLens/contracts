@@ -53,6 +53,7 @@ def data():
     local('git add %s/dist.female.first.txt' % DATA_DIR)
     local('git add %s/dist.male.first.txt' % DATA_DIR)
     local('git add %s/skiplist.txt' % DATA_DIR)
+    local('git add %s/tags.json' % DATA_DIR)
 
 
 def docs():
@@ -122,6 +123,7 @@ def templates():
     local('git add %s/head.html' % TEMPLATE_DIR)
     local('git add %s/index.html' % TEMPLATE_DIR)
     local('git add %s/js.html' % TEMPLATE_DIR)
+    local('git add %s/parserator.html' % TEMPLATE_DIR)
     local('git add %s/search.html' % TEMPLATE_DIR)
     local('git add %s/search-area.html' % TEMPLATE_DIR)
     local('git add %s/table.html' % TEMPLATE_DIR)
@@ -132,6 +134,7 @@ def scripts():
 
     local('git add %s/main.sh' % SCRIPTS_DIR)
     local('git add %s/sync_with_document_cloud.sh' % SCRIPTS_DIR)
+    local('git add %s/train.sh' % SCRIPTS_DIR)
     local('git add %s/updatebackup.sh' % SCRIPTS_DIR)
 
 

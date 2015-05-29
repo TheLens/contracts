@@ -11,11 +11,11 @@ from subprocess import call
 from contracts import PROJECT_DIR
 
 # ignore stuff in virtualenvs or version control directories
-patterns = ('tests')
+patterns = ('logs', 'backup', 'pythondocumentcloud', 'misc')
 
 
 def ignore(directory):
-    '''Should the directory be ignored?'''
+    '''Check if this directory should be ignored.'''
 
     for pattern in patterns:
         if pattern in directory:
@@ -36,8 +36,9 @@ class TestPylint(TestCase):
         # Find all .py files
         files_list = []
         for root, dirnames, filenames in os.walk(PROJECT_DIR):
-            # if ignore(root):
-            #     continue
+
+            if ignore(root):
+                continue
 
             for filename in fnmatch.filter(filenames, '*.py'):
                 files_list.append(os.path.join(root, filename))
@@ -45,7 +46,7 @@ class TestPylint(TestCase):
         for filename in files_list:
             call([
                 'pylint',
-                # '--errors-only',
+                '--errors-only',
                 # '--ignore=check_assessor_urls.py',  # todo: not working
                 # --disable=invalid-name,
                 filename

@@ -1,5 +1,9 @@
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.4.1/js/foundation.min.js"></script>
+<!-- <script type="text/javascript">
+   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script> -->
+<script type="text/javascript" src="{{url_for('static', filename='js/dc-parserator.js')}}"></script>
 <script type="text/javascript">
   $(document).foundation();
 </script>

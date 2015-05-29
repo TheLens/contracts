@@ -9,7 +9,7 @@ import fnmatch
 from contracts import PROJECT_DIR
 
 # ignore stuff in virtualenvs or version control directories
-patterns = ('logs')
+patterns = ('logs', 'backup', 'pythondocumentcloud', 'misc')
 
 
 def ignore(directory):
@@ -36,8 +36,9 @@ class TestPep8(TestCase):
             # print root
             # print dirnames
             # print filenames
-            # if ignore(root):
-            #     continue
+            # print '========'
+            if ignore(root):
+                continue
 
             for filename in fnmatch.filter(filenames, '*.py'):
                 # print filename

@@ -25,6 +25,10 @@ input[type="input"]:active {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
+.token{
+  border: 1px solid black;
+}
+
 .text-box {
   width: 100%;
   margin-bottom: 0;

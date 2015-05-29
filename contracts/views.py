@@ -132,3 +132,53 @@ class Views(object):
         )
 
         return response
+
+    @staticmethod
+    def get_admin_home(data):
+        '''
+        Renders the admin home page (/contracts/admin/).
+
+        :param data: Data for the page.
+        :type data: dict
+        :returns: HTML. Rendered and ready for display.
+        '''
+
+        response = make_response(
+            render_template(
+                'admin.html',
+                lens_css=LENS_CSS,
+                banner_css=BANNER_CSS,
+                contracts_css=CONTRACTS_CSS,
+                download_js=DOWNLOAD_JS,
+                lens_js=LENS_JS
+            )
+        )
+
+        return response
+
+    @staticmethod
+    def get_parserator(tags=None):
+        '''
+        Renders the parserator page (/contracts/admin/).
+
+        :param data: Data for the page.
+        :type data: dict
+        :returns: HTML. Rendered and ready for display.
+        '''
+
+        doc_cloud_id = tags['doc_cloud_id']
+
+        response = make_response(
+            render_template(
+                'parserator.html',
+                doc_cloud_id=doc_cloud_id,
+                tags=tags,
+                lens_css=LENS_CSS,
+                banner_css=BANNER_CSS,
+                contracts_css=CONTRACTS_CSS,
+                download_js=DOWNLOAD_JS,
+                lens_js=LENS_JS
+            )
+        )
+
+        return response

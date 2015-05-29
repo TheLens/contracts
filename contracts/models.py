@@ -2,8 +2,10 @@
 The web app that runs at vault.thelensnola.org/contracts.
 """
 
-# import re
 import time
+import json
+import urllib2
+import httplib
 from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +22,10 @@ from pythondocumentcloud import DocumentCloud
 from contracts import (
     CONNECTION_STRING,
     log
+)
+from contracts.lib.parserator_utils import (
+    get_document_page,
+    spanify
 )
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -169,6 +175,73 @@ class Models(object):
         data['updated_date'] = updated_date
 
         return data
+
+    def get_admin_home(self):
+        '''
+        This is a page that shows a contract. If this contract has been
+        parsed then the tags will be on s3. If the contract has not been
+        parsed then there will be no prefilled tags visible
+
+        :param doc_cloud_id: The single contract's uniquey DocumentCloud ID.
+        :type doc_cloud_id: string
+        :returns: dict. A dict with the updated date.
+        '''
+
+        # check s3 for the tags for a given contract
+        # return those tags to the view.
+
+        data = None
+
+        return data
+
+    def get_parserator_page(self, doc_cloud_id):
+        '''
+        This is a page that shows a contract. If this contract has been
+        parsed then the tags will be on s3. If the contract has not been
+        parsed then there will be no prefilled tags visible
+
+        :param doc_cloud_id: The single contract's uniquey DocumentCloud ID.
+        :type doc_cloud_id: string
+        :returns: dict. A dict with the updated date.
+        '''
+
+        # check s3 for the tags for a given contract
+        # return those tags to the view.
+
+        tags = {'doc_cloud_id': doc_cloud_id}
+
+        return tags
+
+    def do_tags_exist(self, doc_cloud_id):
+        url = (
+            "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
+            "contract_amounts/computer_labels/" + doc_cloud_id
+        )
+
+        c = httplib.HTTPConnection('www.abc.com')
+        c.request("HEAD", '')
+        if c.getresponse().status == 200:
+            return True
+        else:
+            return False
+
+    def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
+        url = (
+            "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
+            "contract_amounts/computer_labels/" + doc_cloud_id
+        )
+
+        page = request.args.get('page')
+        page_text = get_document_page(doc_cloud_id, page)
+        
+        try:  
+            response = urllib2.urlopen(url)
+            computer_generated_tags = response.read()
+            computer_generated_tags = json.loads(computer_generated_tags)
+        except urllib2.HTTPError, e:
+            log.debug("HTTPError error " + str(e.code))
+            computer_generated_tags = None
+        return spanify(page_text, page, computer_generated_tags)
 
     def get_download(self, doc_cloud_id):
         '''
