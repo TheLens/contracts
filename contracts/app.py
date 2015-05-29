@@ -120,7 +120,7 @@ def download(docid):
 
     data = Models().get_download(docid)
 
-    log.debug(data)
+    # log.debug(data)
 
     # view = Views().get_download(data)
 
