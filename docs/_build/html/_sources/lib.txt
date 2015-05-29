@@ -12,13 +12,13 @@ Lib
 .. automodule:: contracts.lib.emailer
     :members:
 
-.. automodule:: contracts.lib.lens_doc_cloud_sync
-    :members:
-
 .. automodule:: contracts.lib.main
     :members:
 
 .. automodule:: contracts.lib.models
+    :members:
+
+.. automodule:: contracts.lib.parserator_utils
     :members:
 
 .. automodule:: contracts.lib.results_language

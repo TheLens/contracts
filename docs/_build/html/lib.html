@@ -128,29 +128,6 @@ repo.</p>
 <dd><p>Sends the email.</p>
 </dd></dl>
 
-<span class="target" id="module-contracts.lib.lens_doc_cloud_sync"></span><p>Matches the Lens database with DocumentCloud.</p>
-<dl class="function">
-<dt id="contracts.lib.lens_doc_cloud_sync.get_from_metadata">
-<code class="descclassname">contracts.lib.lens_doc_cloud_sync.</code><code class="descname">get_from_metadata</code><span class="sig-paren">(</span><em>doc</em>, <em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.lens_doc_cloud_sync.get_from_metadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>docstring</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="contracts.lib.lens_doc_cloud_sync.match_contract">
-<code class="descclassname">contracts.lib.lens_doc_cloud_sync.</code><code class="descname">match_contract</code><span class="sig-paren">(</span><em>doc</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.lens_doc_cloud_sync.match_contract" title="Permalink to this definition">¶</a></dt>
-<dd><p>Match a particular contract.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="contracts.lib.lens_doc_cloud_sync.match_lens_db_to_document_cloud">
-<code class="descclassname">contracts.lib.lens_doc_cloud_sync.</code><code class="descname">match_lens_db_to_document_cloud</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.lens_doc_cloud_sync.match_lens_db_to_document_cloud" title="Permalink to this definition">¶</a></dt>
-<dd><p>Match the Lens database to DocumentCloud.</p>
-<p>DocumentCloud can take anywhere from one minute to 30 minutes to cache new
-uploads and reflect their changes in its API.</p>
-<p>This checks DocumentCloud to make sure that the latest changes have been
-synched.</p>
-</dd></dl>
-
 <span class="target" id="module-contracts.lib.main"></span><p>This script runs the daily downloader.</p>
 <span class="target" id="module-contracts.lib.models"></span><p>These models gather and organize published contracts from the city.</p>
 <dl class="class">
@@ -890,6 +867,48 @@ Need a class here? Just function?</p>
 <dt id="contracts.lib.models.valid_purchase_order">
 <code class="descclassname">contracts.lib.models.</code><code class="descname">valid_purchase_order</code><span class="sig-paren">(</span><em>purchase_order_no</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.models.valid_purchase_order" title="Permalink to this definition">¶</a></dt>
 <dd><p>A simple method to determine if this is a valid purchase order.</p>
+</dd></dl>
+
+<span class="target" id="module-contracts.lib.parserator_utils"></span><p>A few utility functions to support the web app.</p>
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.get_colors">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">get_colors</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.get_colors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the colors for a certain tag</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.get_document_page">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">get_document_page</code><span class="sig-paren">(</span><em>doc_cloud_id</em>, <em>page</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.get_document_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a page in a document cloud document</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.get_labels">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">get_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.get_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Labeled tokens come back from the UI as JSON.
+This method pulls them from the json and dumps
+them out as tuples: (text, value) ex (&#8220;1.2 Million&#8221;, contract_amount)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.sort_keys">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">sort_keys</code><span class="sig-paren">(</span><em>keys</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.sort_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keys come in the form page#-tokennumber (on a page)
+Sort them in order of pages, then in order of token #</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.span_wrap">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">span_wrap</code><span class="sig-paren">(</span><em>text</em>, <em>span_id</em>, <em>tag</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.span_wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap a token in a span tag</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="contracts.lib.parserator_utils.spanify">
+<code class="descclassname">contracts.lib.parserator_utils.</code><code class="descname">spanify</code><span class="sig-paren">(</span><em>page_text</em>, <em>page_no</em>, <em>labels=None</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.lib.parserator_utils.spanify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a page of text and wrap it in span tags
+If the labels from parserator are provided.
+Otherwise it defaults to skip</p>
 </dd></dl>
 
 <span class="target" id="module-contracts.lib.results_language"></span><p>Creates the results language on the /search page, such as, &#8220;10 sales found
