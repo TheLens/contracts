@@ -23,3 +23,6 @@ deploy:
   acl: public_read
   on:
     repo: TheLens/contracts
+notifications:
+  slack:
+    secure: EMQHDyRlv/8yxYc0RPGqLvuO5IPAApbiNXco55jvmqpr1LHMawaa4v05bjq01HiHbd4sgugVnzg+9ghAggPDYbBEJIJCE8v+/JKHKfWNyyihqHcb8g4UsYdJNo74bwzi2FwFEZN4t9vgXYdFewHy7jZG/AiD9gzU0GRGq91xvQk=
