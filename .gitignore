@@ -18,7 +18,6 @@ datamanagement/html*
 *.pdf
 *.DS_Store
 *.log
-*.conf
 *.cfg
 *.secret
 
