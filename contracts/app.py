@@ -250,6 +250,7 @@ def tokens_dump(docid):
         os.remove(outfile)
     except OSError:
         pass
+    log.debug("about to append")
     appendListToXMLfile(tagged_strings,
                         importlib.import_module('parser'),
                         outfile)
