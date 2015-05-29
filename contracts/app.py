@@ -244,6 +244,7 @@ def tokens_dump(docid):
     tagged_sequence = labels
     tagged_strings.add(tuple(tagged_sequence))
     outfile = XML_LOCATION + "/" + docid + ".xml"
+    log.debug(outfile)
     try:
         os.remove(outfile)
     except OSError:
@@ -251,6 +252,7 @@ def tokens_dump(docid):
     appendListToXMLfile(tagged_strings,
                         importlib.import_module('contract_parser'),
                         outfile)
+    log.debug("wrote xml file")
     output = "".join([i for i in open(outfile, "r")])
     conn = S3Connection()
     bucket = conn.get_bucket('lensnola')
