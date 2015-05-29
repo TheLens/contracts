@@ -107,6 +107,7 @@ def tags(doc_cloud_id):
 
     return spanified_text
 
+
 @app.route('/contracts/download/<string:docid>', methods=['GET', 'POST'])
 def download(docid):
     """
@@ -195,7 +196,7 @@ def searchbar_input():
 
 
 @app.route('/contracts/admin/', methods=['GET'])
-#@requires_auth
+@requires_auth
 def admin():
     """
     The parserator data entry page. The contract ID is specified in the URL.
@@ -214,7 +215,7 @@ def admin():
 
 
 @app.route('/contracts/admin/<string:doc_cloud_id>', methods=['GET'])
-#@requires_auth
+@requires_auth
 def parserator(doc_cloud_id):
     """
     The parserator data entry page. The contract ID is specified in the URL.
