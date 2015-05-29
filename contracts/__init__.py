@@ -14,31 +14,32 @@ import getpass
 USER = getpass.getuser()
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
+
 LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
-XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
+XML_LOCATION = "%s/data/parseratorxml" % PROJECT_DIR
 
 # this stores the json that describes the tags for parserator tokens
-TAGS_URL = PROJECT_DIR + "/data/tags.json"
+TAGS_URL = "%s/data/tags.json" % PROJECT_DIR
+
+DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
+DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
+
+S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
+TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
+NUMBER_WORDS_LOCATION = '%s/parser/number_words.txt' % PROJECT_DIR
+
+CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+    os.environ.get('DATABASE_USERNAME'),
+    os.environ.get('DATABASE_PASSWORD'),
+    os.environ.get('DATABASE_SERVER'),
+    os.environ.get('DATABASE_NAME'),
+)
 
 if USER == 'ubuntu':  # Server
     CORPUS_LOC = "/backups/contracts"
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
-    )
-    TEMPLATES = "%s/templates" % PROJECT_DIR
 
     # Static assets
-    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
-
     LENS_CSS = '%s/css/lens.css' % S3_URL
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
@@ -54,24 +55,11 @@ if USER == 'ubuntu':  # Server
 
 if USER == 'abe':  # Server
     CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
 
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
-    )
     TEMPLATES = "%s/templates" % PROJECT_DIR
 
     # Static assets
-    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
-
     LENS_CSS = '%s/css/lens.css' % S3_URL
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
@@ -86,23 +74,8 @@ if USER == 'abe':  # Server
     DEBUG = False
 
 if USER == 'thomasthoren':  # Tom's Local
-    NUMBER_WORDS_LOCATION = 'contract_parser/number_words.txt'
     CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/Users/%s" % USER
-
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
-
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
-    )
-    TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
 
     # Static assets
     LENS_CSS = '/static/css/lens.css'
@@ -117,6 +90,11 @@ if USER == 'thomasthoren':  # Tom's Local
     # app.py config
     RELOADER = True
     DEBUG = True
+
+# These must go after user-specific definitions, since they rely on them:
+VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
+PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
+BIDS_LOCATION = CORPUS_LOC + "/bids/"
 
 # Logging
 if os.path.isfile(LOG_PATH):

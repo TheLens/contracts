@@ -260,7 +260,7 @@ def tokens_dump(docid):
     k.key = 'contracts/contract_amounts/human_labels/' + docid + ".xml"
     k.set_contents_from_string(output)
 
-    return admin()
+    return None
 
 
 if __name__ == '__main__':
