@@ -73,6 +73,9 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="contracts.html">Contracts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lib.html">Lib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parserator.html">Parserator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pythondocumentcloud.html">Python-DocumentCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
 </ul>
 
           
@@ -112,13 +115,25 @@
             
   <div class="section" id="city-of-new-orleans-contracts">
 <h1>City of New Orleans contracts<a class="headerlink" href="#city-of-new-orleans-contracts" title="Permalink to this headline">¶</a></h1>
-<p>WORK IN PROGRESS</p>
-<p>Contents:</p>
+<p><a class="reference external" href="http://vault.thelensnola.org/contracts">http://vault.thelensnola.org/contracts</a></p>
+<p>A permanent collection of the City of New Orleans contracts that is fully searchable and updated daily. You can search by keyword, contractor or city department and download a copy of the contract. Unlike the city&#8217;s contract portal, our collection is ongoing and includes both present and past contracts.</p>
+<p>Find out how to read a contract <a class="reference external" href="http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/">here</a> and read more about this project <a class="reference external" href="http://thelensnola.org/search-new-orleans-government-contracts/">here</a> and <a class="reference external" href="http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/">here3</a>.</p>
+<p>What follows is the technical documentation to help understand and maintain our open-source project.</p>
+<div class="section" id="daily-processes">
+<h2>Daily processes<a class="headerlink" href="#daily-processes" title="Permalink to this headline">¶</a></h2>
+<p>Every day, a cron job runs <code class="code docutils literal"><span class="pre">__main.sh__</span></code>. This calls on <code class="code docutils literal"><span class="pre">main.py</span></code>, which checks the city&#8217;s site using <code class="code docutils literal"><span class="pre">utilities.py</span></code>.</p>
+</div>
+<div class="section" id="packages">
+<h2>Packages<a class="headerlink" href="#packages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound" id="mastertoc">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contracts.html">Contracts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lib.html">Lib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parserator.html">Parserator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pythondocumentcloud.html">Python-DocumentCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
 </ul>
+</div>
 </div>
 <div class="section" id="modules">
 <h2>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>

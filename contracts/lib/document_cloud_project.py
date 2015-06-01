@@ -32,7 +32,7 @@ class DocumentCloudProject(object):
 
     # searchterm = '\'purchase order\':' + "'" + po + "'"
     # searchterm = '\'contract number\':' + "'" + k_no + "'"
-    def get_contract(self, field, value):
+    def get_contract(self, key, value):
         '''
         Fetches the contract with the specified field and value.
 
@@ -43,7 +43,7 @@ class DocumentCloudProject(object):
         :returns: ???. The matching contract(s).
         '''
 
-        searchterm = "'" + field + "':" + "'" + value + "'"
+        searchterm = "'" + key + "':" + "'" + value + "'"
         doc = self.client.documents.search(searchterm).pop()
 
         return doc
@@ -66,7 +66,7 @@ class DocumentCloudProject(object):
 
         return True  # it is an existing contract. We know the k-number
 
-    def add_contract_to_document_cloud(self, purchase_order_no):
+    def add_contract_to_document_cloud(self, purchase_order_number):
         '''
         Add a contract to our DocumentCloud project.
 
@@ -81,13 +81,13 @@ class DocumentCloudProject(object):
         #         run_id, get_timestamp(), purchase_order_no, purchase_order_no
         #     )
         # )
-        if not purchase_order_regex.match(purchase_order_no):
+        if not purchase_order_regex.match(purchase_order_number):
             # log.info(
             #     "{} doesn't look like a valid purchase order. " +
             #     "Skipping for now".format(purchase_order_no)
             # )
             return
-        if purchase_order_no in self.skiplist:
+        if purchase_order_number in self.skiplist:
             # log.info(
             #     '{} | {} | Not adding {} to DocumentCloud. In skiplist ' +
             #     '| {}'.format(
@@ -96,9 +96,9 @@ class DocumentCloudProject(object):
             #     )
             # )
             return
-        if not self.has_contract("purchase order", purchase_order_no):
+        if not self.has_contract("purchase order", purchase_order_number):
             try:
-                purchase_order = PurchaseOrder(purchase_order_no)
+                purchase_order = PurchaseOrder(purchase_order_number)
             except IndexError:
                 # log.info(
                 #     '{} | {} | Something looks wrong with the format on ' +

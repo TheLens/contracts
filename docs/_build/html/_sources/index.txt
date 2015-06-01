@@ -6,9 +6,21 @@
 City of New Orleans contracts
 =============================
 
-WORK IN PROGRESS
+http://vault.thelensnola.org/contracts
 
-Contents:
+A permanent collection of the City of New Orleans contracts that is fully searchable and updated daily. You can search by keyword, contractor or city department and download a copy of the contract. Unlike the city's contract portal, our collection is ongoing and includes both present and past contracts.
+
+Find out how to read a contract `here <http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/>`__ and read more about this project `here <http://thelensnola.org/search-new-orleans-government-contracts/>`__ and `here3 <http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/>`__.
+
+What follows is the technical documentation to help understand and maintain our open-source project.
+
+Daily processes
+---------------
+
+Every day, a cron job runs :code:`__main.sh__`. This calls on :code:`main.py`, which checks the city's site using :code:`utilities.py`.
+
+Packages
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -16,6 +28,9 @@ Contents:
 
    contracts
    lib
+   parserator
+   pythondocumentcloud
+   tests
 
 Modules
 -------

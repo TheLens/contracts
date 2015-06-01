@@ -3,6 +3,10 @@
 Contracts
 =========
 
+The web app runs on Flask and a PostgreSQL database, synced up with DocumentCloud.
+
+-----
+
 .. automodule:: contracts.app
     :members:
 

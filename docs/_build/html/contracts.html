@@ -74,6 +74,9 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">Contracts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lib.html">Lib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parserator.html">Parserator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pythondocumentcloud.html">Python-DocumentCloud</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
 </ul>
 
           
@@ -113,6 +116,8 @@
             
   <div class="section" id="contracts">
 <span id="id1"></span><h1>Contracts<a class="headerlink" href="#contracts" title="Permalink to this headline">¶</a></h1>
+<p>The web app runs on Flask and a PostgreSQL database, synced up with DocumentCloud.</p>
+<hr class="docutils" />
 <span class="target" id="module-contracts.app"></span><p>The web app that runs at vault.thelensnola.org/contracts.</p>
 <p>It lets the public search City of New Orleans contracts that are posted to the
 city&#8217;s purchasing portal. It&#8217;s just a Flask application, and it follows the
@@ -234,23 +239,6 @@ string.</p>
 <dt id="contracts.app.requires_auth">
 <code class="descclassname">contracts.app.</code><code class="descname">requires_auth</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.requires_auth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Authorization process.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="contracts.app.searchbar_input">
-<code class="descclassname">contracts.app.</code><code class="descname">searchbar_input</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contracts.app.searchbar_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receives a POST call from the autocomplete dropdown and returns a dict
-of suggestions. Query is stored in q={} part of URL.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>q</strong> (<em>string</em>) &#8211; The search bar input.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dict of matching suggestions.</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="function">
