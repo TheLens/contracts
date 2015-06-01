@@ -9,7 +9,7 @@ import os
 import json
 import argparse
 
-from contracts.lib.models import LensDatabase
+from contracts.lib.lens_database import LensDatabase
 from pythondocumentcloud import DocumentCloud
 from pythondocumentcloud.toolbox import DoesNotExistError
 from contracts import log, CORPUS_LOC
@@ -101,17 +101,24 @@ class Backup(object):
             doc = self.client.documents.get(doc_cloud_id)
             pdf = doc.pdf
             metadata = self.get_meta_data(doc)
-            if not os.path.exists(self.get_path(doc_cloud_id, ".pdf")) or self.force:
+            path_check = os.path.exists(self.get_path(doc_cloud_id, ".pdf"))
+            if not path_check or self.force:
                 pdf = doc.pdf
-                with open(self.get_path(doc_cloud_id, ".pdf"), "wb") as outfile:
+                file_path = self.get_path(doc_cloud_id, ".pdf")
+                with open(file_path, "wb") as outfile:
                     outfile.write(pdf)
 
-            if not os.path.exists(self.get_path(doc_cloud_id, ".txt")) or self.force:
-                with open(self.get_path(doc_cloud_id, ".txt"), "wb") as outfile:
+            path_check = os.path.exists(self.get_path(doc_cloud_id, ".txt"))
+            if not path_check or self.force:
+                file_path = self.get_path(doc_cloud_id, ".txt")
+                with open(file_path, "wb") as outfile:
                     outfile.write(json.dumps(metadata))
 
-            if not os.path.exists(self.get_path(doc_cloud_id, "_text.txt")) or self.force:
-                with open(self.get_path(doc_cloud_id, "_text.txt"), "wb") as outfile:
+            path_check = os.path.exists(
+                self.get_path(doc_cloud_id, "_text.txt"))
+            if not path_check or self.force:
+                file_path = self.get_path(doc_cloud_id, "_text.txt")
+                with open(file_path, "wb") as outfile:
                     outfile.write(json.dumps(doc.full_text))
         else:
             log.info("{}".format(doc_cloud_id + " already is backed up"))

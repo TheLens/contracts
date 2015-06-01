@@ -53,7 +53,7 @@ def data():
     local('git add %s/dist.all.last.txt' % DATA_DIR)
     local('git add %s/dist.female.first.txt' % DATA_DIR)
     local('git add %s/dist.male.first.txt' % DATA_DIR)
-    local('git add %s/skiplist.txt' % DATA_DIR)
+    local('git add %s/skip-list.csv' % DATA_DIR)
     local('git add %s/tags.json' % DATA_DIR)
 
 
@@ -85,17 +85,18 @@ def contracts():
 def lib():
     '''/contracts/lib'''
 
-    # local('git add %s/vaultclasses.py' % LIB_DIR)
-
     local('git add %s/__init__.py' % LIB_DIR)
     local('git add %s/backup.py' % LIB_DIR)
     local('git add %s/daily_linker.py' % LIB_DIR)
+    local('git add %s/document_cloud_project.py' % LIB_DIR)
     local('git add %s/emailer.py' % LIB_DIR)
+    local('git add %s/lens_database.py' % LIB_DIR)
+    local('git add %s/lens_repository.py' % LIB_DIR)
     local('git add %s/main.py' % LIB_DIR)
-    local('git add %s/models.py' % LIB_DIR)
-    local('git add %s/models.py' % LIB_DIR)
     local('git add %s/parserator_utils.py' % LIB_DIR)
+    local('git add %s/purchase_order.py' % LIB_DIR)
     local('git add %s/results_language.py' % LIB_DIR)
+    local('git add %s/utilities.py' % LIB_DIR)
     local('git add %s/vendor_scraper.py' % LIB_DIR)
 
 
@@ -193,11 +194,11 @@ def commit(message):
 
 
 def push():
-    local('git push origin master')
+    local('git push origin development')
 
 
 def pull():
-    local('git pull origin master')
+    local('git pull origin development')
 
 
 def github(message):

@@ -7,7 +7,7 @@ import smtplib
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from contracts.lib.models import LensDatabase
+from contracts.lib.lens_database import LensDatabase
 
 
 def send_email(title, message):

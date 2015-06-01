@@ -174,27 +174,6 @@ def requires_auth(f):
     return decorated
 
 
-# @cache.memoize(timeout=5000)
-@app.route("/contracts/input", methods=['POST'])
-def searchbar_input():
-    '''
-    Receives a POST call from the autocomplete dropdown and returns a dict
-    of suggestions. Query is stored in q={} part of URL.
-
-    :param q: The search bar input.
-    :type q: string
-    :returns: A dict of matching suggestions.
-    '''
-
-    term = request.args.get('q')
-
-    log.debug('term: %s', term)
-
-    data = Models().searchbar_input(term)
-
-    return data
-
-
 @app.route('/contracts/admin/', methods=['GET'])
 @requires_auth
 def admin():

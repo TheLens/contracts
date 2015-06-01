@@ -26,9 +26,9 @@ if USER == 'ubuntu':  # Server
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
+    BIDS_LOCATION = CORPUS_LOC + "/bids"
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),
@@ -59,9 +59,9 @@ elif USER == 'abe':  # Server
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/home/%s" % USER
 
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
+    BIDS_LOCATION = CORPUS_LOC + "/bids"
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),
@@ -92,9 +92,9 @@ else:  # USER == 'thomasthoren' or Read the Docs
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/Users/%s" % USER
 
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors/"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders/"
-    BIDS_LOCATION = CORPUS_LOC + "/bids/"
+    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
+    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
+    BIDS_LOCATION = CORPUS_LOC + "/bids"
 
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),

@@ -213,10 +213,10 @@ class Models(object):
         return tags
 
     def do_tags_exist(self, doc_cloud_id):
-        url = (
-            "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
-            "contract_amounts/computer_labels/" + doc_cloud_id
-        )
+        # url = (
+        #     "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
+        #     "contract_amounts/computer_labels/" + doc_cloud_id
+        # )
 
         c = httplib.HTTPConnection('www.abc.com')
         c.request("HEAD", '')
@@ -233,8 +233,8 @@ class Models(object):
 
         page = request.args.get('page')
         page_text = get_document_page(doc_cloud_id, page)
-        
-        try:  
+
+        try:
             response = urllib2.urlopen(url)
             computer_generated_tags = response.read()
             computer_generated_tags = json.loads(computer_generated_tags)
