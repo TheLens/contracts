@@ -589,7 +589,7 @@ class DailyLinker(object):
 
 if __name__ == '__main__':
     contracts = DailyLinker().get_daily_contracts()
-    for c in contracts:
-        # cid = c[0]
-        vendor = c[1]
+    for contract in contracts:
+        # contract_id = contract[0]
+        vendor = contract[1]
         DailyLinker().try_to_link(vendor)

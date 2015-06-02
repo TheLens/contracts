@@ -1,143 +1,47 @@
 
-"""
-Represents the collection of contracts on DocumentCloud.
-"""
+'''
+Interacting with the DocumentCloud project.
+'''
 
 import re
-from datetime import date
 from pythondocumentcloud import DocumentCloud
-from contracts.db import Contract
-from contracts.lib.purchase_order import PurchaseOrder
-from contracts.lib.lens_repository import LensRepository
-from contracts.lib.lens_database import LensDatabase
+from contracts.lib.utilities import Utilities
 from contracts import (
     DOC_CLOUD_USERNAME,
     DOC_CLOUD_PASSWORD,
-    BIDS_LOCATION
+    BIDS_LOCATION,
+    PROJECT_URL,
+    log
 )
 
 
 class DocumentCloudProject(object):
     '''
-    Represents the collection of contracts on DocumentCloud.
+    Methods for interacting with the collection of contracts on DocumentCloud.
+    This project is what users interact with in the app.
     '''
 
     def __init__(self):
-        doc_cloud_user = DOC_CLOUD_USERNAME
-        doc_cloud_password = DOC_CLOUD_PASSWORD
-        self.client = DocumentCloud(doc_cloud_user, doc_cloud_password)
-        # sometimes won't need all the docs, so dont do the search on init
-        self.docs = None
-        self.skiplist = LensRepository().get_skip_list()
+        self.project_id = '1542-city-of-new-orleans-contracts'
+        self.api_connection = DocumentCloud(
+            DOC_CLOUD_USERNAME, DOC_CLOUD_PASSWORD)
 
-    # searchterm = '\'purchase order\':' + "'" + po + "'"
-    # searchterm = '\'contract number\':' + "'" + k_no + "'"
-    def get_contract(self, key, value):
+    def check_if_need_to_upload(self, purchase_order_number):
         '''
-        Fetches the contract with the specified field and value.
+        Checks DocumentCloud project to determine whether this contract needs
+        to be uploaded.
 
-        :param field: The key for searching through the DocumentCloud API.
-        :type field: string.
-        :param value: The key's value.
-        :type value: string.
-        :returns: ???. The matching contract(s).
+        :param purchase_order_number: The contract's purchase order number.
+        :type purchase_order_number: string.
+        :returns: boolean. True if need to upload, False if don't need to.
         '''
 
-        searchterm = "'" + key + "':" + "'" + value + "'"
-        doc = self.client.documents.search(searchterm).pop()
+        output = Utilities().check_that_contract_is_valid_and_public(
+            purchase_order_number)
 
-        return doc
-
-    def has_contract(self, field, value):
-        '''
-        Checks if there is a contract for this field and value.
-
-        :param field: The key for searching through the DocumentCloud API.
-        :type field: string.
-        :param value: The key's value.
-        :type value: string.
-        :returns: boolean. True if there is a contract found, False if not.
-        '''
-
-        searchterm = "'" + field + "':" + "'" + value + "'"
-
-        if len(self.client.documents.search(searchterm)) < 1:
-            return False  # it is a new contract
-
-        return True  # it is an existing contract. We know the k-number
-
-    def add_contract_to_document_cloud(self, purchase_order_number):
-        '''
-        Add a contract to our DocumentCloud project.
-
-        :param purchase_order_no: The contract's unique ID in DocumentCloud.
-        :type purchase_order_no: string.
-        :returns: ???
-        '''
-
-        purchase_order_regex = re.compile(r'[A-Z]{2}\d+')
-        # log.info(
-        #     '{} | {} | Attempting to add {} to DocumentCloud | {}'.format(
-        #         run_id, get_timestamp(), purchase_order_no, purchase_order_no
-        #     )
-        # )
-        if not purchase_order_regex.match(purchase_order_number):
-            # log.info(
-            #     "{} doesn't look like a valid purchase order. " +
-            #     "Skipping for now".format(purchase_order_no)
-            # )
-            return
-        if purchase_order_number in self.skiplist:
-            # log.info(
-            #     '{} | {} | Not adding {} to DocumentCloud. In skiplist ' +
-            #     '| {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no,
-            #         purchase_order_no
-            #     )
-            # )
-            return
-        if not self.has_contract("purchase order", purchase_order_number):
-            try:
-                purchase_order = PurchaseOrder(purchase_order_number)
-            except IndexError:
-                # log.info(
-                #     '{} | {} | Something looks wrong with the format on ' +
-                #     'this one. Skipping for now | {}'.format(
-                #         run_id, get_timestamp(),
-                #         purchase_order_no, purchase_order_no
-                #     )
-                # )
-                return
-            # log.info(
-            #     '{} | {} | Adding {} to DocumentCloud | {}'.format(
-            #         run_id, get_timestamp(),
-            #         purchase_order_no, purchase_order_no
-            #     )
-            # )
-
-            # Checks if there is at least one attachment. Some don't have any.
-            if len(purchase_order.attachments) > 0:
-                counter = 1
-                for attachment in purchase_order.attachments:
-                    # Loop through each attachment
-
-                    bidnumber = re.search(
-                        '[0-9]+', attachment.get('href')).group()
-                    bid_file_location = BIDS_LOCATION + \
-                        bidnumber + ".pdf"
-                    extra_string = ""
-                    if counter > 1:
-                        extra_string = str(counter) + " of " + \
-                            str(len(purchase_order.attachments))
-                    temp = purchase_order.description + extra_string
-                    self.upload_contract(
-                        bid_file_location,
-                        purchase_order.data,
-                        temp,
-                        purchase_order.title + extra_string
-                    )
-                    counter += 1
-        else:
+        contract_exists = self._check_if_contract_exists(
+            "purchase order", purchase_order_number)
+        if contract_exists:
             pass
             # log.info(
             #     '{} | {} | Not adding {} to DocumentCloud. Already up ' +
@@ -147,35 +51,126 @@ class DocumentCloudProject(object):
             #     )
             # )
 
-    def get_all_docs(self):
+        if output is False or contract_exists:
+            return False  # Do not upload contract
+        else:
+            return True
+
+    def _search_for_contract(self, key, value):
         '''
-        Runs a query for all of the contracts in our DocumentCloud project.
+        Fetches the contract with the specified key and value from the
+        DocumentCloud project.
 
-        :returns: list. A list of all of the project's contracts.
+        :param key: The key for searching through the DocumentCloud API.
+        :type key: string.
+        :param value: The key's value.
+        :type value: string.
+        :returns: A PythonDocumentCloud.Document class instance for the \
+        matching contract.
         '''
 
-        if self.docs is None:
-            self.docs = self.client.documents.search(
-                'projectid: 1542-city-of-new-orleans-contracts')
+        # searchterm = '\'purchase order\':' + "'" + po + "'"
+        # searchterm = '\'contract number\':' + "'" + k_no + "'"
 
-        return self.docs
+        search_term = "'" + key + "':" + "'" + value + "'"
+        document = self.api_connection.documents.search(search_term).pop()
 
-    def upload_contract(self, fname, data, description, title):
+        return document
+
+    def _check_if_contract_exists(self, key, value):
         '''
-        This uploads a contract onto DocumentCloud.
-        It also adds this contract to the Lens database.
+        Checks if there is a contract for this field and value in our
+        DocumentCloud project.
 
-        :param file: The contract PDF file?
-        :type file: PDF
-        :param data: The contract's (metadata).
-        :type data: dict. ???
+        :param key: The key for searching through the DocumentCloud API.
+        :type key: string.
+        :param value: The key's value.
+        :type value: string.
+        :returns: boolean. True if there is a contract found, False if no \
+        contract is found.
+        '''
+
+        search_term = "'" + key + "':" + "'" + value + "'"
+
+        if len(self.api_connection.documents.search(search_term)) < 1:
+            return False
+        else:
+            return True
+
+    def prepare_then_add_contract(self, purchase_order_object):
+        '''
+        Call on method to make minor adjustments, then call on another method
+        to upload the contract file and its metadata to the DocumentCloud
+        project.
+
+        :param purchase_order_object: A PurchaseOrder object instance.
+        '''
+
+        # Verify that there is at least one attachment (an actual contract?).
+        number_of_attachments = len(purchase_order_object.attachments)
+
+        if number_of_attachments > 0:
+            for i, attachment in enumerate(purchase_order_object.attachments):
+                bid_number = re.search(
+                    '[0-9]+', attachment.get('href')).group()
+                bid_file_location = BIDS_LOCATION + '/' + bid_number + ".pdf"
+
+                purchase_order_object = self.prepare_contract(
+                    purchase_order_object,
+                    i
+                )
+                self._upload_contract(
+                    bid_file_location,
+                    purchase_order_object.data,
+                    purchase_order_object.description,
+                    purchase_order_object.title
+                )
+
+    def prepare_contract(self, purchase_order_object, iteration_value):
+        '''
+        Prepares to add a contract to our DocumentCloud project.
+
+        :param purchase_order_number: A PurchaseOrder object instance.
+        :returns: A modified PurchaseOrder object instance.
+        '''
+
+        number_of_attachments = len(purchase_order_object.attachments)
+
+        # If multiple attachments, add language like "page 1 of 2":
+        page_string = ""
+        if number_of_attachments > 1:
+            page_string = str(iteration_value + 1) + " of " + \
+                str(number_of_attachments)
+
+        # description = purchase_order_object.description + page_string
+        purchase_order_object.description += page_string
+
+        # title = purchase_order_object.title + page_string
+        purchase_order_object.title += page_string
+
+        return purchase_order_object
+
+    def _upload_contract(self, filename, data, description, title):
+        '''
+        This actually uploads a contract to our DocumentCloud project.
+
+        :param filename: The path to the downloaded contract PDF file (?).
+        :type filename: string
+        :param data: The contract's metadata (?).
+        :type data: dict. (?)
         :param description: The contract's description.
         :type description: string.
         :param title: The contract's title.
         :type title: string.
-        :returns: ???
         '''
 
+        log.debug(filename)
+        log.debug(data)
+        log.debug(description)
+        log.debug(title)
+
+        # TODO: Move to another method. Also possible that this was checked
+        # previously in the PurchaseOrder class.
         if len(data['contract number']) < 1:
             # log.info(
             #     '{} | {} | Not adding {} to DocumentCloud. '
@@ -188,77 +183,70 @@ class DocumentCloudProject(object):
             # )
             return  # do not upload. There is a problem
 
-        title = title.replace("/", "")
-        newcontract = self.client.documents.upload(
-            fname,
+        title = title.replace("/", "")  # TODO: Not sure what this does
+
+        # new_contract = self.api_connection.documents.upload(
+        self.api_connection.documents.upload(
+            filename,
             title,
-            'City of New Orleans',
+            'City of New Orleans',  # Source of this file
             description,
-            None,
-            'http://vault.thelensnola.org/contracts',
-            'public',
-            '1542-city-of-new-orleans-contracts',
-            data,
-            False
+            None,  # Related article
+            PROJECT_URL,  # Published URL
+            'public',  # Access
+            self.project_id,  # Project
+            data,  # Data
+            False  # Secure
         )
         # log.info('{} | {} | {} has doc_cloud_id {} | {}'.format(
         #     run_id, get_timestamp(),
         #     data['purchase order'],
-        #     newcontract.id,
+        #     new_contract.id,
         #     data['purchase order']
         # ))
-        contract = Contract()
 
-        # TODO: "Instance of 'Document' has no 'id' member":
-        contract.doc_cloud_id = newcontract.id
-        with LensDatabase() as db:
-            contract.contractnumber = data['contract number']
-            contract.purchaseordernumber = data['purchase order']
-            contract.description = description
-            contract.title = title
-            contract.dateadded = date.today()
+        # Note: Addition of this contract to LensDatabase was moved to that
+        # class' ___ method.
 
-            with LensDatabase() as lens_db:
-                lens_db.add_department(data['department'])
-                lens_db.add_vendor(
-                    data['vendor'],
-                    vendor_id_city=data['vendor_id'])
-
-                contract.departmentid = lens_db.get_department_id(
-                    data['department'])
-                contract.vendorid = lens_db.get_lens_vendor_id(data['vendor'])
-
-            db.add_contract_to_lens_database(contract)
-
-    def get_metadata(self, doc_cloud_id, meta_field):
+    def _get_all_contracts(self):
         '''
-        Fetches the metadata associated with a contract on DocumentCloud.
-        Needs to get for departments and vendors, then uppercase them and
-        then update them in DC.
+        Runs a query for all of the contracts in our DocumentCloud project.
 
-        :param doc_cloud_id: The contract's unique ID in DocumentCloud.
-        :type doc_cloud_id: string
-        :param meta_field: The specific metadata field for this contract.
-        :type meta_field: string
-        :returns: ???
+        :returns: A list of all of the project's contracts, stored as \
+        PythonDocumentCloud instances.
         '''
 
-        contract = self.client.documents.get(doc_cloud_id)
-        # contract.data[meta_field] = new_meta_data_value
-        # contract.put()
+        # TODO: parameterize this search term
+        contracts = self.api_connection.documents.search(
+            'projectid:%s' % self.project_id)
 
-        return contract
+        return contracts
 
-    def update_metadata(self, doc_cloud_id, meta_field, new_meta_data_value):
+    def _get_metadata(self, document_cloud_id):
+        '''
+        Fetches the metadata associated with this contract on our
+        DocumentCloud project.
+
+        :param document_cloud_id: The contract's unique ID in DocumentCloud.
+        :type document_cloud_id: string
+        :returns: dict? The contract's metadata.
+        '''
+
+        contract = self.api_connection.documents.get(document_cloud_id)
+        metadata = contract.data
+
+        return metadata
+
+    def _update_metadata(self, document_cloud_id, meta_key, meta_value):
         '''
         Updates the metadata associated with the contracts on DocumentCloud.
 
-        :param doc_cloud_id: The contract's unique ID in DocumentCloud.
-        :type doc_cloud_id: string
-        :param meta_field: The specific metadata field for this contract.
-        :type meta_field: string
-        :param new_meta_data_value: The new metadata value for this field.
-        :type new_meta_data_value: string
+        :param document_cloud_id: The contract's unique ID in DocumentCloud.
+        :type document_cloud_id: string
+        :param meta_key: The specific metadata field for this contract.
+        :type meta_key: string
+        :param meta_value: The new metadata value for this field.
+        :type meta_value: string
         '''
 
         # log.info(
@@ -271,6 +259,6 @@ class DocumentCloudProject(object):
         #         new_meta_data_value
         #     )
         # )
-        contract = self.client.documents.get(doc_cloud_id)
-        contract.data[meta_field] = new_meta_data_value
+        contract = self.api_connection.documents.get(document_cloud_id)
+        contract.data[meta_key] = meta_value
         contract.put()

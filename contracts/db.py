@@ -1,7 +1,7 @@
 
-"""
+'''
 These classes that map to tables in the underlying database.
-"""
+'''
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,7 +12,7 @@ Base = declarative_base()
 
 
 class Vendor(Base):
-    """
+    '''
     A vendor sells goods or services to the city. [*] vendor_id_city is city's
     ID number for the vendor.
 
@@ -22,7 +22,7 @@ class Vendor(Base):
     :type name: string
     :param vendor_id_city: The city's vendor ID.
     :type vendor_id_city: string
-    """
+    '''
 
     __tablename__ = 'vendors'
 
@@ -38,14 +38,14 @@ class Vendor(Base):
 
 
 class Department(Base):
-    """
+    '''
     A department is a part of city government. Ex: Blight or Sanitation.
 
     :param id: The table's primary key.
     :type id: int
     :param name: ???
     :type name: string
-    """
+    '''
 
     __tablename__ = 'departments'
 
@@ -60,14 +60,14 @@ class Department(Base):
 
 
 class Person(Base):
-    """
+    '''
     A person is an officer of a company.
 
     :param id: The table's primary key.
     :type id: int
     :param name: ???
     :type name: string
-    """
+    '''
 
     __tablename__ = 'people'
 
@@ -82,14 +82,14 @@ class Person(Base):
 
 
 class Company(Base):
-    """
+    '''
     A company does business with the city.
 
     :param id: The table's primary key.
     :type id: int
     :param name: ???
     :type name: string
-    """
+    '''
 
     __tablename__ = 'companies'
 
@@ -104,7 +104,7 @@ class Company(Base):
 
 
 class Address(Base):
-    """
+    '''
     Companies or people can have addresses.
 
     :param id: The table's primary key.
@@ -119,7 +119,7 @@ class Address(Base):
     :type zipcode: int
     :param sourcefile: ???
     :type sourcefile: string
-    """
+    '''
 
     __tablename__ = 'addresses'
 
@@ -144,23 +144,18 @@ class Address(Base):
 
 
 class Contract(Base):
-    """
-    A contract is any piece of paper that gets posted on the city's public
-    purchasing portal. Sometimes the city posts "contracts" that are really
-    film permits or MOUs. The doc_cloud_id links the contract to DocumentCloud.
-    The URL for the contract on DocumentCloud will be
-    https://www.documentcloud.org/documents/{{doc_cloud_id}}}.html
-
-    The city uses two ID numbers to track contracts: k numbers and PO numbers.
+    '''
+    The city uses two ID numbers to track contracts: K numbers and purchase
+    order numbers.
 
     To buy anything, the city must go through an internal approval process that
     generates a purchase order. This purchase order number gets associated with
     the final contract.
 
     Each contract that goes to the law department also gets assigned a
-    k number. But some contracts are rejected by the law department and are
-    resubmitted. If this happens, the k number is retired. So there will be
-    gaps in the k numbers.
+    sequential K number. But some contracts are rejected by the law department
+    and are later resubmitted. If this happens, the K number is retired.
+    Therefore, there can be gaps in the K numbers.
 
     :param id: The table's primary key.
     :type id: int
@@ -172,7 +167,10 @@ class Contract(Base):
     :type contractnumber: string
     :param purchaseordernumber: ???
     :type purchaseordernumber: string
-    :param doc_cloud_id: ???
+    :param doc_cloud_id: The unique ID for this contract on our DocumentCloud \
+                         project. The URL for the contract on DocumentCloud \
+                         will be https://www.documentcloud.org/documents/\
+                         {{doc_cloud_id}}}.html
     :type doc_cloud_id: string
     :param description: ???
     :type description: string
@@ -180,7 +178,7 @@ class Contract(Base):
     :type title: string
     :param dateadded: ???
     :type dateadded: date
-    """
+    '''
 
     __tablename__ = 'contracts'
 
@@ -224,7 +222,7 @@ class Contract(Base):
 
 
 class CompanyAddress(Base):
-    """
+    '''
     Links addresses to companies.
 
     :param id: The table's primary key.
@@ -235,7 +233,7 @@ class CompanyAddress(Base):
     :type companyID: int
     :param primaryaddress: ???
     :type primaryaddress: boolean
-    """
+    '''
 
     __tablename__ = 'companiesaddresses'
 
@@ -257,7 +255,7 @@ class CompanyAddress(Base):
 
 
 class PersonAddress(Base):
-    """
+    '''
     Links people to addresses.
 
     :param id: The table's primary key.
@@ -268,7 +266,7 @@ class PersonAddress(Base):
     :type companyID: int
     :param primaryaddress: ???
     :type primaryaddress: boolean
-    """
+    '''
 
     __tablename__ = 'peopleaddresses'
 
@@ -285,7 +283,7 @@ class PersonAddress(Base):
 
 
 class VendorOfficer(Base):
-    """
+    '''
     Links a vendor to people who are its officers.
 
     :param id: The table's primary key.
@@ -294,7 +292,7 @@ class VendorOfficer(Base):
     :type vendorid: int
     :param personid: ???, foreign key points to people.id.
     :type personid: int
-    """
+    '''
 
     __tablename__ = 'vendorsofficers'
 
@@ -311,7 +309,7 @@ class VendorOfficer(Base):
 
 
 class VendorOfficerCompany(Base):
-    """
+    '''
     Links a vendor (from the city's system) with a company.
 
     :param id: The table's primary key.
@@ -322,7 +320,7 @@ class VendorOfficerCompany(Base):
     :type companiesid: int
     :param primaryaddress: ???
     :type primaryaddress: boolean
-    """
+    '''
 
     __tablename__ = 'vendorsofficerscompanies'
 
@@ -340,7 +338,7 @@ class VendorOfficerCompany(Base):
 
 
 class EthicsRecord(Base):
-    """
+    '''
     It goes in datamanagement instead of lib/models because it doesn't really
     concern the public web app.
 
@@ -376,7 +374,7 @@ class EthicsRecord(Base):
     :type receiptamount: string
     :param description: ???
     :type description: string
-    """
+    '''
 
     __tablename__ = 'ethics_records'
 

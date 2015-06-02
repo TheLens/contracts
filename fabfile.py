@@ -13,7 +13,6 @@ APP_DIR = '%s/contracts' % PROJECT_DIR
 CONFS_DIR = '%s/confs' % PROJECT_DIR
 CSS_DIR = '%s/contracts/static/css' % PROJECT_DIR
 DATA_DIR = '%s/data' % PROJECT_DIR
-# DATAMANAGEMENT_DIR = '%s/contracts/datamanagement' % PROJECT_DIR
 DOCS_DIR = '%s/docs' % PROJECT_DIR
 IMAGES_DIR = '%s/contracts/static/css/images' % PROJECT_DIR
 JS_DIR = '%s/contracts/static/js' % PROJECT_DIR
@@ -141,6 +140,14 @@ def parser():
     local('git add %s/number_words.txt' % PARSER_DIR)
 
 
+def pythondocumentcloud():
+    '''/pythondocumentcloud/'''
+
+    local('git add %s/__init__.py' % PYTHON_DC_DIR)
+    local('git add %s/MultipartPostHandler.py' % PYTHON_DC_DIR)
+    local('git add %s/toolbox.py' % PYTHON_DC_DIR)
+
+
 def scripts():
     '''/scripts/'''
 
@@ -161,14 +168,6 @@ def tests():
     local('git add %s/test_pylint.py' % TESTS_DIR)
 
 
-def pythondocumentcloud():
-    '''/pythondocumentcloud/'''
-
-    local('git add %s/__init__.py' % PYTHON_DC_DIR)
-    local('git add %s/MultipartPostHandler.py' % PYTHON_DC_DIR)
-    local('git add %s/toolbox.py' % PYTHON_DC_DIR)
-
-
 # Others
 def addthemall():
     '''Run through entire deployment.'''
@@ -178,7 +177,6 @@ def addthemall():
     data()
     docs()
     contracts()
-    # datamanagement()
     lib()
     css()
     js()

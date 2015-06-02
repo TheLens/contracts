@@ -14,10 +14,15 @@ Find out how to read a contract `here <http://thelensnola.org/2014/05/29/how-to-
 
 What follows is the technical documentation to help understand and maintain our open-source project.
 
+The three main areas
+--------------------
+
+The primary things to focus on are our local (server) database, our local contract repository and our DocumentCloud project (remote), which acts as both a database and a repository.
+
 Daily processes
 ---------------
 
-Every day, a cron job runs :code:`__main.sh__`. This calls on :code:`main.py`, which checks the city's site using :code:`utilities.py`.
+Every day, a cron job runs :code:`__main.sh__`. This calls on :code:`check_city.py`, which checks the city's purchasing site. For each of ....  for any new contracts :code:`utilities.py`.
 
 Packages
 --------

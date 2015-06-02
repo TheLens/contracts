@@ -12,7 +12,7 @@ import argparse
 from contracts.lib.lens_database import LensDatabase
 from pythondocumentcloud import DocumentCloud
 from pythondocumentcloud.toolbox import DoesNotExistError
-from contracts import log, CORPUS_LOC
+from contracts import CORPUS_LOC
 
 
 class Backup(object):
@@ -97,7 +97,7 @@ class Backup(object):
         '''
 
         if self.needs_to_be_backed_up(doc_cloud_id) or self.force:
-            log.info("{}".format("BACKUP " + doc_cloud_id))
+            # log.info("{}".format("BACKUP " + doc_cloud_id))
             doc = self.client.documents.get(doc_cloud_id)
             pdf = doc.pdf
             metadata = self.get_meta_data(doc)
@@ -121,7 +121,8 @@ class Backup(object):
                 with open(file_path, "wb") as outfile:
                     outfile.write(json.dumps(doc.full_text))
         else:
-            log.info("{}".format(doc_cloud_id + " already is backed up"))
+            pass
+            # log.info("{}".format(doc_cloud_id + " already is backed up"))
 
 
 if __name__ == "__main__":
@@ -129,4 +130,5 @@ if __name__ == "__main__":
         try:
             Backup().backup(document_cloud_id)
         except DoesNotExistError:
-            log.info("{}".format(document_cloud_id + " DoesNotExistError"))
+            pass
+            # log.info("{}".format(document_cloud_id + " DoesNotExistError"))

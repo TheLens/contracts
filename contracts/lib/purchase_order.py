@@ -1,23 +1,25 @@
 
-"""
-Represents a purchase order.
-"""
+'''
+Represents a purchase order object.
+'''
 
 import os
 import re
 import urllib2
 import uuid
-import subprocess
+# import subprocess
 from bs4 import BeautifulSoup
+from contracts.lib.utilities import Utilities
 from contracts import (
     VENDORS_LOCATION,
     PURCHASE_ORDER_LOCATION,
-    BIDS_LOCATION
+    # BIDS_LOCATION,
+    log
 )
 
 
 class PurchaseOrder(object):
-    """
+    '''
     A purchase order number is assigned when the order is authorized to
     purchase a service or good. The numbers gets associated with a city
     contract. This number is used to track a contract in the city's
@@ -25,26 +27,19 @@ class PurchaseOrder(object):
 
     All contracts have purchase orders, but not all purchase orders are for
     contracts.
-    """
+    '''
 
-    def __init__(self, purchase_order_no, download_attachments=True):
-        '''
-        A purchase order.
-        '''
-
+    def __init__(self, purchase_order_number):  # , download_attachments=True):
         # this is a uuid that is unique to a given run of the program.
         # Grep for it in the log file to see a certain run
         self.run_id = " " + str(uuid.uuid1())
 
-        # If not a valid number, exit.
-        if not self.check_if_valid_purchase_order_number(purchase_order_no):
-            # log.info(
-            #     '{} | {} | Skipping. Not a valid purchaseorder | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno
-            #     )
-            # )
+        output = Utilities().check_if_valid_purchase_order_format(
+            purchase_order_number)
+        if output is False:
             return
-        html = self.get_html(purchase_order_no)
+
+        html = self.get_html(purchase_order_number)
         soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
         self.download_vendor_profile(self.vendor_id_city)
@@ -64,32 +59,22 @@ class PurchaseOrder(object):
         self.purchaseorder = self.get_purchase_order(soup)
 
         self.attachments = self.get_attachments(soup)
-        if download_attachments:
-            for attachment in self.attachments:
-                self.download_attachment(attachment)
+
+        # TODO: Remove from __init__. Downloading a file should be explicit,
+        # not implicit.
+        # if download_attachments:
+        #     for attachment in self.attachments:
+        #         self.download_attachment(attachment)
         self.data = self.get_data()
         self.title = self.vendor_name + " : " + self.description
 
-    @staticmethod
-    def check_if_valid_purchase_order_number(purchase_order_no):
-        """
-        A method to determine if this is a valid purchase order using regular
-        expressions.
-        """
-
-        purchase_order_regex = r'[A-Z]{2}\d{3,}'
-        purchase_order_pattern = re.compile(purchase_order_regex)
-        if purchase_order_pattern.match(purchase_order_no):
-            return True
-        else:
-            return False
-
     def get_data(self):
-        """
-        Return metadata (from DocumentCloud).
+        '''
+        Return metadata, which is scraped and parsed from the HTML.
 
-        :returns: dict. The metadata for this contract page's HTML.
-        """
+        :returns: dict. The metadata for this contract, such as title, date \
+                        added, description, purchase order number and more.
+        '''
 
         output = {}
         output['vendor_id'] = self.vendor_id_city
@@ -100,72 +85,79 @@ class PurchaseOrder(object):
 
         return output
 
-    def download_attachment(self, attachment):
-        """
-        Download an attachment associated with a purchase order.
+    # def download_attachment(self, attachment):
+    #     '''
+    #     Download an attachment associated with a purchase order.
 
-        :param attachment: ???
-        :type attachment: ???
-        """
+    #     :param attachment: ???
+    #     :type attachment: ???
+    #     '''
 
-        bidnumber = re.search('[0-9]+', attachment.get('href')).group()
-        bid_file_location = BIDS_LOCATION + bidnumber + ".pdf"
-        if not os.path.isfile(bid_file_location):
-            self.download_attachment_file(bidnumber, bid_file_location)
-            # log.info(
-            #     '{} | {} | Downloaded bid {} associated with purchase ' +
-            #     'order {} | {}'.format(
-            #         run_id, get_timestamp(), bidnumber,
-            #         self.purchaseorder, self.purchaseorder
-            #     )
-            # )
-        else:
-            pass
-            # log.info(
-            #     '{} | {} | Already have bid {} for purchase ' +
-            #     'order {} | {}'.format(
-            #         run_id, get_timestamp(), bidnumber,
-            #         self.purchaseorder, self.purchaseorder
-            #     )
-            # )
+    #     bidnumber = re.search('[0-9]+', attachment.get('href')).group()
+    #     bid_file_location = BIDS_LOCATION + bidnumber + ".pdf"
+    #     if not os.path.isfile(bid_file_location):
+    #         self.download_attachment_file(bidnumber, bid_file_location)
+    #         # log.info(
+    #         #     '{} | {} | Downloaded bid {} associated with purchase ' +
+    #         #     'order {} | {}'.format(
+    #         #         run_id, get_timestamp(), bidnumber,
+    #         #         self.purchaseorder, self.purchaseorder
+    #         #     )
+    #         # )
+    #     # else:
+    #         # pass
+    #         # log.info(
+    #         #     '{} | {} | Already have bid {} for purchase ' +
+    #         #     'order {} | {}'.format(
+    #         #         run_id, get_timestamp(), bidnumber,
+    #         #         self.purchaseorder, self.purchaseorder
+    #         #     )
+    #         # )
 
-    def get_html(self, purchase_order_no):
-        """
+    def get_html(self, purchase_order_number):
+        '''
         Check to see if the purchase order should be downloaded.
         If so, then download it.
 
-        :param purchase_order_no: The contract's unique ID on DocumentCloud.
-        :type purchase_order_no: string
+        :param purchase_order_number: The contract's unique ID on \
+        DocumentCloud.
+        :type purchase_order_number: string
         :returns: ???
-        """
+        '''
 
-        if os.path.isfile(PURCHASE_ORDER_LOCATION + purchase_order_no):
+        file_location = PURCHASE_ORDER_LOCATION + '/' + purchase_order_number
+
+        if os.path.isfile(file_location):
             # log.info(
             #     '{} | {} | Already have purchase order | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no
+            #         run_id, get_timestamp(), purchase_order_number
             #     )
             # )
-            return "".join([i.replace("\n", "") for i in open(
-                PURCHASE_ORDER_LOCATION + purchase_order_no)])
+            return "".join([i.replace("\n", "") for i in open(file_location)])
         else:
-            self.download_purchase_order(purchase_order_no)
+            self.download_purchase_order(purchase_order_number)
 
-    def download_purchase_order(self, purchaseorderno):
-        """
+    def download_purchase_order(self, purchase_order_number):
+        '''
         Download the HTML associated with a purchase order.
 
-        :param purchaseorderno: The contract's unique ID on DocumentCloud.
-        :type purchaseorderno: string
+        :param purchase_order_number: The contract's unique ID on \
+        DocumentCloud.
+        :type purchase_order_number: string
         :returns: ???
-        """
+        '''
 
-        if not self.check_if_valid_purchase_order_number(purchaseorderno):
-            # log.info("not a valid po {}".format(purchaseorderno))
+        output = Utilities().check_if_valid_purchase_order_format(
+            purchase_order_number)
+        if output is False:
             return
-        if not os.path.exists(PURCHASE_ORDER_LOCATION + purchaseorderno):
+
+        path_check = os.path.exists(
+            PURCHASE_ORDER_LOCATION + '/' + purchase_order_number)
+        if not path_check:
             url = (
                 'http://www.purchasing.cityofno.com/bso/external/' +
-                'purchaseorder/poSummary.sdo?docId=' + purchaseorderno +
+                'purchaseorder/poSummary.sdo?docId=' + purchase_order_number +
                 '&releaseNbr=0&parentUrl=contract')
             # log.info(
             #     '{} | {} | Attempting to download url | {}'.format(
@@ -174,25 +166,27 @@ class PurchaseOrder(object):
             # )
             response = urllib2.urlopen(url)
             html = response.read()
-            with open(PURCHASE_ORDER_LOCATION + purchaseorderno, 'w') as fname:
-                fname.write(html)
+
+            filepath = PURCHASE_ORDER_LOCATION + '/' + purchase_order_number
+            with open(filepath, 'w') as filename:
+                filename.write(html)
                 # log.info(
                 #     '{} | {} | Downloaded purchase order | {}'.format(
-                #         run_id, get_timestamp(), purchaseorderno
+                #         run_id, get_timestamp(), purchase_order_number
                 #     )
                 # )
 
     @staticmethod
     def download_vendor_profile(vendor_id_city):
-        """
+        '''
         Download the vendor page associated with a purchase order, if we don't
         have the vendor page already.
 
         :param vendor_id_city: ???.
         :type vendor_id_city: ???
-        """
+        '''
 
-        vendor_file_location = VENDORS_LOCATION + vendor_id_city
+        vendor_file_location = VENDORS_LOCATION + '/' + vendor_id_city
         if not os.path.isfile(vendor_file_location):
             try:
                 response = urllib2.urlopen(
@@ -214,8 +208,7 @@ class PurchaseOrder(object):
                 #         run_id, get_timestamp(), vendor_id_city
                 #     )
                 # )
-        else:
-            pass
+        # else:
             # log.info(
             #     '{} | {} | Skipped vendor file. Already present | {}'.format(
             #         run_id, get_timestamp(), vendor_id_city
@@ -224,13 +217,13 @@ class PurchaseOrder(object):
 
     @staticmethod
     def get_attachments(soup):
-        """
+        '''
         Find the attachments to download from the HTML.
 
         :param soup: A BeautifulSoup object for the contract page's HTML.
         :type soup: BeautifulSoup object
         :returns: ???
-        """
+        '''
 
         try:
             main_table = soup.select('.table-01').pop()
@@ -293,7 +286,8 @@ class PurchaseOrder(object):
             description = metadatarow[1].findChildren(
                 ['td'])[5].contents.pop().strip()
             return description
-        except:
+        except Exception, error:
+            log.exception(error, exc_info=True)
             return ""
 
     def get_vendor_name(self, soup):
@@ -361,7 +355,8 @@ class PurchaseOrder(object):
                 'k',
                 ''
             ).replace("m", '').strip().replace("M", "")
-        except:
+        except Exception, error:
+            log.exception(error, exc_info=True)
             knumber = "unknown"
 
         if len(knumber) == 0:
@@ -419,132 +414,132 @@ class PurchaseOrder(object):
     def __str__(self):
         return "<PurchaseOrder {}>".format(self.purchaseorder)
 
-    @staticmethod
-    def download_attachment_file(bid_no, bid_file_location):
-        '''
-        Download the attachment file found on contract page.
+    # @staticmethod
+    # def download_attachment_file(bid_no, bid_file_location):
+    #     '''
+    #     Download the attachment file found on contract page.
 
-        :param bid_no: ???
-        :type bid_no: ???
-        :param bid_file_location: ???
-        :type bid_file_location: ???
-        :returns: ???
-        '''
+    #     :param bid_no: ???
+    #     :type bid_no: ???
+    #     :param bid_file_location: ???
+    #     :type bid_file_location: ???
+    #     :returns: ???
+    #     '''
 
-        if not os.path.exists(bid_no):
-            process = subprocess.Popen([
-                'curl',
-                '-o',
-                bid_file_location,
-                'http://www.purchasing.cityofno.com/bso/external/document/' +
-                'attachments/attachmentFileDetail.sdo',
-                '-H',
-                'Pragma: no-cache',
-                '-H',
-                'Origin: null',
-                '-H',
-                'Accept-Encoding: gzip,deflate,sdch',
-                '-H',
-                'Accept-Language: en-US,en;q=0.8',
-                '-H',
-                'Content-Type: multipart/form-data; ' +
-                'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
-                '-H',
-                'Accept: text/html,application/xhtml+xml,' +
-                'application/xml;q=0.9,image/webp,*/*;q=0.8',
-                '-H',
-                'Connection: keep-alive',
-                '--data-binary',
-                '''------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="mode"\r
-    \r
-    download\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="parentUrl"\r
-    \r
-    /external/purchaseorder/poSummary.sdo\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="parentId"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="fileNbr"\r
-    \r
-    ''' + bid_no + '''\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="workingDir"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docId"\r
-    \r
-    4051927411\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docType"\r
-    \r
-    P\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docSubType"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="releaseNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="downloadFileNbr"\r
-    \r
-    ''' + bid_no + '''\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="itemNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="currentPage"\r
-    \r
-    1\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="querySql"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortBy"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortByIndex"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortByDescending"\r
-    \r
-    false\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="revisionNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="receiptId"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="vendorNbr"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="vendorGrp"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="invoiceNbr"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="displayName"\r
-    \r
-    Grainger Inc. Februaryl 2008.pdf\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG--\r
-    ''',
-                '--compressed'
-            ])
-            process.wait()
+    #     if not os.path.exists(bid_no):
+    #         process = subprocess.Popen([
+    #             'curl',
+    #             '-o',
+    #             bid_file_location,
+    #             'http://www.purchasing.cityofno.com/bso/external/document/' +
+    #             'attachments/attachmentFileDetail.sdo',
+    #             '-H',
+    #             'Pragma: no-cache',
+    #             '-H',
+    #             'Origin: null',
+    #             '-H',
+    #             'Accept-Encoding: gzip,deflate,sdch',
+    #             '-H',
+    #             'Accept-Language: en-US,en;q=0.8',
+    #             '-H',
+    #             'Content-Type: multipart/form-data; ' +
+    #             'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
+    #             '-H',
+    #             'Accept: text/html,application/xhtml+xml,' +
+    #             'application/xml;q=0.9,image/webp,*/*;q=0.8',
+    #             '-H',
+    #             'Connection: keep-alive',
+    #             '--data-binary',
+    #             '''------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="mode"\r
+    # \r
+    # download\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="parentUrl"\r
+    # \r
+    # /external/purchaseorder/poSummary.sdo\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="parentId"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="fileNbr"\r
+    # \r
+    # ''' + bid_no + '''\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="workingDir"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="docId"\r
+    # \r
+    # 4051927411\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="docType"\r
+    # \r
+    # P\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="docSubType"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="releaseNbr"\r
+    # \r
+    # 0\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="downloadFileNbr"\r
+    # \r
+    # ''' + bid_no + '''\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="itemNbr"\r
+    # \r
+    # 0\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="currentPage"\r
+    # \r
+    # 1\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="querySql"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="sortBy"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="sortByIndex"\r
+    # \r
+    # 0\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="sortByDescending"\r
+    # \r
+    # false\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="revisionNbr"\r
+    # \r
+    # 0\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="receiptId"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="vendorNbr"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="vendorGrp"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="invoiceNbr"\r
+    # \r
+    # \r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
+    # Content-Disposition: form-data; name="displayName"\r
+    # \r
+    # Grainger Inc. Februaryl 2008.pdf\r
+    # ------WebKitFormBoundaryP4a4C1okQYkBGBSG--\r
+    # ''',
+    #             '--compressed'
+    #         ])
+    #         process.wait()

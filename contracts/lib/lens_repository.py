@@ -1,157 +1,77 @@
 
-"""
-Keeping local contracts collection in sync with DocumentCloud project.
-"""
+'''
+Keeping the local contracts collection in sync with our DocumentCloud project.
+'''
 
 import os
-import re
-import csv
 import urllib2
-from contracts import (
-    PROJECT_DIR,
-    PURCHASE_ORDER_LOCATION
-)
+from contracts.lib.utilities import Utilities
+from contracts import PURCHASE_ORDER_LOCATION
 
 
 class LensRepository(object):
-    """
-    Methods for keeping local contracts archive in sync with DocumentCloud
-    project.
-    """
+    '''
+    Methods for keeping the local contracts archive in sync with our
+    DocumentCloud project.
+    '''
 
-    def __init__(self):
-        # Check for contracts to skip. Ex. airport contracts.
-        # They are not posted on the city's public purchasing site,
-        # but are included in the city's contract logs:
-        self.skiplist = self.get_skip_list()
-        self.purchase_orders_location = PURCHASE_ORDER_LOCATION
+    def check_if_need_to_download(self, purchase_order_number):
+        '''
+        Checks local directory to determine whether a local copy is needed.
 
-    @staticmethod
-    def check_if_valid_purchase_order_number(purchase_order_no):
-        """
-        A method to determine if this is a valid purchase order using regular
-        expressions.
-        """
+        :param purchase_order_number: The contract's purchase order number.
+        :type purchase_order_number: string.
+        :returns: boolean. True if need to download, False if don't need to.
+        '''
 
-        purchase_order_regex = r'[A-Z]{2}\d{3,}'
-        purchase_order_pattern = re.compile(purchase_order_regex)
-        if purchase_order_pattern.match(purchase_order_no):
-            return True
+        # Check if contract has valid format and is public
+        validity = Utilities().check_that_contract_is_valid_and_public(
+            purchase_order_number)
+
+        file_location = PURCHASE_ORDER_LOCATION + '/' + purchase_order_number
+        local_copy_exists = os.path.isfile(file_location)
+
+        if validity is False or local_copy_exists:
+            return False  # Don't download
         else:
-            return False
+            return True
 
-    def download_purchaseorder(self, purchase_order_no):
+    def download_purchase_order(self, purchase_order_number):
         '''
-        Download (the contract matching this purchase order number?).
+        Download the contract matching this purchase order number, but first
+        check if it is valid, not in the skip list and not already downloaded.
 
-        :param purchase_order_no: The contract's unique ID for DocumentCloud.
-        :type purchase_order_no: string.
-        :returns: ???
+        :param purchase_order_number: The contract's unique ID for \
+        DocumentCloud.
+        :type purchase_order_number: string.
         '''
 
-        if purchase_order_no in self.skiplist:
-            '''skip non-public contracts'''
+        file_location = PURCHASE_ORDER_LOCATION + '/' + purchase_order_number
 
-            # log.warning(
-            #     '{} | {} | Contract is in the skiplist | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no)
-            # )
-            return
+        response = urllib2.urlopen(
+            'http://www.purchasing.cityofno.com/bso/external/' +
+            'purchaseorder/poSummary.sdo?docId=' + purchase_order_number +
+            '&releaseNbr=0&parentUrl=contract')
+        html = response.read()
 
-        output = self.check_if_valid_purchase_order_number(
-            purchase_order_no)
-        if not output:
-            '''
-            Checks regex to make sure that this is a feasible purchase order.
-            '''
-            # log.warning(
-            #     '{} | {} | Invalid purchase order | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no)
-            # )
-            return
-
-        file_loc = self.purchase_orders_location + '/' + purchase_order_no
-        if not os.path.isfile(file_loc):
-            response = urllib2.urlopen(
-                'http://www.purchasing.cityofno.com/bso/external/' +
-                'purchaseorder/poSummary.sdo?docId=' + purchase_order_no +
-                '&releaseNbr=0&parentUrl=contract')
-            html = response.read()
-            self.write_purchase_order(html, file_loc)
+        self._write_purchase_order(html, file_location)
 
     @staticmethod
-    def write_purchase_order(html, file_location):
+    def _write_purchase_order(html, file_location):
         '''
-        docstring
+        This takes an individual contract page's HTML and writes it out to an
+        HTML file in the proper location.
 
-        :param html: The contract's unique ID for DocumentCloud.
+        :param html: The individual contract page's HTML.
         :type html: string.
-        :param file_location: The contract's unique ID for DocumentCloud.
+        :param file_location: The path to where the file should be created.
         :type file_location: string.
-        :returns: ???
         '''
 
-        with open(file_location, 'w') as f:
-            '''
-            Save the HTML for an individual purchase order page.
-            '''
-
+        with open(file_location, 'w') as filename:
             # log.warning(
-            #     '{} | {} | Writing purchase_order_no to file | {}'.format(
+            #     '{} | {} | Writing purchase_order_number
+            # to file | {}'.format(
             #         run_id, get_timestamp(), file_location)
             # )
-            f.write(html)  # python will convert \n to os.linesep
-
-    def check_if_public_and_need_to_download(self, purchase_order_no):
-        '''
-        docstring
-
-        :param purchase_order_no: The contract's unique ID for DocumentCloud.
-        :type purchase_order_no: string.
-        :returns: ???
-        '''
-
-        if purchase_order_no in self.skiplist:
-            '''
-            If this contract is not posted publicly, then skip it.
-            The skip list stores the private contracts that we know about but
-            are not posted online by the city.
-            '''
-
-            # log.warning(
-            #     '{} | {} | Contract is in the skiplist | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no
-            #     )
-            # )
-            return
-
-        file_loc = self.purchase_orders_location + purchase_order_no
-
-        if not os.path.isfile(file_loc):
-            self.download_purchaseorder(purchase_order_no)
-        else:
-            pass
-            # log.warning(
-            #     '{} | {} | The Lens repo already has this ' +
-            #     'purchase_order_no | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_no)
-            # )
-
-    @staticmethod
-    def get_skip_list():
-        """
-        Some contracts are not posted on the city's site even though they are
-        included in the city's contract inventory. We put these contracts on a
-        skip list so they are ignored in code.
-
-        :returns: list. Includes the contract codes to skip.
-        """
-
-        skip_list_location = PROJECT_DIR + '/data/skip-list.csv'
-
-        with open(skip_list_location, "r") as fname:
-            reader = csv.reader(fname)
-            next(reader, None)  # Skip header row
-            skip_list = list(row[0] for row in reader)
-
-            return skip_list
+            filename.write(html)

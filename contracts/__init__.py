@@ -17,6 +17,11 @@ PROJECT_DIR = os.path.abspath(
 LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
 XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
 NUMBER_WORDS_LOCATION = PROJECT_DIR + '/parser/number_words.txt'
+PROJECT_URL = 'http://vault.thelensnola.org/contracts'
+
+DATABASE_NAME = 'contracts'
+DATABASE_SERVER = 'localhost'
+
 
 # this stores the json that describes the tags for parserator tokens
 TAGS_URL = PROJECT_DIR + "/data/tags.json"
@@ -32,8 +37,8 @@ if USER == 'ubuntu':  # Server
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
+        DATABASE_SERVER,
+        DATABASE_NAME,
     )
     TEMPLATES = "%s/templates" % PROJECT_DIR
 
@@ -65,8 +70,8 @@ elif USER == 'abe':  # Server
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
+        DATABASE_SERVER,
+        DATABASE_NAME,
     )
     TEMPLATES = "%s/templates" % PROJECT_DIR
 
@@ -87,7 +92,7 @@ elif USER == 'abe':  # Server
     RELOADER = False
     DEBUG = False
 else:  # USER == 'thomasthoren' or Read the Docs
-    CORPUS_LOC = "/Volumes/External HDD/contracts-backup"
+    CORPUS_LOC = "%s/backup" % PROJECT_DIR
     DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
     DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
     ROOT_FOLDER = "/Users/%s" % USER
@@ -99,8 +104,8 @@ else:  # USER == 'thomasthoren' or Read the Docs
     CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
         os.environ.get('DATABASE_USERNAME'),
         os.environ.get('DATABASE_PASSWORD'),
-        os.environ.get('DATABASE_SERVER'),
-        os.environ.get('DATABASE_NAME'),
+        DATABASE_SERVER,
+        DATABASE_NAME,
     )
     TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
 

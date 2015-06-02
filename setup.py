@@ -49,7 +49,7 @@ setup(
         'docutils',
         'ecdsa',
         'Fabric',
-        'Flask',
+        'flask',
         'Flask-Cache',
         'itsdangerous',
         'Jinja2',
