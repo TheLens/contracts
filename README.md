@@ -43,11 +43,3 @@ Add these as part of your virtual environment (`~/.virtualenvs/contracts/bin/pos
 * DOCUMENT_CLOUD_PASSWORD
 * CONTRACTS_ADMIN_USERNAME (for accessing administrative web pages, i.e. parserator)
 * CONTRACTS_ADMIN_PASSWORD (administrative web page password)
-
-### Cron jobs
-
-Adjust your project paths as needed.
-
-* `cd /home/ubuntu/contracts && git fetch origin master && git reset --hard FETCH_HEAD`  # Keep in sync with master branch
-* `/home/ubuntu/contracts/backup.sh`  # Creates local and remote backups
-* `/home/ubuntu/contracts/main.sh`  # Starts checks for new contracts and ensures that everything is in sync

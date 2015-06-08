@@ -21,7 +21,7 @@ def tokenize(doc_cloud_id):
 
     ids = {}
     document = client.documents.get(doc_cloud_id)
-    pages = document.pages
+    pages = document['pages']
     for page in range(1, pages + 1):
         counter = 0
         tokens = MODULE.tokenize(document.get_page_text(page))

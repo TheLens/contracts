@@ -18,9 +18,9 @@ class Vendor(Base):
 
     :param id: The table's primary key, which is also our internal vendor ID.
     :type id: int
-    :param name: ???
+    :param name: The vendor's name.
     :type name: string
-    :param vendor_id_city: The city's vendor ID.
+    :param vendor_id_city: The city's vendor ID. TODO: Why is this needed?
     :type vendor_id_city: string
     '''
 
@@ -39,11 +39,11 @@ class Vendor(Base):
 
 class Department(Base):
     '''
-    A department is a part of city government. Ex: Blight or Sanitation.
+    A department is a part of city government. Ex: Blight, sanitation.
 
     :param id: The table's primary key.
     :type id: int
-    :param name: ???
+    :param name: The department name.
     :type name: string
     '''
 
@@ -65,7 +65,7 @@ class Person(Base):
 
     :param id: The table's primary key.
     :type id: int
-    :param name: ???
+    :param name: The company officer's name.
     :type name: string
     '''
 
@@ -83,11 +83,12 @@ class Person(Base):
 
 class Company(Base):
     '''
-    A company does business with the city.
+    A company does business with the city. TODO: How is this different from a
+    vendor?
 
     :param id: The table's primary key.
     :type id: int
-    :param name: ???
+    :param name: The company name.
     :type name: string
     '''
 
@@ -105,17 +106,17 @@ class Company(Base):
 
 class Address(Base):
     '''
-    Companies or people can have addresses.
+    The addresses for companies or people.
 
     :param id: The table's primary key.
     :type id: int
-    :param street: ???
+    :param street: The street address.
     :type street: string
-    :param city: ???
+    :param city: The city.
     :type city: string
-    :param state: ???
+    :param state: The state.
     :type state: string
-    :param zipcode: ???
+    :param zipcode: The ZIP code.
     :type zipcode: int
     :param sourcefile: ???
     :type sourcefile: string
@@ -163,18 +164,18 @@ class Contract(Base):
     :type departmentid: int
     :param vendorid: ???, foreign key points to vendors.id.
     :type vendorid: int
-    :param contractnumber: ???
+    :param contractnumber: The contract number.
     :type contractnumber: string
-    :param purchaseordernumber: ???
+    :param purchaseordernumber: The contract's purchase order number.
     :type purchaseordernumber: string
     :param doc_cloud_id: The unique ID for this contract on our DocumentCloud \
                          project. The URL for the contract on DocumentCloud \
                          will be https://www.documentcloud.org/documents/\
                          {{doc_cloud_id}}}.html
     :type doc_cloud_id: string
-    :param description: ???
+    :param description: The contract's description?
     :type description: string
-    :param title: ???
+    :param title: The contract's title?
     :type title: string
     :param dateadded: ???
     :type dateadded: date
@@ -223,7 +224,7 @@ class Contract(Base):
 
 class CompanyAddress(Base):
     '''
-    Links addresses to companies.
+    A link table between addresses and companies.
 
     :param id: The table's primary key.
     :type id: int
@@ -256,7 +257,7 @@ class CompanyAddress(Base):
 
 class PersonAddress(Base):
     '''
-    Links people to addresses.
+    A link table between people to addresses.
 
     :param id: The table's primary key.
     :type id: int
@@ -284,7 +285,7 @@ class PersonAddress(Base):
 
 class VendorOfficer(Base):
     '''
-    Links a vendor to people who are its officers.
+    A link table between vendors and their officers.
 
     :param id: The table's primary key.
     :type id: int
@@ -310,7 +311,7 @@ class VendorOfficer(Base):
 
 class VendorOfficerCompany(Base):
     '''
-    Links a vendor (from the city's system) with a company.
+    A link table between vendors (from the city's system) and companies.
 
     :param id: The table's primary key.
     :type id: int
@@ -339,8 +340,7 @@ class VendorOfficerCompany(Base):
 
 class EthicsRecord(Base):
     '''
-    It goes in datamanagement instead of lib/models because it doesn't really
-    concern the public web app.
+    TK
 
     :param primary_key: The table's primary key.
     :type primary_key: int
@@ -438,7 +438,7 @@ class EthicsRecord(Base):
 
 def remake_db():
     '''
-    Creates the database via SQLAlchemy (?).
+    Creates the database via SQLAlchemy.
     '''
 
     engine = create_engine(CONNECTION_STRING)

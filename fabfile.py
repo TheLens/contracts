@@ -86,15 +86,16 @@ def lib():
 
     local('git add %s/__init__.py' % LIB_DIR)
     local('git add %s/backup.py' % LIB_DIR)
+    local('git add %s/check_city.py' % LIB_DIR)
     local('git add %s/daily_linker.py' % LIB_DIR)
     local('git add %s/document_cloud_project.py' % LIB_DIR)
     local('git add %s/emailer.py' % LIB_DIR)
     local('git add %s/lens_database.py' % LIB_DIR)
     local('git add %s/lens_repository.py' % LIB_DIR)
-    local('git add %s/main.py' % LIB_DIR)
     local('git add %s/parserator_utils.py' % LIB_DIR)
     local('git add %s/purchase_order.py' % LIB_DIR)
     local('git add %s/results_language.py' % LIB_DIR)
+    local('git add %s/sync_local_database_document_cloud.py' % LIB_DIR)
     local('git add %s/utilities.py' % LIB_DIR)
     local('git add %s/vendor_scraper.py' % LIB_DIR)
 
@@ -151,10 +152,11 @@ def pythondocumentcloud():
 def scripts():
     '''/scripts/'''
 
+    local('git add %s/backup.sh' % SCRIPTS_DIR)
+    local('git add %s/local_backup.sh' % SCRIPTS_DIR)
     local('git add %s/main.sh' % SCRIPTS_DIR)
-    local('git add %s/sync_with_document_cloud.sh' % SCRIPTS_DIR)
+    local('git add %s/parserate.py' % SCRIPTS_DIR)
     local('git add %s/train.sh' % SCRIPTS_DIR)
-    local('git add %s/updatebackup.sh' % SCRIPTS_DIR)
 
 
 def tests():

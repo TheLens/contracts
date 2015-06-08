@@ -27,7 +27,31 @@ class LensDatabase(object):
         engine = create_engine(CONNECTION_STRING)
         self.sn = sessionmaker(bind=engine)
 
-    # refactor to take a type
+    def check_if_database_has_contract(self, purchase_order_number):
+        '''
+        Checks if local database already has this contract.
+
+        :param purchase_order_number: The unique ID in the city's website.
+        :type purchase_order_number: string
+        :returns: boolean. True if the contract is present, False if not.
+        '''
+
+        session = self.sn()
+
+        query_count = session.query(
+            Contract
+        ).filter(
+            Contract.purchaseordernumber == purchase_order_number
+        ).count()
+
+        session.close()
+
+        if query_count == 1:
+            return True
+        else:
+            return False
+
+    # Refactor to take a type  <-- ???
     def get_officers(self):
         '''
         Returns a list of all company officers in the database.
@@ -35,9 +59,23 @@ class LensDatabase(object):
         :returns: list. All of the company officers in our database.
         '''
 
-        # TODO: add SQL Alchemy logic to get officers
+        # TODO: Test that this works correctly.
 
-        pass
+        session = self.sn()
+
+        officers_query = session.query(
+            Person.name
+        ).all()
+        # TODO: need to sort alphabetically?
+
+        session.close()
+
+        officers = []
+
+        for row in officers_query:
+            officers.append(row.name)
+
+        return officers
 
     def add_vendor_if_missing(self, vendor, vendor_id_city=None):
         '''
@@ -230,30 +268,6 @@ class LensDatabase(object):
 
         session.close()
 
-    def has_contract(self, purchase_order_number):
-        '''
-        Checks if local database already has this contract.
-
-        :param purchase_order_number: The unique ID in the city's website.
-        :type purchase_order_number: string
-        :returns: boolean. True if the contract is present, False if not.
-        '''
-
-        session = self.sn()
-
-        query_count = session.query(
-            Contract
-        ).filter(
-            Contract.purchaseordernumber == purchase_order_number
-        ).count()
-
-        session.close()
-
-        if query_count == 1:
-            return True
-        else:
-            return False
-
     def get_contract(self, purchase_order_number):
         '''
         Get a contract from the database.
@@ -345,9 +359,10 @@ class LensDatabase(object):
 
     def get_half_filled_contracts(self):
         '''
-        A half-filled contract is where we know DC ID but don't know PO number
-        or any of the other metadata in the city's PO system because when we
-        upload the contract to DC...
+        A half-filled contract is where we know the DocumentCloud ID but don't
+        know purchase order number or any of the other metadata in the city's
+        purchase order system because when we upload the contract to
+        DocumentCloud...
 
         DocumentCloud doesn't give immediate access to all document properties.
         This pulls out the contracts in the database added during upload but
@@ -453,31 +468,6 @@ class LensDatabase(object):
         :param purchase_order_number: The contract to add.
         :type purchase_order_number: string.
         '''
-
-        # contract = Contract()
-
-        # # TODO: "Instance of 'Document' has no 'id' member":
-        # contract.doc_cloud_id = new_contract.id
-
-        # with LensDatabase() as database:
-        #     contract.contractnumber = data['contract number']
-        #     contract.purchaseordernumber = data['purchase order']
-        #     contract.description = description
-        #     contract.title = title
-        #     contract.dateadded = date.today()
-
-        #     with LensDatabase() as lens_db:
-        #         lens_db.add_department(data['department'])
-        #         lens_db.add_vendor(
-        #             data['vendor'],
-        #             vendor_id_city=data['vendor_id'])
-
-        #         contract.departmentid = lens_db.get_department_id(
-        #             data['department'])
-        #         contract.vendorid = lens_db.get_lens_vendor_id(
-        #             data['vendor'])
-
-        #     database.add_contract_to_local_database(contract)
 
         session = self.sn()
 

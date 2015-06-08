@@ -6,10 +6,11 @@ Keeping the local contracts collection in sync with our DocumentCloud project.
 import os
 import urllib2
 from contracts.lib.utilities import Utilities
-from contracts import PURCHASE_ORDER_LOCATION
+from contracts import PURCHASE_ORDER_LOCATION, log
 
 
 class LensRepository(object):
+
     '''
     Methods for keeping the local contracts archive in sync with our
     DocumentCloud project.
@@ -32,6 +33,7 @@ class LensRepository(object):
         local_copy_exists = os.path.isfile(file_location)
 
         if validity is False or local_copy_exists:
+            log.debug("Not downloading %s", purchase_order_number)
             return False  # Don't download
         else:
             return True
@@ -42,7 +44,7 @@ class LensRepository(object):
         check if it is valid, not in the skip list and not already downloaded.
 
         :param purchase_order_number: The contract's unique ID for \
-        DocumentCloud.
+                                      DocumentCloud.
         :type purchase_order_number: string.
         '''
 
@@ -69,9 +71,5 @@ class LensRepository(object):
         '''
 
         with open(file_location, 'w') as filename:
-            # log.warning(
-            #     '{} | {} | Writing purchase_order_number
-            # to file | {}'.format(
-            #         run_id, get_timestamp(), file_location)
-            # )
+            log.info('Writing file %s', file_location)
             filename.write(html)

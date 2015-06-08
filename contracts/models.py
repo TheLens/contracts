@@ -1,3 +1,4 @@
+
 """
 The web app that runs at vault.thelensnola.org/contracts.
 """
@@ -19,14 +20,8 @@ from contracts.db import (
     VendorOfficer
 )
 from pythondocumentcloud import DocumentCloud
-from contracts import (
-    CONNECTION_STRING,
-    log
-)
-from contracts.lib.parserator_utils import (
-    get_document_page,
-    spanify
-)
+from contracts import CONNECTION_STRING, log
+from contracts.lib.parserator_utils import get_document_page, spanify
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
@@ -602,7 +597,9 @@ class Models(object):
         query_builder = QueryBuilder()
         query_builder.add_text(data['search_input'])
         query_builder.add_term(
-            self.dc_query.split(':')[0], self.dc_query.split(':')[1])
+            self.dc_query.split(':')[0],
+            self.dc_query.split(':')[1]
+        )
 
         terms = ['vendor', 'department']  # , 'officer']
 
@@ -657,7 +654,7 @@ class QueryBuilder(object):
         """
 
         output = ""
-        for k in self.query.keys():
-            output += k + ":" + '"' + self.query[k] + '" '
+        for key in self.query.keys():
+            output += key + ":" + '"' + self.query[key] + '" '
         output = output + self.text
         return output.strip()

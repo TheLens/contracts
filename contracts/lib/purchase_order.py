@@ -6,7 +6,6 @@ Represents a purchase order object.
 import os
 import re
 import urllib2
-import uuid
 # import subprocess
 from bs4 import BeautifulSoup
 from contracts.lib.utilities import Utilities
@@ -30,29 +29,27 @@ class PurchaseOrder(object):
     '''
 
     def __init__(self, purchase_order_number):  # , download_attachments=True):
-        # this is a uuid that is unique to a given run of the program.
-        # Grep for it in the log file to see a certain run
-        self.run_id = " " + str(uuid.uuid1())
-
-        output = Utilities().check_if_valid_purchase_order_format(
+        validity = Utilities().check_if_valid_purchase_order_format(
             purchase_order_number)
-        if output is False:
+        if validity is False:
             return
 
         html = self.get_html(purchase_order_number)
-        soup = BeautifulSoup(html)
         self.vendor_id_city = self.get_vendor_id(html)
         self.download_vendor_profile(self.vendor_id_city)
+
+        soup = BeautifulSoup(html)
         self.description = self.get_description(soup)
         try:
             self.vendor_name = self.get_vendor_name(soup)
-        except IOError:
+        except IOError, error:
+            log.exception(error, exc_info=True)
+
             self.vendor_name = "unknown"
-            # log.info(
-            #     '{} | Skipping. No associated vendor info | {}'.format(
-            #         run_id, get_timestamp(), purchaseorderno, purchaseorderno
-            #     )
-            # )
+            log.info(
+                'Skipping. No associated vendor info for %s',
+                purchase_order_number
+            )
             return
         self.department = self.get_department(soup)
         self.k_number = self.get_knumber(soup)
