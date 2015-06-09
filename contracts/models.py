@@ -34,7 +34,7 @@ class Models(object):
         '''docstring'''
 
         self.engine = create_engine(CONNECTION_STRING)
-        self.pagelength = 8  # DocumentCloud API default is 10
+        self.pagelength = 10  # DocumentCloud API default is 10
         self.dc_query = 'projectid:1542-city-of-new-orleans-contracts'
         self.document_cloud_client = DocumentCloud()
 
@@ -63,8 +63,35 @@ class Models(object):
         log.debug(data)
 
         # Find the last updated date for footer
-        data['updated_date'] = time.strftime("%b %-d, %Y")
+        updated_date = time.strftime("%b. %-d, %Y")
+
+        # Correct for AP Style
+        updated_date = updated_date.replace('Mar.', 'March')
+        updated_date = updated_date.replace('Apr.', 'April')
+        updated_date = updated_date.replace('May.', 'May')
+        updated_date = updated_date.replace('Jun.', 'June')
+        updated_date = updated_date.replace('Jul.', 'July')
+
+        data['updated_date'] = updated_date
         log.debug(data)
+
+        '''
+        Getting 10 most recent contracts
+        '''
+        documents = self.get_contracts(limit=self.pagelength)
+        log.debug(documents)
+
+        # Fixing IDs:
+        documents = self.translate_to_doc_cloud_form(documents)
+        log.debug(documents)
+
+        number_of_documents = self.pagelength
+        log.debug(number_of_documents)
+
+        data['number_of_documents'] = number_of_documents
+        data['results_language'] = (
+            "Showing %d most recent sales." % number_of_documents)
+        data['documents'] = documents
 
         log.debug('Done collecting home data')
 
@@ -125,7 +152,14 @@ class Models(object):
         number_of_pages = number_of_pages + 1
         log.debug('number_of_pages: %d', number_of_pages)
 
-        updated_date = time.strftime("%b %-d, %Y")
+        updated_date = time.strftime("%b. %-d, %Y")
+
+        # Correct for AP Style
+        updated_date = updated_date.replace('Mar.', 'March')
+        updated_date = updated_date.replace('Apr.', 'April')
+        updated_date = updated_date.replace('May.', 'May')
+        updated_date = updated_date.replace('Jun.', 'June')
+        updated_date = updated_date.replace('Jul.', 'July')
 
         vendors = self.get_vendors()
         officers = self.get_officers()
@@ -164,7 +198,14 @@ class Models(object):
 
         data = {}
 
-        updated_date = time.strftime("%b %-d, %Y")
+        updated_date = time.strftime("%b. %-d, %Y")
+
+        # Correct for AP Style
+        updated_date = updated_date.replace('Mar.', 'March')
+        updated_date = updated_date.replace('Apr.', 'April')
+        updated_date = updated_date.replace('May.', 'May')
+        updated_date = updated_date.replace('Jun.', 'June')
+        updated_date = updated_date.replace('Jul.', 'July')
 
         data['doc_cloud_id'] = doc_cloud_id
         data['updated_date'] = updated_date

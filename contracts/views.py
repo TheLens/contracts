@@ -35,6 +35,9 @@ class Views(object):
         departments = data['departments']
         officers = data['officers']
         updated_date = data['updated_date']
+        documents = data['documents']
+        number_of_documents = data['number_of_documents']
+        results_language = data['results_language']
 
         response = make_response(
             render_template(
@@ -42,6 +45,9 @@ class Views(object):
                 vendors=vendors,
                 departments=departments,
                 officers=officers,
+                documents=documents,
+                number_of_documents=number_of_documents,
+                results_language=results_language,
                 updated_date=updated_date,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
@@ -70,7 +76,6 @@ class Views(object):
 
         vendors = data['vendors']
         departments = data['departments']
-        # print departments
         number_of_documents = data['number_of_documents']
         number_of_pages = data['number_of_pages']
         current_page = data['current_page']

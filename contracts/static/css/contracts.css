@@ -58,8 +58,9 @@ input[type="input"]:active {
   margin-bottom: 15px;
 }
 
-.open-button {
-  background-color: #c3c3c3;
+.open-button,
+button.open-button {
+  font-size: 0.8em;
 }
 
 .download {
@@ -93,24 +94,29 @@ input[type="input"]:active {
   padding: 7px 0;
 }
 
+.black,
+.black:hover,
+.black:active,
+.black:visited,
+.black:focus {
+  color: black;
+}
+
 /*.contract-row:hover {
   background-color: #F5F5EF;
 }*/
 
 .contract-title {
-  cursor: pointer;
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-weight: bold;
 }
 
 .contract-description {
-  font-size: 12px;
+  font-size: 0.8em;
   color: #191919;
-  cursor: pointer;
 }
 
 .contract-date {
-  cursor: pointer;
   color: #191919;
   font-size: 0.8em;
   padding-left: 15px;
@@ -206,6 +212,9 @@ input[type="input"]:active {
 @media screen and (max-width: 600px) {
   .open-button {
     margin-top: 15px;
+  }
+  .DV-container {
+    height: 425px;
   }
 }
 /***************

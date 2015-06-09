@@ -1,5 +1,5 @@
 <div class="row">
-  <div id="results-status" class="small-12 slim results-status columns">
+  <div id="results-status" class="small-12 results-status columns">
     {{ results_language }}
   </div>
 </div>
@@ -10,10 +10,10 @@
         <div class="row contract-row" id="{{ document.id }}">
           <div class="small-12 medium-9 columns">
             <div class="contract-title">
-              {{ document.title }}
+              <a href="/contracts/contract/{{ document.id }}" class="black">{{ document.title }}</a>
             </div>
             <div class="contract-description">
-              {{ document.description }}
+              <a href="/contracts/contract/{{ document.id }}" class="black">{{ document.description }}</a>
             </div>
             <div class="contract-date">
               {{ document.dateadded }}
