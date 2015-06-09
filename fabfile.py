@@ -112,7 +112,6 @@ def js():
     '''/contracts/static/js'''
 
     local('git add %s/dc-parserator.js' % JS_DIR)
-    local('git add %s/download.js' % JS_DIR)
     local('git add %s/lens.js' % JS_DIR)
     local('git add %s/results.js' % JS_DIR)
     local('git add %s/search.js' % JS_DIR)

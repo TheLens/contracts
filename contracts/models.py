@@ -288,8 +288,7 @@ class Models(object):
         :returns: PDF. The PDF file for this contract (?).
         '''
 
-        docs = self.query_document_cloud(
-            "document:" + '"' + doc_cloud_id + '"')
+        docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
         response = make_response(docs.pop().pdf)
         disposition_header = "attachment; filename=" + doc_cloud_id + ".pdf"
         response.headers["Content-Disposition"] = disposition_header

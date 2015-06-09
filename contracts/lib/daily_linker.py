@@ -1,8 +1,8 @@
 
-'''docstring'''
+'''Finds links between vendors and campaign contributions (?).'''
 
-import datetime
 import re
+import csv
 import dateutil.parser
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -19,10 +19,13 @@ from contracts.db import (
     Company,
     EthicsRecord
 )
-from contracts import log, CONNECTION_STRING, PROJECT_DIR
+from contracts import log, CONNECTION_STRING, PROJECT_DIR, TODAY_DATE
 
 
 class Option:
+
+    '''docstring'''
+
     def __init__(self, name, org_type, city):
         self.name = name
         self.type = org_type
@@ -31,32 +34,113 @@ class Option:
 
 class DailyLinker(object):
 
+    '''docstring'''
+
     def __init__(self):
-        self.last_names = [l.strip("\n").split(" ")[0] for l in tuple(
-            open("%s/data/dist.all.last.txt" % PROJECT_DIR, "r"))]
-        self.first_male = [l.strip("\n").split(" ")[0] for l in tuple(
-            open("%s/data/dist.male.first.txt" % PROJECT_DIR, "r"))]
-        self.first_female = [l.strip("\n").split(" ")[0] for l in tuple(
-            open("%s/data/dist.female.first.txt" % PROJECT_DIR, "r"))]
-        self.first_names = self.first_female + self.first_male
+        self.last_names = self._get_last_names()
+        self.first_names = self._get_first_names()
 
         # ap = AddressParser()
 
         engine = create_engine(CONNECTION_STRING)
-
         self.sn = sessionmaker(bind=engine)
 
         self.driver = webdriver.PhantomJS(
             executable_path='/usr/local/bin/phantomjs', port=65000)
 
+        # TODO:
         # known_people = [t.strip("\n").replace(".", "") for t in tuple(
         #     open("known_people.txt", "r"))]  # a list of known people
         # known_companies = [t.strip("\n").replace(".", "") for t in tuple(
         #     open("known_companies.txt", "r"))]
 
+    def try_to_link(self, vendor_name):
+        '''docstring'''
+
+        search_results = self.search_sos(vendor_name)
+        total_hits = self.get_total_hits(search_results)
+        if total_hits == 1:
+            print "perfect hit for {}".format(vendor_name)
+            self.process_direct_hit(search_results, vendor_name)
+
+    def get_daily_contracts(self, today_string=TODAY_DATE):
+        '''docstring'''
+
+        session = self.sn()
+
+        # defaults to today
+        contracts = session.query(
+            Contract.doc_cloud_id,
+            Vendor.name
+        ).filter(
+            Contract.dateadded == today_string
+        ).filter(
+            Contract.vendorid == Vendor.id
+        ).all()
+
+        session.close()
+
+        return contracts
+
+    def _get_last_names(self):
+        '''docstring'''
+
+        last_names = []
+
+        last_name_path = "%s/data/all-last.csv" % PROJECT_DIR
+
+        with open(last_name_path, "r") as fname:
+            reader = csv.reader(fname)
+            next(reader, None)  # Skip header row
+            for row in reader:
+                last_names.append(row[0])
+
+        return last_names
+
+    def _get_first_names(self):
+        '''docstring'''
+
+        male_first_names = self._get_male_first_names()
+        female_first_names = self._get_female_first_names
+
+        first_names = male_first_names + female_first_names
+
+        return first_names
+
+    def _get_male_first_names(self):
+        '''docstring'''
+
+        first_male = []
+        first_male_name_path = "%s/data/male-first.csv" % PROJECT_DIR
+
+        with open(first_male_name_path, "r") as fname:
+            reader = csv.reader(fname)
+            next(reader, None)  # Skip header row
+            for row in reader:
+                first_male.append(row[0])
+
+        return first_male
+
+    def _get_first_female_names(self):
+        '''docstring'''
+
+        first_female = []
+
+        first_female_name_path = "%s/data/female-first.csv" % PROJECT_DIR
+
+        with open(first_female_name_path, "r") as fname:
+            reader = csv.reader(fname)
+            next(reader, None)  # Skip header row
+            for row in reader:
+                self.first_female.append(row[0])
+
+        return first_female
+
     @staticmethod
     def has_known_person_suffix(name):
-        nameregexes = [
+        '''docstring'''
+
+        name_regexes = [
             ', JR$',
             ', JR\.?',
             '^REV',
@@ -91,16 +175,19 @@ class DailyLinker(object):
             ', DVM',
             'DR '
         ]
-        for n in nameregexes:
-            reg = re.compile(n)
+        for name_regex in name_regexes:
+            reg = re.compile(name_regex)
             # people with Jr ect at the end of the name are people:
             if reg.search(name):
                 return True
+
         return False
 
     @staticmethod
     def has_known_company_suffix(name):
-        companyregexes = [
+        '''docstring'''
+
+        company_regexes = [
             ', INC\.?$',
             ', L\.?L\.?C\.?$',
             ', INC\.?',
@@ -112,14 +199,17 @@ class DailyLinker(object):
             "ASSOCIATION",
             ' & '
         ]
-        for n in companyregexes:
-            reg = re.compile(n)
+        for company_regex in company_regexes:
+            reg = re.compile(company_regex)
             # people with Jr ect at the end of the name are people:
             if reg.search(name):
                 return True
+
         return False
 
     def is_common_first_and_last_name_and_has_initial(self, name):
+        '''docstring'''
+
         if len(name.split(" ")) == 2:
             return False
 
@@ -156,6 +246,8 @@ class DailyLinker(object):
     #     return False
 
     def is_this_a_person(self, name_of_thing):
+        '''docstring'''
+
         if self.has_known_person_suffix(name_of_thing):
             return True
 
@@ -168,6 +260,8 @@ class DailyLinker(object):
         return False
 
     def is_this_a_company(self, name_of_thing):
+        '''docstring'''
+
         if self.has_known_company_suffix(name_of_thing):
             return True
 
@@ -260,7 +354,7 @@ class DailyLinker(object):
 
     def link(self, name, vendor):
         '''
-        link the vendor to the company
+        Link the vendor to the company.
         '''
 
         session = self.sn()
@@ -322,13 +416,17 @@ class DailyLinker(object):
                 return
 
     def get_options(self, soup):
+        '''docstring'''
+
         table = [t for t in soup.select(
             "#ctl00_cphContent_grdSearchResults_EntityNameOrCharterNumber"
         ).pop().select("tr") if not t.attrs["class"][0] == "RowHeader"]
+
         options = []
-        for t in table:
+
+        for row in table:
             try:
-                tds = t.select("td")
+                tds = row.select("td")
                 company_name = tds[0].text.replace("\n", "")
                 company_type = tds[1].text.replace("\n", "")
                 company_city = tds[2].text
@@ -336,14 +434,18 @@ class DailyLinker(object):
                 options.append(option)
             except:
                 pass
+
         return options
 
     def find_button_to_click(self, firm):
+        '''docstring'''
+
         soup = BeautifulSoup(self.driver.page_source)
         rows = soup.find_all("tr")
         rows = [r for r in rows if "class" in r.attrs.keys()]
         row = [r for r in rows if r.attrs[
             'class'][0] == "RowNormal" or r.attrs['class'] == "RowAlt"]
+
         if len(row) == 1:
             contents = row.pop().contents
             contents = contents[4]
@@ -358,6 +460,8 @@ class DailyLinker(object):
             return t['id']
 
     def get_rows_in_city(self, city):
+        '''docstring'''
+
         city = city.upper()
         soup = BeautifulSoup(self.driver.page_source)
         rows = soup.find_all("tr")
@@ -371,7 +475,10 @@ class DailyLinker(object):
         return [r.contents[4].contents[1] for r in city_rows]
 
     def get_pages_for_potential_hits(self, potential_hits):
+        '''docstring'''
+
         pages = []
+
         for p in potential_hits:
             id = p.attrs['id']
             self.driver.find_element_by_id(id).click()
@@ -379,6 +486,7 @@ class DailyLinker(object):
             pages.append(page)
             self.driver.find_element_by_id(
                 "ctl00_cphContent_btnBackToSearchResults").click()
+
         return pages
 
     # def pick_from_options(self, firm):
@@ -476,6 +584,8 @@ class DailyLinker(object):
         return page
 
     def process_direct_hit(self, raw_html, vendor_name):
+        '''docstring'''
+
         vendor_name = vendor_name.strip("\n").replace(".", "")
 
         print "adding {}".format(vendor_name)
@@ -508,41 +618,14 @@ class DailyLinker(object):
         #    add_name(name)
 
     def get_total_hits(self, page):
+        '''docstring'''
+
         if "ctl00_cphContent_tblResults" in self.driver.page_source:
             return 1
         text = self.driver.find_element_by_id(
             "ctl00_cphContent_lblTotalResults").text
         return int(text)  # no hits
         raise Exception("Error!")
-
-    def try_to_link(self, vendor_name):
-        search_results = self.search_sos(vendor_name)
-        total_hits = self.get_total_hits(search_results)
-        if total_hits == 1:
-            print "perfect hit for {}".format(vendor_name)
-            self.process_direct_hit(search_results, vendor_name)
-
-    def get_daily_contracts(
-        self,
-        today_string=datetime.datetime.today().strftime('%Y-%m-%d')
-    ):
-        '''docstring'''
-
-        session = self.sn()
-
-        # defaults to today
-        contracts = session.query(
-            Contract.doc_cloud_id,
-            Vendor.name
-        ).filter(
-            Contract.dateadded == today_string
-        ).filter(
-            Contract.vendorid == Vendor.id
-        ).all()
-
-        session.close()
-
-        return contracts
 
     def get_state_contributions(self, name):
         '''docstring'''
@@ -573,7 +656,7 @@ class DailyLinker(object):
 
         session = self.sn()
 
-        names = session.query(
+        names_query = session.query(
             Person.name
         ).filter(
             Vendor.id == VendorOfficer.vendorid
@@ -585,7 +668,12 @@ class DailyLinker(object):
 
         session.close()
 
-        return [str(i[0]) for i in names]
+        names = []
+
+        for i in names_query:
+            names.append(str(i[0]))
+
+        return names
 
 if __name__ == '__main__':
     contracts = DailyLinker().get_daily_contracts()

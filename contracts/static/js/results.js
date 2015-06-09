@@ -73,7 +73,6 @@ function checkNumberOfResults() {
   }
 
   if (number_of_pages !== '1') {
-    // document.getElementById('results-status').innerHTML = 'No results found for your search.';  // TODO: replace with full-blown language from app
     document.getElementById('previous').style.display = 'block';
     document.getElementById('next').style.display = 'block';
   }

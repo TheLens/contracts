@@ -22,7 +22,7 @@ class Utilities(object):
         are ignored and not published.
 
         Skipped contracts include things that are sensitive in nature, such as
-        securtiy plans for the airport.
+        security plans for the airport.
 
         :returns: list. A list of the purchase order numbers of contracts to \
         skip.

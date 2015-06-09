@@ -320,7 +320,6 @@ class LensDatabase(object):
         :returns: string. The ID for the vendor.
         '''
 
-        # self.session.flush()
         session = self.sn()
 
         vendor = session.query(
@@ -454,6 +453,7 @@ class LensDatabase(object):
             EthicsRecord.contributorname == name
         ).all()
 
+        # TODO:
         contributions.sort(key=lambda x: dateutil.parser.parse(x.receiptdate))
 
         session.close()

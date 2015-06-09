@@ -7,6 +7,7 @@ be written into files in this repo.
 """
 
 import os
+from datetime import date
 import logging
 import logging.handlers
 import getpass
@@ -21,6 +22,8 @@ PROJECT_URL = 'http://vault.thelensnola.org/contracts'
 
 DATABASE_NAME = 'contracts'
 DATABASE_SERVER = 'localhost'
+
+TODAY_DATE = date.today().strftime('%Y-%m-%d')
 
 
 # this stores the json that describes the tags for parserator tokens
@@ -49,7 +52,6 @@ if USER == 'ubuntu':  # Server
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
 
-    DOWNLOAD_JS = '%s/js/download.js' % S3_URL
     LENS_JS = '%s/js/lens.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
@@ -82,7 +84,6 @@ elif USER == 'abe':  # Server
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
 
-    DOWNLOAD_JS = '%s/js/download.js' % S3_URL
     LENS_JS = '%s/js/lens.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
@@ -114,7 +115,6 @@ else:  # USER == 'thomasthoren' or Read the Docs
     BANNER_CSS = '/static/css/banner.css'
     CONTRACTS_CSS = '/static/css/contracts.css'
 
-    DOWNLOAD_JS = '/static/js/download.js'
     LENS_JS = '/static/js/lens.js'
     RESULTS_JS = '/static/js/results.js'
     SEARCH_JS = '/static/js/search.js'

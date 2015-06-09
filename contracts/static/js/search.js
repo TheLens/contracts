@@ -81,16 +81,6 @@ function setHandlers() {
     getSearch();
   });
 
-  // $(".open-button").on("click", function() {
-  //   var id = $(this).parents(".contract-row").attr("id");
-  //   window.location.href = '/contracts/contract/' + id;
-  // });
-
-  // $(".download").on("click", function() {
-  //   var id = $(this).parents(".contract-row").attr("id");
-  //   downloadFile("/contracts/download/" + id);
-  // });
-
   $("#advanced-search").on("click", function() {
     var display = document.getElementById("filters").style.display;
     if (display === "block") {
@@ -187,7 +177,7 @@ function getSearch(keep_current_page) {
 $(document).ready(function() {
   $(document).keypress(function(e) {
     if (e.which == 13) {
-      getSearch();  // todo: Need to have GET at first, POST afterward.
+      getSearch();
     }
   });
 
