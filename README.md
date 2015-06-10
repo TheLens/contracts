@@ -4,7 +4,7 @@
 
 A permanent collection of the City of New Orleans contracts that is fully searchable and updated daily. You can search by keyword, contractor or city department and download a copy of the contract. Unlike the city's contract portal, our collection is ongoing and includes both present and past contracts.
 
-Find out how to read a contract `here <http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/>`__ and read more about this project `here <http://thelensnola.org/search-new-orleans-government-contracts/>`__ and `here <http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/>`__. 
+Find out how to read a contract [here](http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/) and read more about this project [here](http://thelensnola.org/search-new-orleans-government-contracts/) and [here](http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/). 
 
 [![Build Status](https://travis-ci.org/TheLens/contracts.svg?branch=master)](https://travis-ci.org/TheLens/contracts) [![Documentation Status](https://readthedocs.org/projects/city-of-new-orleans-contracts/badge/?version=latest)](https://readthedocs.org/projects/city-of-new-orleans-contracts/?badge=latest) [![Coverage Status](https://coveralls.io/repos/TheLens/contracts/badge.svg)](https://coveralls.io/r/TheLens/contracts)
 
