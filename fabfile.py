@@ -51,7 +51,7 @@ def data():
 
     local('git add %s/all-last.csv' % DATA_DIR)
     local('git add %s/female-first.csv' % DATA_DIR)
-    # Keep these two off of GitHub for their privacy
+    # Keep these two off of GitHub for their privacy:
     # local('git add %s/known_companies.txt' % DATA_DIR)
     # local('git add %s/known_people.txt' % DATA_DIR)
     local('git add %s/male-first.csv' % DATA_DIR)
