@@ -1,8 +1,8 @@
 """
-The web app that runs at vault.thelensnola.org/contracts.
+The web app that runs at http://vault.thelensnola.org/contracts.
 
-It lets the public search City of New Orleans contracts that are posted to the
-city's purchasing portal. It's just a Flask application, and it follows the
+It allows the public to search City of New Orleans contracts that are posted
+to the city's purchasing portal. It's a Flask application, and it follows the
 structure from the Flask tutorials. The front end is built with Foundation.
 It uses SQLAlchemy to connect to a PostgreSQL database.
 """
@@ -12,8 +12,8 @@ import importlib
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from flask import Flask, request, Response
-from functools import wraps
 # from flask.ext.cache import Cache
+from functools import wraps
 from contracts.models import Models
 from contracts.lib.parserator_utils import get_labels
 from parserator.data_prep_utils import appendListToXMLfile
@@ -25,7 +25,7 @@ from contracts import (
     XML_LOCATION
 )
 
-app = Flask(__name__)  # , template_folder=templates)
+app = Flask(__name__)
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
@@ -38,7 +38,6 @@ def intro():
     """
 
     log.debug('/')
-
     log.debug(os.environ)
 
     data = Models().get_home()
@@ -119,7 +118,6 @@ def download(docid):
     log.debug('/download')
 
     data = Models().get_download(docid)
-
     # log.debug(data)
 
     # view = Views().get_download(data)
@@ -218,30 +216,42 @@ def tokens_dump(docid):
     The UI is sending tagged tokens back to the server.
     Save them to train parserator
     """
+
     log.debug('/contracts/admin/tokens')
+
     tagged_strings = set()
     labels = get_labels()
     tagged_sequence = labels
     tagged_strings.add(tuple(tagged_sequence))
-    outfile = XML_LOCATION + "/" + docid + ".xml"
+
+    outfile = "%s/%s.xml" % (XML_LOCATION, docid)
     log.debug(outfile)
+
     try:
         os.remove(outfile)
     except OSError:
         pass
-    log.debug("about to append")
-    appendListToXMLfile(tagged_strings,
-                        importlib.import_module('parser'),
-                        outfile)
-    log.debug("wrote xml file")
+
+    log.debug("About to append")
+
+    appendListToXMLfile(
+        tagged_strings,
+        importlib.import_module('parser'),
+        outfile
+    )
+
+    log.debug("Wrote XML file")
+
     output = "".join([i for i in open(outfile, "r")])
     conn = S3Connection()
     bucket = conn.get_bucket('lensnola')
     k = Key(bucket)
-    k.key = 'contracts/contract_amounts/human_labels/' + docid + ".xml"
+    k.key = 'contracts/contract_amounts/human_labels/%s.xml' % docid
     k.set_contents_from_string(output)
-    log.debug("wrote to s3")
-    return "wrote to s3"
+
+    log.debug("Wrote to S3")
+
+    return "Wrote to S3"
 
 
 if __name__ == '__main__':

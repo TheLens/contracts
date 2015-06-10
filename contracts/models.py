@@ -1,7 +1,7 @@
 
-"""
+'''
 The web app that runs at vault.thelensnola.org/contracts.
-"""
+'''
 
 import time
 import json
@@ -251,7 +251,7 @@ class Models(object):
     def do_tags_exist(self, doc_cloud_id):
         # url = (
         #     "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
-        #     "contract_amounts/computer_labels/" + doc_cloud_id
+        #     "contract_amounts/computer_labels/%s" % doc_cloud_id
         # )
 
         c = httplib.HTTPConnection('www.abc.com')
@@ -264,7 +264,7 @@ class Models(object):
     def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
         url = (
             "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
-            "contract_amounts/computer_labels/" + doc_cloud_id
+            "contract_amounts/computer_labels/%s" % doc_cloud_id
         )
 
         page = request.args.get('page')
@@ -275,7 +275,7 @@ class Models(object):
             computer_generated_tags = response.read()
             computer_generated_tags = json.loads(computer_generated_tags)
         except urllib2.HTTPError, e:
-            log.debug("HTTPError error " + str(e.code))
+            log.debug("HTTPError error %s" % str(e.code))
             computer_generated_tags = None
         return spanify(page_text, page, computer_generated_tags)
 
@@ -290,7 +290,7 @@ class Models(object):
 
         docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
         response = make_response(docs.pop().pdf)
-        disposition_header = "attachment; filename=" + doc_cloud_id + ".pdf"
+        disposition_header = "attachment; filename=%s.pdf" % doc_cloud_id
         response.headers["Content-Disposition"] = disposition_header
 
         return response
@@ -330,7 +330,7 @@ class Models(object):
 
     # @cache.memoize(timeout=900)
     def query_document_cloud(self, search_term, page=1):
-        """
+        '''
         Queries the DocumentCloud API.
         This is it's own method so that queries can be cached via @memoize to
         speed things up.
@@ -341,7 +341,7 @@ class Models(object):
         Default: 1.
         :type page: string
         :returns: dict. (?) The output that matches the query.
-        """
+        '''
 
         log.debug('search_term: "%s"', search_term)
 
@@ -359,14 +359,14 @@ class Models(object):
 
     # @cache.memoize(timeout=900)
     def query_document_cloud_count(self, search_term):
-        """
+        '''
         Finds the number of documents in DocumentCloud project that
         match this query.
 
         :param search_term: The search term for DocumentCloud API query.
         :type search_term: string
         :returns: int. The number of records that match this query.
-        """
+        '''
 
         log.debug(
             'query_document_cloud_count with search_term: %s', search_term)
@@ -380,7 +380,7 @@ class Models(object):
 
     @staticmethod
     def translate_to_doc_cloud_form(documents):
-        """
+        '''
         In the database each row for contracts has an ID which is different
         from the doc_cloud_id on DocumentCloud. This just translates rows so
         that their ID is equal to the doc_cloud_id. It's a bit awkward and
@@ -389,7 +389,7 @@ class Models(object):
         :param documents: A list of documents (from where?).
         :type documents: list
         :returns: list. A list of documents, with corrected IDs (how?).
-        """
+        '''
 
         log.debug('translate_to_doc_cloud_form')
 
@@ -400,7 +400,7 @@ class Models(object):
 
     # @cache.memoize(timeout=900)
     def get_contracts(self, offset=0, limit=None):
-        """
+        '''
         Query the database in reverse chronological order. Specify the number
         of recent contracts with offset and limit values.
 
@@ -409,7 +409,7 @@ class Models(object):
         :param limit: The number of records to return.
         :type limit: int
         :returns: list. (?) The contracts that matched the query.
-        """
+        '''
 
         log.debug('get_contracts')
 
@@ -437,11 +437,11 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)
     def get_contracts_count(self):
-        """
+        '''
         Query the count of all contracts in database.
 
         :returns: int. The total number of contracts in the database.
-        """
+        '''
 
         log.debug('Start get_contracts_count')
 
@@ -460,11 +460,11 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_vendors(self):
-        """
+        '''
         Query all vendors in the database linked to a contract.
 
         :returns: list. (?) The vendors that are linked to a contract.
-        """
+        '''
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
@@ -485,11 +485,11 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_departments(self):
-        """
+        '''
         Query all departments in the database.
 
         :returns: list. All departments in our database.
-        """
+        '''
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
@@ -514,14 +514,14 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_officers(self, vendor=None):
-        """
+        '''
         Get officers for a given vendor.
 
         :param vendor: The vendor to check on.
         :type vendor: string
         :returns: list. A list of officers listed under the vendor company in \
         the Secretary of State's database.
-        """
+        '''
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
@@ -565,14 +565,14 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)
     def translate_to_vendor(self, officer_term):
-        """
+        '''
         Translates a request for an officer to a request for a vendor
         associated with a given officer.
 
         :param officer_term: The name of the officer.
         :type officer_term: string
         :returns: ???
-        """
+        '''
 
         sn = sessionmaker(bind=self.engine)
         session = sn()
@@ -599,14 +599,14 @@ class Models(object):
 
     # @cache.memoize(timeout=100000)
     def find_number_of_documents(self, search_term):
-        """
+        '''
         Redirect to the proper function for finding the total number of
         relevant documents for a given search.
 
         :param search_term: The query's search term.
         :type search_term: string
         :returns: int. The number of matching documents.
-        """
+        '''
 
         log.debug('find_number_of_documents')
 
@@ -620,7 +620,7 @@ class Models(object):
             return self.query_document_cloud_count(search_term)
 
     def translate_web_query_to_dc_query(self, data):
-        """
+        '''
         Translates search input parameters into a request string for the
         DocumentCloud API, which utilizes the Apache Lucene syntax.
 
@@ -630,7 +630,7 @@ class Models(object):
         :param data: The query parameters.
         :type data: dict
         :returns: string. The query string ready for the DocumentCloud API.
-        """
+        '''
 
         log.debug('translate_web_query_to_dc_query')
 
@@ -661,40 +661,44 @@ class Models(object):
 
 
 class QueryBuilder(object):
-    """
+    '''
     Build a query for the DocumentCloud API.
-    """
+    '''
 
     def __init__(self):
-        """
+        '''
         Initialized as blank. Terms are stored in a dictionary.
-        """
+        '''
 
         self.query = {}
         self.text = ""
 
     def add_term(self, term, value):
-        """
+        '''
         Add a term to the dictionary. If term is updated it will just
         re-write the dictionary value.
-        """
+        '''
 
         self.query[term] = value
 
     def add_text(self, text):
-        """
+        '''
         Add a freetext component to the query (ex. 'playground').
-        """
+        '''
 
         self.text = text
 
     def get_query(self):
-        """
+        '''
         Translate the dictionary into a DocumentCloud query.
-        """
+        '''
 
         output = ""
+
         for key in self.query.keys():
-            output += key + ":" + '"' + self.query[key] + '" '
+            # TODO: Why trailing space?
+            output += '%s:"%s" ' % (key, self.query[key])
+
         output = output + self.text
+
         return output.strip()

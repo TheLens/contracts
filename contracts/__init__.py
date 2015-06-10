@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-"""
+'''
 Holds the settings so that they are accessible to other classes.
 All private information is stored in environment variables and should never
 be written into files in this repo.
-"""
+'''
 
 import os
 from datetime import date
@@ -12,119 +12,107 @@ import logging
 import logging.handlers
 import getpass
 
-USER = getpass.getuser()
+# Project directory paths
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
-LOG_PATH = "%s/logs/contracts.log" % PROJECT_DIR
-XML_LOCATION = PROJECT_DIR + "/data/parseratorxml"
-NUMBER_WORDS_LOCATION = PROJECT_DIR + '/parser/number_words.txt'
+
 PROJECT_URL = 'http://vault.thelensnola.org/contracts'
 
+# Common variables
+TODAY_DATE_STRING = date.today().strftime('%Y-%m-%d')
+TODAY_DATE = date.today()
+
+# Parserator
+TAGS_URL = '%s/data/tags.json' % PROJECT_DIR  # JSON for parserator tokens.
+XML_LOCATION = '%s/data/parseratorxml' % PROJECT_DIR
+NUMBER_WORDS_LOCATION = '%s/parser/number_words.txt' % PROJECT_DIR
+
+# DocumentCloud
+DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
+DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
+
+# Database
 DATABASE_NAME = 'contracts'
 DATABASE_SERVER = 'localhost'
+CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+    os.environ.get('DATABASE_USERNAME'),
+    os.environ.get('DATABASE_PASSWORD'),
+    DATABASE_SERVER,
+    DATABASE_NAME,
+)
+CAMPAIGN_CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+    os.environ.get('DATABASE_USERNAME'),
+    os.environ.get('DATABASE_PASSWORD'),
+    DATABASE_SERVER,
+    'campaigncontributions',
+)
 
-TODAY_DATE = date.today().strftime('%Y-%m-%d')
-
-
-# this stores the json that describes the tags for parserator tokens
-TAGS_URL = PROJECT_DIR + "/data/tags.json"
+USER = getpass.getuser()
 
 if USER == 'ubuntu':  # Server
-    CORPUS_LOC = "/backups/contracts"
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
-    ROOT_FOLDER = "/home/%s" % USER
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
-    BIDS_LOCATION = CORPUS_LOC + "/bids"
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        DATABASE_SERVER,
-        DATABASE_NAME,
-    )
-    TEMPLATES = "%s/templates" % PROJECT_DIR
+    CORPUS_LOC = '/backups/contracts'
 
-    # Static assets
-    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
+    S3_URL = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
 
-    LENS_CSS = '%s/css/lens.css' % S3_URL
+    # CSS
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
+    LENS_CSS = '%s/css/lens.css' % S3_URL
 
+    # JavaScript
     LENS_JS = '%s/js/lens.js' % S3_URL
+    PARSERATOR_JS = '%s/js/parserator.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
-    PARSERATOR_JS = '%s/js/dc-parserator.js' % S3_URL
 
-    # app.py config
+    # Flask config
     RELOADER = False
     DEBUG = False
-elif USER == 'abe':  # Server
-    CORPUS_LOC = "%s/backups/contracts" % PROJECT_DIR
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
-    ROOT_FOLDER = "/home/%s" % USER
+elif USER == 'abe':  # Local
+    CORPUS_LOC = '%s/backups/contracts' % PROJECT_DIR
 
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
-    BIDS_LOCATION = CORPUS_LOC + "/bids"
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        DATABASE_SERVER,
-        DATABASE_NAME,
-    )
-    TEMPLATES = "%s/templates" % PROJECT_DIR
+    S3_URL = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
 
-    # Static assets
-    S3_URL = "https://s3-us-west-2.amazonaws.com/lensnola/contracts"
-
-    LENS_CSS = '%s/css/lens.css' % S3_URL
+    # CSS
     BANNER_CSS = '%s/css/banner.css' % S3_URL
     CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
+    LENS_CSS = '%s/css/lens.css' % S3_URL
 
+    # JavaScript
     LENS_JS = '%s/js/lens.js' % S3_URL
+    PARSERATOR_JS = '%s/js/parserator.js' % S3_URL
     RESULTS_JS = '%s/js/results.js' % S3_URL
     SEARCH_JS = '%s/js/search.js' % S3_URL
-    PARSERATOR_JS = '%s/js/dc-parserator.js' % S3_URL
 
-    # app.py config
+    # Flask config
     RELOADER = False
     DEBUG = False
 else:  # USER == 'thomasthoren' or Read the Docs
-    CORPUS_LOC = "%s/backup" % PROJECT_DIR
-    DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
-    DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
-    ROOT_FOLDER = "/Users/%s" % USER
+    CORPUS_LOC = '%s/backup' % PROJECT_DIR
 
-    VENDORS_LOCATION = CORPUS_LOC + "/vendors"
-    PURCHASE_ORDER_LOCATION = CORPUS_LOC + "/purchaseorders"
-    BIDS_LOCATION = CORPUS_LOC + "/bids"
-
-    CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-        os.environ.get('DATABASE_USERNAME'),
-        os.environ.get('DATABASE_PASSWORD'),
-        DATABASE_SERVER,
-        DATABASE_NAME,
-    )
-    TEMPLATES = "%s/contracts/templates" % PROJECT_DIR
-
-    # Static assets
-    LENS_CSS = '/static/css/lens.css'
+    # CSS
     BANNER_CSS = '/static/css/banner.css'
     CONTRACTS_CSS = '/static/css/contracts.css'
+    LENS_CSS = '/static/css/lens.css'
 
+    # JavaScript
     LENS_JS = '/static/js/lens.js'
+    PARSERATOR_JS = '/static/js/parserator.js'
     RESULTS_JS = '/static/js/results.js'
     SEARCH_JS = '/static/js/search.js'
-    PARSERATOR_JS = '/static/js/dc-parserator.js'
 
-    # app.py config
+    # Flask config
     RELOADER = True
     DEBUG = True
 
+ATTACHMENTS_LOCATION = '%s/attachments' % CORPUS_LOC
+DOCUMENTS_LOCATION = '%s/documents' % CORPUS_LOC
+PURCHASE_ORDER_LOCATION = '%s/purchase-orders' % CORPUS_LOC
+VENDORS_LOCATION = '%s/vendors' % CORPUS_LOC
+
 # Logging
+LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
+
 if os.path.isfile(LOG_PATH):
     os.remove(LOG_PATH)
 

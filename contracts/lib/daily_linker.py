@@ -3,7 +3,6 @@
 
 import re
 import csv
-import dateutil.parser
 from bs4 import BeautifulSoup
 from selenium import webdriver
 # from address import AddressParser, Address
@@ -19,10 +18,16 @@ from contracts.db import (
     Company,
     EthicsRecord
 )
-from contracts import log, CONNECTION_STRING, PROJECT_DIR, TODAY_DATE
+from contracts import (
+    log,
+    CONNECTION_STRING,
+    CAMPAIGN_CONNECTION_STRING,
+    PROJECT_DIR,
+    TODAY_DATE
+)
 
 
-class Option:
+class Option(object):
 
     '''docstring'''
 
@@ -60,7 +65,7 @@ class DailyLinker(object):
         search_results = self.search_sos(vendor_name)
         total_hits = self.get_total_hits(search_results)
         if total_hits == 1:
-            print "perfect hit for {}".format(vendor_name)
+            print "perfect hit for %s" % vendor_name
             self.process_direct_hit(search_results, vendor_name)
 
     def get_daily_contracts(self, today_string=TODAY_DATE):
@@ -101,7 +106,7 @@ class DailyLinker(object):
         '''docstring'''
 
         male_first_names = self._get_male_first_names()
-        female_first_names = self._get_female_first_names
+        female_first_names = self._get_female_first_names()
 
         first_names = male_first_names + female_first_names
 
@@ -110,21 +115,22 @@ class DailyLinker(object):
     def _get_male_first_names(self):
         '''docstring'''
 
-        first_male = []
+        male_first_names = []
+
         first_male_name_path = "%s/data/male-first.csv" % PROJECT_DIR
 
         with open(first_male_name_path, "r") as fname:
             reader = csv.reader(fname)
             next(reader, None)  # Skip header row
             for row in reader:
-                first_male.append(row[0])
+                male_first_names.append(row[0])
 
-        return first_male
+        return male_first_names
 
-    def _get_first_female_names(self):
+    def _get_female_first_names(self):
         '''docstring'''
 
-        first_female = []
+        female_first_names = []
 
         first_female_name_path = "%s/data/female-first.csv" % PROJECT_DIR
 
@@ -132,12 +138,12 @@ class DailyLinker(object):
             reader = csv.reader(fname)
             next(reader, None)  # Skip header row
             for row in reader:
-                self.first_female.append(row[0])
+                female_first_names.append(row[0])
 
-        return first_female
+        return female_first_names
 
     @staticmethod
-    def has_known_person_suffix(name):
+    def _has_known_person_suffix(name):
         '''docstring'''
 
         name_regexes = [
@@ -177,7 +183,7 @@ class DailyLinker(object):
         ]
         for name_regex in name_regexes:
             reg = re.compile(name_regex)
-            # people with Jr ect at the end of the name are people:
+            # people with Jr etc at the end of the name are people:
             if reg.search(name):
                 return True
 
@@ -201,7 +207,7 @@ class DailyLinker(object):
         ]
         for company_regex in company_regexes:
             reg = re.compile(company_regex)
-            # people with Jr ect at the end of the name are people:
+            # People with Jr etc at the end of the name are people:
             if reg.search(name):
                 return True
 
@@ -248,7 +254,7 @@ class DailyLinker(object):
     def is_this_a_person(self, name_of_thing):
         '''docstring'''
 
-        if self.has_known_person_suffix(name_of_thing):
+        if self._has_known_person_suffix(name_of_thing):
             return True
 
         if self.is_common_first_and_last_name_and_has_initial(name_of_thing):
@@ -259,7 +265,7 @@ class DailyLinker(object):
 
         return False
 
-    def is_this_a_company(self, name_of_thing):
+    def _is_this_a_company(self, name_of_thing):
         '''docstring'''
 
         if self.has_known_company_suffix(name_of_thing):
@@ -287,7 +293,8 @@ class DailyLinker(object):
                 return
             if indb == 1:
                 return
-        if self.is_this_a_company(name):
+
+        if self._is_this_a_company(name):
             indb = session.query(Company).filter(Company.name == name).count()
             if indb == 0:
                 company = Company(name)
@@ -296,7 +303,8 @@ class DailyLinker(object):
                 return
             if indb == 1:
                 return
-        print "coult not link {}".format(name)
+
+        print "Could not link %s" % name
 
         session.close()
 
@@ -306,6 +314,7 @@ class DailyLinker(object):
         session = self.sn()
 
         indb = session.query(Vendor).filter(Vendor.name == vendor_name).count()
+
         if indb == 0:
             vendor = Vendor(vendor_name.replace(".", ""))
             session.add(vendor)
@@ -390,8 +399,9 @@ class DailyLinker(object):
                 VendorOfficer.personid == personindb.id
             ).count()
             if vendorindb is not None and personindb is not None and link < 1:
-                print "linking {} to {}".format(
-                    str(vendorindb.id), str(personindb.id))
+                print "Linking %s to %s" % (
+                    str(vendorindb.id), str(personindb.id)
+                )
                 link = VendorOfficer(vendorindb.id, personindb.id)
                 session.add(link)
                 session.commit()
@@ -407,8 +417,9 @@ class DailyLinker(object):
                 VendorOfficerCompany.companiesid == companyindb.id
             ).count()
             if vendorindb is not None and companyindb is not None and link < 1:
-                print "linking {} to {}".format(
-                    str(vendorindb.id), str(companyindb.id))
+                print "Linking %s to %s" % (
+                    str(vendorindb.id), str(companyindb.id)
+                )
                 link = VendorOfficerCompany(vendorindb.id, companyindb.id)
                 session.add(link)
                 session.commit()
@@ -463,13 +474,17 @@ class DailyLinker(object):
         '''docstring'''
 
         city = city.upper()
+
         soup = BeautifulSoup(self.driver.page_source)
         rows = soup.find_all("tr")
-        rows = [r for r in rows if "class" in r.attrs.keys()]
-        rows_normal = [r for r in rows if (r.attrs['class'][0] == "RowNormal")]
-        rows_alt = [r for r in rows if r.attrs['class'][0] == "RowAlt"]
+
+        rows = [row for row in rows if "class" in row.attrs.keys()]
+        rows_normal = [
+            row for row in rows if row.attrs['class'][0] == "RowNormal"]
+        rows_alt = [row for row in rows if row.attrs['class'][0] == "RowAlt"]
         rows = rows_alt + rows_normal
-        city_rows = [r for r in rows if city in ''.join(r.findAll(text=True))]
+        city_rows = [
+            row for row in rows if city in ''.join(row.findAll(text=True))]
 
         # return the IDs for each button to explore
         return [r.contents[4].contents[1] for r in city_rows]
@@ -479,13 +494,14 @@ class DailyLinker(object):
 
         pages = []
 
-        for p in potential_hits:
-            id = p.attrs['id']
-            self.driver.find_element_by_id(id).click()
+        for potential_hit in potential_hits:
+            p_id = potential_hit.attrs['id']
+            self.driver.find_element_by_id(p_id).click()
             page = self.driver.page_source
             pages.append(page)
             self.driver.find_element_by_id(
-                "ctl00_cphContent_btnBackToSearchResults").click()
+                "ctl00_cphContent_btnBackToSearchResults"
+            ).click()
 
         return pages
 
@@ -588,8 +604,8 @@ class DailyLinker(object):
 
         vendor_name = vendor_name.strip("\n").replace(".", "")
 
-        print "adding {}".format(vendor_name)
-        log.debug("Adding {}".format(vendor_name))
+        print "Adding %s" % vendor_name
+        log.debug("Adding %s", vendor_name)
 
         self.add_vendor(vendor_name)
         soup = BeautifulSoup(raw_html)
@@ -622,34 +638,12 @@ class DailyLinker(object):
 
         if "ctl00_cphContent_tblResults" in self.driver.page_source:
             return 1
+
         text = self.driver.find_element_by_id(
-            "ctl00_cphContent_lblTotalResults").text
+            "ctl00_cphContent_lblTotalResults"
+        ).text
+
         return int(text)  # no hits
-        raise Exception("Error!")
-
-    def get_state_contributions(self, name):
-        '''docstring'''
-
-        session = self.sn()
-
-        contributions = session.query(
-            EthicsRecord
-        ).filter(
-            EthicsRecord.contributorname == name
-        ).all()
-
-        session.close()
-
-        # contributions.sort(lambda x: dateutil.parser.parse(x.receiptdate))
-
-        output = []
-
-        for contribution in contributions:
-            output.append(dateutil.parser.parse(contribution.receiptdate))
-
-        output = output.sort()
-
-        return output
 
     def get_names_from_vendor(self, name):
         '''docstring'''
@@ -674,6 +668,33 @@ class DailyLinker(object):
             names.append(str(i[0]))
 
         return names
+
+    def get_state_contributions(self, name):
+        '''docstring'''
+
+        engine = create_engine(CAMPAIGN_CONNECTION_STRING)
+        sn = sessionmaker(bind=engine)
+        session = sn()
+
+        contributions = session.query(
+            EthicsRecord
+        ).filter(
+            EthicsRecord.contributorname == name
+        ).all()
+
+        session.close()
+
+        # TODO: Sort output by increasing donation size
+        # contributions.sort(lambda x: dateutil.parser.parse(x.receiptdate))
+
+        output = []
+
+        for contribution in contributions:
+            output.append(contribution.__str__())  # __str__ has desired form
+
+        output.sort()
+
+        return output
 
 if __name__ == '__main__':
     contracts = DailyLinker().get_daily_contracts()

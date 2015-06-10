@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 '''
 Utility functions for gathering and organizing published contracts from the
@@ -14,18 +15,21 @@ TODO: Create a system that routinely checks older pages in purchasing system.
 import re
 import time
 import urllib2
-from contracts import log
+from random import shuffle
+from bs4 import BeautifulSoup
 from contracts.lib.lens_database import LensDatabase
 from contracts.lib.purchase_order import PurchaseOrder
 from contracts.lib.lens_repository import LensRepository
 from contracts.lib.document_cloud_project import DocumentCloudProject
+from contracts import log
 
 
 class CheckCity(object):
 
     '''Methods for checking on the city's purchasing website.'''
 
-    def check_pages(self, pages):
+    # TODO: Refactor this, and probably break into smaller methods.
+    def check_pages(self):
         '''
         Runs a scan for each of the 10 most recent pages on the city's
         purchasing website.
@@ -34,10 +38,114 @@ class CheckCity(object):
         :type pages: list.
         '''
 
-        for page in pages:
-            log.debug('Checking city purchasing page %d', page)
-            self._scan_index_page(page)
+        number_of_pages = self._find_number_of_pages()
+
+        new_pages = range(1, 11)
+        old_pages = range(11, number_of_pages + 1)
+
+        shuffle(new_pages)
+        shuffle(old_pages)
+
+        new_counter = 0
+        for new_page in new_pages:
+            log.debug('\n')
+            log.debug('Checking city purchasing page %d', new_page)
+            print (
+                '\n' +
+                '\n========' +
+                '\nPage %s' % new_page +
+                '\n========')
+
+            need_to_scrape = LensDatabase().check_if_need_to_scrape(new_page)
+
+            if need_to_scrape is False:
+                continue
+
+            self._scan_index_page(new_page)
+
+            LensDatabase().update_scrape_log(new_page)
+            new_counter += 1
+
+            # Run five times per day, so break after 2 pages in order to reach
+            # 10 pages per day.
+            if new_counter == 2:
+                break
             time.sleep(60)
+            break  # TODO: Uncomment eventually
+
+        old_counter = 0
+        for old_page in old_pages:
+            log.debug('\n')
+            log.debug('Checking city purchasing page %d', old_page)
+            print (
+                '\n' +
+                '\n========' +
+                '\nPage %s' % old_page +
+                '\n========')
+
+            need_to_scrape = LensDatabase().check_if_need_to_scrape(old_page)
+
+            if need_to_scrape is False:
+                continue
+
+            self._scan_index_page(old_page)
+
+            LensDatabase().update_scrape_log(old_page)
+            old_counter += 1
+
+            # Run five times per day, seven days per week, so break after 13
+            # pages in order to reach about 450 pages per week.
+            if old_counter == 13:
+                break
+            time.sleep(60)
+            break  # TODO: Uncomment eventually
+
+    def _find_number_of_pages(self):
+        '''
+        Finds how many pages of contracts there are on the city's
+        purchasing site.
+
+        :returns: int. The number of pages.
+        '''
+
+        html = self._get_index_page(1)
+        soup = BeautifulSoup(html)
+
+        main_table = soup.select('.table-01').pop()
+
+        metadata_row = main_table.find_all(
+            'tr', recursive=False
+        )[3].findChildren(  # [3] if zero-based, [4] if not
+            ['td']
+        )
+
+        metadata_row = metadata_row[0].findChildren(
+            ['table']
+        )[0].findChildren(
+            ['tr']
+        )[0].findChildren(
+            ['td']
+        )[0].findChildren(
+            ['table']
+        )[0].findChildren(
+            ['tr']
+        )[1]
+
+        href = metadata_row.findChildren(
+            ['td']
+        )[0].findChildren(
+            ['a']
+        )[-1].get('href')
+
+        number_of_pages = re.search(
+            '[0-9]+', href).group()
+
+        log.debug(
+            'There are %s pages found on the city\'s purchasing portal',
+            number_of_pages
+        )
+
+        return int(number_of_pages)
 
     def _scan_index_page(self, page_number):
         '''
@@ -50,9 +158,15 @@ class CheckCity(object):
         html = self._get_index_page(page_number)
         purchase_order_numbers = self._get_purchase_order_numbers(html)
 
-        for purchase_order_number in purchase_order_numbers:
+        for i, purchase_order_number in enumerate(purchase_order_numbers):
+            print (
+                '\n-----------------------' +
+                '\nPurchase order %s' % purchase_order_number +
+                '\n-----------------------' +
+                '\n(%d of %d)' % (i + 1, len(purchase_order_numbers)))
             log.debug(
                 'Analyzing purchase order number %s', purchase_order_number)
+
             self._check_if_need_to_download_contract(purchase_order_number)
             time.sleep(10)
 
@@ -68,6 +182,8 @@ class CheckCity(object):
         on the page.
         '''
 
+        # TODO: Why this pattern? It skips JOB1234123. Is there any need to
+        # restrict to only two characters?
         pattern = '(?<=docId=)[A-Z][A-Z][0-9]+'
         output = re.findall(pattern, html)
 
@@ -92,7 +208,8 @@ class CheckCity(object):
     #     else:
     #         return False
 
-    def _check_if_need_to_download_contract(self, purchase_order_number):
+    @staticmethod
+    def _check_if_need_to_download_contract(purchase_order_number):
         '''
         Determines whether this contract should be downloaded, and also whether
         it needs to be added to our DocumentCloud and local database.
@@ -102,24 +219,26 @@ class CheckCity(object):
         '''
 
         log.info(
-            'Checking if need to download purchase order %s',
+            'Checking purchase order %s',
             purchase_order_number)
 
         # Check local file repository
         try:
+            print '\n*** LensRepository ***'
             need_to_download = LensRepository().check_if_need_to_download(
                 purchase_order_number)
             if need_to_download:
-                log.debug('Need to download %s', purchase_order_number)
                 LensRepository().download_purchase_order(purchase_order_number)
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
-                'Contract not posted publically. Purchase order=%s',
+                'Purchase order %s not posted publically',
                 purchase_order_number
             )
+            print 'Purchase order not posted publically.'
 
         try:
+            print '\n*** PurchaseOrder ***'
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
         except IndexError, error:
@@ -129,30 +248,30 @@ class CheckCity(object):
 
         # Check DocumentCloud project
         try:
+            print '\n*** DocumentCloudProject ***'
             need_to_upload = DocumentCloudProject().check_if_need_to_upload(
                 purchase_order_number)
             if need_to_upload:
-                log.debug('Need to upload to DocumentCloud!')
                 DocumentCloudProject().prepare_then_add_contract(
                     purchase_order_object)
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
-                'Contract not posted publically. Purchase order=%s',
+                'Purchase order %s not posted publically',
                 purchase_order_number
             )
 
         # Check local database
         try:
+            print '\n*** LensDatabase ***'
             contract_exist = LensDatabase().check_if_database_has_contract(
                 purchase_order_number)
             if contract_exist is False:
-                log.debug('Need to add to database!')
                 LensDatabase().add_to_database(purchase_order_object)
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
-                'Contract not posted publically. Purchase order=%s',
+                'Purchase order %s not posted publically',
                 purchase_order_number
             )
 
@@ -299,5 +418,4 @@ class CheckCity(object):
         return output
 
 if __name__ == '__main__':
-    pages = range(1, 11)
-    CheckCity().check_pages(pages)
+    CheckCity().check_pages()

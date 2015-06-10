@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 '''
 Represents a purchase order object.
@@ -6,13 +7,13 @@ Represents a purchase order object.
 import os
 import re
 import urllib2
-import subprocess
+from subprocess import call
 from bs4 import BeautifulSoup
 from contracts.lib.utilities import Utilities
 from contracts import (
     VENDORS_LOCATION,
     PURCHASE_ORDER_LOCATION,
-    BIDS_LOCATION,
+    ATTACHMENTS_LOCATION,
     log
 )
 
@@ -32,10 +33,20 @@ class PurchaseOrder(object):
         return "<PurchaseOrder {}>".format(self.purchaseorder)
 
     def __init__(self, purchase_order_number):
+        log.debug(
+            'Building PurchaseOrder object for %s', purchase_order_number)
+
         validity = Utilities().check_if_valid_purchase_order_format(
             purchase_order_number)
         if validity is False:
+            print (
+                '\xF0\x9F\x9A\xAB  ' +
+                'Purchase order %s is invalid.' % purchase_order_number)
+            log.debug(
+                'Purchase order %s format is invalid', purchase_order_number)
             return
+
+        self.purchase_order_number = purchase_order_number
 
         html = self.get_html(purchase_order_number)
         self.vendor_id_city = self.get_city_vendor_id(html)
@@ -50,17 +61,23 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
 
             self.vendor_name = "unknown"
-            log.info('No associated vendor info for %s', purchase_order_number)
+            print (
+                '\xF0\x9F\x9A\xAB  ' +
+                'No vendor info for purchase order %s.' % (
+                    purchase_order_number))
+            log.info(
+                'No associated vendor info for %s', self.purchase_order_number)
             return
 
         self.department = self.get_department(soup)
         self.k_number = self.get_knumber(soup)
-        self.purchaseorder = self.get_purchase_order(soup)
+        self.purchaseorder = self.purchase_order_number
         self.attachments = self.get_attachments(soup)
         self.data = self.get_data()
-        self.title = self.vendor_name + " : " + self.description
+        self.title = "%s : %s" % (self.vendor_name, self.description)
 
-    def get_html(self, purchase_order_number):
+    @staticmethod
+    def get_html(purchase_order_number):
         '''
         Reads the HTML contents of this purchase order file.
 
@@ -70,7 +87,9 @@ class PurchaseOrder(object):
         :returns: string. The HTML contains for this purchase order file.
         '''
 
-        file_location = PURCHASE_ORDER_LOCATION + '/' + purchase_order_number
+        file_location = (
+            '%s/%s' % (PURCHASE_ORDER_LOCATION, purchase_order_number)
+        )
 
         with open(file_location, 'r') as html_file:
             html = html_file.read()
@@ -110,7 +129,7 @@ class PurchaseOrder(object):
         :type city_vendor_id: string.
         '''
 
-        vendor_file_location = VENDORS_LOCATION + '/' + city_vendor_id
+        vendor_file_location = '%s/%s' % (VENDORS_LOCATION, city_vendor_id)
 
         if os.path.isfile(vendor_file_location):
             log.info('Vendor file for %s already present', city_vendor_id)
@@ -143,7 +162,7 @@ class PurchaseOrder(object):
             main_table = soup.select('.table-01').pop()
             metadata_row = main_table.findChildren(
                 ['tr']
-            )[1].findChildren(  # Was [2]
+            )[2].findChildren(  # Why not [1]?
                 ['td']
             )[0].findChildren(
                 ['table']
@@ -153,9 +172,9 @@ class PurchaseOrder(object):
 
             description = metadata_row[1].findChildren(
                 ['td']
-            )[5].contents.strip()  # Was contents.pop().strip()
+            )[5].contents.pop().strip()  # pop() pulls out from list
 
-            return description
+            return str(description)
         except Exception, error:
             log.exception(error, exc_info=True)
             return ""
@@ -176,7 +195,7 @@ class PurchaseOrder(object):
                 ['td']
             )[1].findChildren(
                 ['a']
-            )[0].contents.strip()  # Was contents.pop().strip()
+            )[0].contents.pop().strip()  # pop() pulls out from list
 
             # Extract only the name, then remove periods.
             vendor = vendor_link_text.split('-')[1].strip().replace(".", "")
@@ -186,13 +205,13 @@ class PurchaseOrder(object):
             # so we can find matches.
             vendor = vendor.upper()
 
-            return vendor
+            return str(vendor)
         except IndexError, error:
             # In cases of index error, go ahead and download the vendor page.
             log.exception(error, exc_info=True)
 
             vendor_file_location = (
-                VENDORS_LOCATION + '/' + self.vendor_id_city  # + '.html'?
+                '%s/%s' % (VENDORS_LOCATION, self.vendor_id_city)  # + '.html'?
             )
 
             # Downloaded this file in download_vendor_profile()
@@ -223,7 +242,7 @@ class PurchaseOrder(object):
 
         metadata_row = main_table.findChildren(
             ['tr']
-        )[1].findChildren(  # Was [2]
+        )[2].findChildren(  # Why not [1]?
             ['td']
         )[0].findChildren(
             ['table']
@@ -231,7 +250,7 @@ class PurchaseOrder(object):
 
         department = metadata_row[5].findChildren(
             ['td']
-        )[1].contents.strip()  # Was contents.pop().strip()
+        )[1].contents.pop().strip()  # pop() pulls out from list
 
         # Convert to uppercase for DocumentCloud. Search queries are also
         # converted to uppercase so we can find matches.
@@ -253,7 +272,7 @@ class PurchaseOrder(object):
 
         metadata_row = main_table.findChildren(
             ['tr']
-        )[1].findChildren(  # Was [2]
+        )[2].findChildren(  # Why not [1]?
             ['td']
         )[0].findChildren(
             ['table']
@@ -264,7 +283,7 @@ class PurchaseOrder(object):
         try:
             knumber = metadata_row[6].findChildren(
                 ['td']
-            )[1].contents
+            )[1].contents.pop()
 
             # Remove extra characters:
             knumber = knumber.replace('k', '').replace('K', '').replace(
@@ -292,7 +311,7 @@ class PurchaseOrder(object):
 
         purchase_order = main_table.findChildren(
             ['tr']
-        )[1].findChildren(  # Was [2]
+        )[2].findChildren(  # Why not [1]?
             ['td']
         )[0].findChildren(
             ['table']
@@ -300,7 +319,7 @@ class PurchaseOrder(object):
             ['tr']
         )[1].findChildren(
             ['td']
-        )[1].contents.strip()  # Was contents.pop().strip()
+        )[1].contents.pop().strip()  # pop() pulls out from list
 
         return purchase_order
 
@@ -319,7 +338,7 @@ class PurchaseOrder(object):
 
             metadatarow = main_table.findChildren(
                 ['tr']
-            )[1].findChildren(  # Was [2]
+            )[2].findChildren(  # Why not [1]?
                 ['td']
             )[0].findChildren(
                 ['table']
@@ -372,153 +391,173 @@ class PurchaseOrder(object):
         :type attachment: string
         '''
 
-        # TODO: Why are we calling these bids? Aren't they contracts?
-        bid_number = re.search('[0-9]+', attachment.get('href')).group()
-        bid_file_location = BIDS_LOCATION + '/' + bid_number + ".pdf"
+        # The city's purchasing site has an internal ID for each attachment.
+        # Here we use it to download the attachment files, and also to store
+        # locally so we can have a list of the attachments we have on hand.
+        city_attachment_id = re.search(
+            '[0-9]+', attachment.get('href')).group()
+        log.debug('Gathering data for attachment %s', city_attachment_id)
 
-        if os.path.isfile(bid_file_location):  # Have already downloaded
+        attachment_id_path = '%s/%s.pdf' % (
+            ATTACHMENTS_LOCATION, city_attachment_id)
+
+        display_name = self._get_attachment_display_name(city_attachment_id)
+
+        if os.path.isfile(attachment_id_path):  # Have already downloaded
+            print (
+                '\xF0\x9F\x9A\xAB  ' +
+                'Already have attachment %s. Skipping.' % city_attachment_id)
             log.info(
-                'Already have bid %s for purchase order %s',
-                bid_number,
-                self.purchaseorder
-            )
+                'Already have attachment ID %s for purchase order %s',
+                city_attachment_id,
+                self.purchaseorder)
         else:
-            self.download_attachment_file(bid_number, bid_file_location)
+            log.debug('Start downloading attachments')
+
+            self.download_attachment_file(
+                city_attachment_id,
+                display_name,
+                attachment_id_path
+            )
             log.info(
-                'Downloaded bid %s associated with purchase order %s',
-                bid_number,
+                'Downloaded attachment ID %s for purchase order %s',
+                city_attachment_id,
                 self.purchaseorder
             )
 
-    @staticmethod
-    def download_attachment_file(bid_number, bid_file_location):
+    def _get_attachment_display_name(self, city_attachment_id):
+        '''docstring'''
+
+        response = urllib2.urlopen(
+            'http://www.purchasing.cityofno.com/bso/external/document/' +
+            'attachments/attachmentFileDetail.sdo?' +
+            'fileNbr=%s' % city_attachment_id +
+            '&docId=%s' % self.purchase_order_number +
+            '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
+            'poSummary.sdo&external=true'
+        )
+        html = response.read()
+
+        soup = BeautifulSoup(html)
+        header = soup.select(".sectionheader-01")[0].contents.pop()
+        header = ' '.join(header.split())
+
+        attachment_file_name = str(header).replace(
+            "Attachment File Detail:", "").strip()
+
+        return attachment_file_name
+
+    def download_attachment_file(self,
+                                 attachment_id,
+                                 display_name,
+                                 attachment_file_location):
         '''
         Download the attachment file found on contract page.
 
-        :param bid_number: The bid number (a contract number?).
-        :type bid_number: string
-        :param bid_file_location: The path to where to save the bid file.
-        :type bid_file_location: string
-        :returns: ???
+        :param attachment_id: The city's internal attachment ID.
+        :type attachment_id: string
+        :param attachment_file_location: The path for where to save the \
+                                         attachment file.
+        :type attachment_file_location: string
         '''
 
-        # TODO: Need to test this. Why is Grainger, Inc. hard-coded? Should
-        # that be a variable spot to insert bid_number into?
-        # TODO: Double-check that string formatting hasn't broken anything.
-        if not os.path.exists(bid_number):
-            process = subprocess.Popen([
+        print (
+            '\xE2\x9C\x85  ' +
+            'Downloading "%s" with city ID %s...' % (
+                display_name, attachment_id))
+        log.debug(
+            'Downloading attachment %s with city ID %s',
+            display_name,
+            attachment_id
+        )
+
+        if not os.path.exists(attachment_id):
+            call([
                 'curl',
                 '-o',
-                bid_file_location,
+                attachment_file_location,
                 'http://www.purchasing.cityofno.com/bso/external/document/' +
                 'attachments/attachmentFileDetail.sdo',
                 '-H',
                 'Pragma: no-cache',
                 '-H',
-                'Origin: null',
+                'Origin: http://www.purchasing.cityofno.com',
                 '-H',
-                'Accept-Encoding: gzip,deflate,sdch',
+                'Accept-Encoding: gzip, deflate',
                 '-H',
                 'Accept-Language: en-US,en;q=0.8',
                 '-H',
-                'Content-Type: multipart/form-data; ' +
-                'boundary=----WebKitFormBoundaryP4a4C1okQYkBGBSG',
+                'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X ' +
+                '10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                'Chrome/43.0.2357.81 Safari/537.36',
                 '-H',
-                'Accept: text/html,application/xhtml+xml,' +
-                'application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Content-Type: multipart/form-data; boundary=----' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP',
+                '-H',
+                'Accept: text/html,application/xhtml+xml,application/' +
+                'xml;q=0.9,image/webp,*/*;q=0.8',
+                '-H',
+                'Cache-Control: no-cache',
+                '-H',
+                'Referer: http://www.purchasing.cityofno.com/bso/external/' +
+                'document/attachments/attachmentFileDetail.sdo?fileNbr=' +
+                '%s&docId=%s' % (attachment_id, self.purchase_order_number) +
+                '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
+                'poSummary.sdo&external=true',
+                '-H',
+                'Cookie: JSESSIONID=5FC84DA3EC020E1FC19700761C0EBEB3',
                 '-H',
                 'Connection: keep-alive',
                 '--data-binary',
-                '''------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="mode"\r
-    \r
-    download\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="parentUrl"\r
-    \r
-    /external/purchaseorder/poSummary.sdo\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="parentId"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="fileNbr"\r
-    \r
-    ''' + bid_number + '''\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="workingDir"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docId"\r
-    \r
-    4051927411\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docType"\r
-    \r
-    P\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="docSubType"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="releaseNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="downloadFileNbr"\r
-    \r
-    ''' + bid_number + '''\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="itemNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="currentPage"\r
-    \r
-    1\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="querySql"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortBy"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortByIndex"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="sortByDescending"\r
-    \r
-    false\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="revisionNbr"\r
-    \r
-    0\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="receiptId"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="vendorNbr"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="vendorGrp"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="invoiceNbr"\r
-    \r
-    \r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG\r
-    Content-Disposition: form-data; name="displayName"\r
-    \r
-    Grainger Inc. Februaryl 2008.pdf\r
-    ------WebKitFormBoundaryP4a4C1okQYkBGBSG--\r
-    ''',
+                '$\'------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
+                'Disposition: form-data; name="mode"\r\n\r\ndownload\r\n' +
+                '------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
+                'Disposition: form-data; name="parentUrl"\r\n\r\n/external/' +
+                'purchaseorder/poSummary.sdo\r\n------WebKitFormBoundary' +
+                'GAY56ngXMDvs6qDP\r\nContent-Disposition: form-data; ' +
+                'name="parentId"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="fileNbr"\r\n\r\n' +
+                '%s' % attachment_id +
+                '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
+                'Disposition: form-data; name="workingDir"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="docId"\r\n\r\n' +
+                '%s' % self.purchase_order_number +
+                '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
+                'Disposition: form-data; name="docType"\r\n\r\nP\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="docSubType"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="releaseNbr"\r\n\r\n0\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="downloadFileNbr"\r\n\r\n' +
+                '%s' % attachment_id +
+                '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
+                'Disposition: form-data; name="itemNbr"\r\n\r\n0\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="currentPage"\r\n\r\n1\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="querySql"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="sortBy"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="sortByIndex"\r\n\r\n0\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="sortByDescending"\r\n\r\nfalse\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="revisionNbr"\r\n\r\n0\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="receiptId"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="vendorNbr"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="vendorGrp"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="invoiceNbr"\r\n\r\n\r\n------' +
+                'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
+                'form-data; name="displayName"\r\n\r\n' +
+                '%s' % display_name +
+                '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP--\r\n\'',
                 '--compressed'
             ])
-            process.wait()

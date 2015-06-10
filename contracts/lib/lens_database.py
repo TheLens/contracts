@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 
 '''
-Represents the Lens database that tracks contracts.
+Represents the local database that tracks contracts.
 '''
 
-from datetime import datetime, date
-import dateutil
+from datetime import date, timedelta
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from contracts.db import (
@@ -13,9 +13,9 @@ from contracts.db import (
     Person,
     Department,
     VendorOfficer,
-    EthicsRecord
+    ScrapeLog
 )
-from contracts import CONNECTION_STRING
+from contracts import CONNECTION_STRING, TODAY_DATE, log
 
 
 class LensDatabase(object):
@@ -36,6 +36,11 @@ class LensDatabase(object):
         :returns: boolean. True if the contract is present, False if not.
         '''
 
+        log.debug(
+            'Checking if local database has purchase order %s',
+            purchase_order_number
+        )
+
         session = self.sn()
 
         query_count = session.query(
@@ -46,178 +51,100 @@ class LensDatabase(object):
 
         session.close()
 
-        if query_count == 1:
+        if query_count == 1:  # Database has the contract
+            print (
+                '\xF0\x9F\x9A\xAB  ' +
+                'Database already has %s.' % purchase_order_number)
+            log.debug('Database already has %s', purchase_order_number)
             return True
         else:
+            log.debug('Database needs %s', purchase_order_number)
             return False
 
-    # Refactor to take a type  <-- ???
-    def get_officers(self):
+    def add_to_database(self, purchase_order_object):
         '''
-        Returns a list of all company officers in the database.
+        Add this contract to the local database. Initialize a Contract object
+        class instance and fill out with the relevant information.
 
-        :returns: list. All of the company officers in our database.
+        :param purchase_order_object: The PurchaseOrder object instance.
+        :type purchase_order_object: A PurchaseOrder object instance.
         '''
 
-        # TODO: Test that this works correctly.
+        print (
+            '\xE2\x9C\x85  ' +
+            'Adding purchase order %s to database...' % (
+                purchase_order_object.purchase_order_number))
+        log.debug(
+            'Adding %s to database',
+            purchase_order_object.purchase_order_number
+        )
 
         session = self.sn()
 
-        officers_query = session.query(
-            Person.name
+        contract = Contract()
+
+        # TODO: Might need to have a follow-up method that pulls from
+        # DocumentCloud project and inserts its ID into this row in the
+        # database.
+        # contract.doc_cloud_id = TODO
+
+        contract.contractnumber = purchase_order_object.k_number
+        contract.purchaseordernumber = purchase_order_object.purchaseorder
+        contract.description = purchase_order_object.description
+        contract.title = purchase_order_object.title
+        contract.dateadded = date.today()
+
+        self._add_department_if_missing(purchase_order_object.department)
+        self._add_vendor_if_missing(
+            purchase_order_object.vendor_name,
+            vendor_id_city=purchase_order_object.vendor_id_city
+        )
+
+        contract.departmentid = self._get_department_id(
+            purchase_order_object.department)
+        contract.vendorid = self._get_database_vendor_id(
+            purchase_order_object.vendor_name)
+
+        self._add_contract_to_local_database(contract)
+
+        session.close()
+
+    def get_daily_contracts(self):
+        '''
+        Get today's contracts (and the vendors).
+
+        Not called on by this class, but is called on by emailer.py.
+
+        :returns: A list of dicts (?) for the daily contracts.
+        '''
+
+        log.debug('Getting today\'s contracts')
+
+        session = self.sn()
+
+        contracts = session.query(
+            Contract.doc_cloud_id,
+            Vendor.name
+        ).filter(
+            Contract.dateadded == TODAY_DATE
+        ).filter(
+            Contract.vendorid == Vendor.id
         ).all()
-        # TODO: need to sort alphabetically?
 
         session.close()
 
-        officers = []
-
-        for row in officers_query:
-            officers.append(row.name)
-
-        return officers
-
-    def add_vendor_if_missing(self, vendor, vendor_id_city=None):
-        '''
-        Calls on a check to see if the database needs to add the vendor.
-        If so, then calls a method to add the vendor to the database.
-
-        :param vendor: ???
-        :type vendor: ???
-        :param vendor_id_city: ???
-        :type vendor_id_city: ???
-        '''
-
-        vendor_exists = self.check_if_vendor_exists(vendor)
-        if vendor_exists is False:
-            self.add_vendor(vendor, vendor_id_city)
-
-    def check_if_vendor_exists(self, vendor):
-        '''
-        Checks if database has this department.
-
-        :param department: ???
-        :type department: ???
-        :returns: boolean. True if it exists in the database, False if not.
-        '''
-
-        session = self.sn()
-
-        vendor_count = session.query(
-            Vendor
-        ).filter(
-            Vendor.name == vendor
-        ).count()
-
-        session.close()
-
-        if vendor_count == 0:
-            return False
-        else:
-            return True
-
-    # refactor to take a type
-    def add_vendor(self, vendor, vendor_id_city=None):
-        '''
-        Add vendor to the Lens database.
-
-        :param vendor: The vendor to add to our database.
-        :type vendor: string
-        '''
-
-        session = self.sn()
-
-        vendor = Vendor(vendor)
-        vendor.vendor_id_city = vendor_id_city
-
-        session.add(vendor)
-        session.commit()
-
-        session.close()
-
-    def check_if_department_exists(self, department):
-        '''
-        Checks if database has this department.
-
-        :param department: ???
-        :type department: ???
-        :returns: boolean. True if it exists in the database, False if not.
-        '''
-
-        session = self.sn()
-
-        department_count = session.query(
-            Department
-        ).filter(
-            Department.name == department
-        ).count()
-
-        session.close()
-
-        if department_count == 0:
-            return False
-        else:
-            return True
-
-    def add_department_if_missing(self, department):
-        '''
-        Calls on a check to see if the database needs to add the department.
-        If so, then calls a method to add the department to the database.
-
-        :param department: ???
-        :type department: ???
-        '''
-
-        department_exists = self.check_if_department_exists(department)
-        if department_exists is False:
-            self.add_department(department)
-
-    def add_department(self, department):
-        '''
-        Add department to the local database.
-
-        :param meta_field: The department to add to local database.
-        :type meta_field: string
-        '''
-
-        session = self.sn()
-
-        department = Department(department)
-        session.add(department)
-        session.commit()
-
-        session.close()
-
-    def add_contract_to_local_database(self, contract):
-        '''
-        Add a contract to the local database.
-
-        :param contract: The contract to add to our database.
-        :type contract: A ___ class instance.
-        '''
-
-        session = self.sn()
-
-        contract_count = session.query(
-            Contract
-        ).filter(
-            Contract.doc_cloud_id == contract.doc_cloud_id
-        ).count()
-
-        # Checking for the absence of this contract, meaning this contract is
-        # not in our DB.
-        if contract_count == 0:
-            session.add(contract)
-            session.commit()
-
-        session.close()
+        return contracts
 
     def get_all_contract_ids(self):
         '''
         Fetches a list of all of the contract IDs in our DocumentCloud project.
 
+        Not called on by this class, but is called on by backup.py.
+
         :returns: list. A list of all IDs in our DocumentCloud project.
         '''
+
+        log.debug('Fetching a list of all contract IDs in database')
 
         session = self.sn()
 
@@ -236,184 +163,18 @@ class LensDatabase(object):
 
         return document_ids
 
-    def update_contract_from_document_cloud(self, document_cloud_id, fields):
-        '''
-        Update an existing contract in the Lens database.
-        TODO: compare to add_contract(), because this doesn't update. It adds.
-
-        :param document_cloud_id: The unique ID in DocumentCloud.
-        :type document_cloud_id: string
-        :param fields: The metadata fields to add along with the contract?
-        :type fields: dict
-        '''
-
-        session = self.sn()
-
-        contract = session.query(
-            Contract
-        ).filter(
-            Contract.doc_cloud_id == document_cloud_id
-        ).first()
-
-        contract.contractnumber = fields['contractno']
-        contract.vendorid = fields['vendor']
-        contract.departmentid = fields['department']
-        contract.dateadded = fields['dateadded']
-        contract.title = fields['title']
-        contract.purchaseordernumber = fields['purchaseno']
-        contract.description = fields['description']
-
-        session.add(contract)
-        session.commit()
-
-        session.close()
-
-    def get_contract(self, purchase_order_number):
-        '''
-        Get a contract from the database.
-
-        :param purchase_order_no: The unique ID in the city's website.
-        :type purchase_order_no: string
-        :returns: dict. A dict (?) for the matching contract.
-        '''
-
-        session = self.sn()
-
-        query = session.query(
-            Contract
-        ).filter(
-            Contract.purchaseordernumber == purchase_order_number
-        ).first()
-
-        session.close()
-
-        return query
-
-    def get_contract_doc_cloud_id(self, document_cloud_id):
-        '''
-        Get a contract from the DocumentCloud project.
-
-        :param document_cloud_id: The unique ID in the DocumentCloud project.
-        :type document_cloud_id: string
-        :returns: dict. A dict (?) for the matching contract.
-        '''
-
-        session = self.sn()
-
-        query = session.query(
-            Contract
-        ).filter(
-            Contract.doc_cloud_id == document_cloud_id
-        ).first()
-
-        session.close()
-
-        return query
-
-    def get_lens_vendor_id(self, vendor):
-        '''
-        Get a vendor's ID from our database.
-        TODO: refactor
-
-        :param vendor: The vendor.
-        :type vendor: string
-        :returns: string. The ID for the vendor.
-        '''
-
-        session = self.sn()
-
-        vendor = session.query(
-            Vendor
-        ).filter(
-            Vendor.name == vendor
-        ).first()
-
-        vendor_id = vendor.id
-
-        session.close()
-
-        return vendor_id
-
-    def get_department_id(self, department):
-        '''
-        Get the department's ID from our database.
-        TODO: refactor
-
-        :param department: The department.
-        :type department: string
-        :returns: string. The ID for the department.
-        '''
-
-        session = self.sn()
-
-        department_id = session.query(
-            Department
-        ).filter(
-            Department.name == department
-        ).first().id
-
-        session.close()
-
-        return department_id
-
-    def get_half_filled_contracts(self):
-        '''
-        A half-filled contract is where we know the DocumentCloud ID but don't
-        know purchase order number or any of the other metadata in the city's
-        purchase order system because when we upload the contract to
-        DocumentCloud...
-
-        DocumentCloud doesn't give immediate access to all document properties.
-        This pulls out the contracts in the database added during upload but
-        that still need to have their details filled in.
-
-        :returns: SQLAlchemy query result.
-        '''
-
-        session = self.sn()
-
-        query = session.query(
-            Contract
-        ).filter(
-            Contract.departmentid is None
-        ).all()
-
-        session.close()
-
-        return query
-
-    def get_daily_contracts(self):  # defaults to today
-        '''
-        Get today's contracts (and the vendors) for the daily email.
-
-        :returns: A list of dicts (?) for the daily contracts.
-        '''
-
-        today_string = datetime.today().strftime('%Y-%m-%d')
-
-        session = self.sn()
-
-        contracts = session.query(
-            Contract.doc_cloud_id,
-            Vendor.name
-        ).filter(
-            Contract.dateadded == today_string
-        ).filter(
-            Contract.vendorid == Vendor.id
-        ).all()
-
-        session.close()
-
-        return contracts
-
     def get_people_associated_with_vendor(self, name):
         '''
         Get a list of people associated with the vendor.
 
+        Not called on by this class, but is called on by emailer.py.
+
         :param name: The vendor name.
         :type name: string
-        :returns: list. The people who are associated with this vendor.
+        :returns: list. The people who are associated with this vendor (how?).
         '''
+
+        log.debug('Finding people associated with %s', name)
 
         session = self.sn()
 
@@ -436,65 +197,466 @@ class LensDatabase(object):
 
         return people
 
-    def get_state_contributions(self, name):
+    def check_if_need_to_scrape(self, page):
         '''
-        Find the state contributions for this contributor.
+        If page is <= 10 and last scrape was before today, scrape it.
+        If page is > 10 and last scrape was more than seven days ago, scrape.
 
-        :param name: The name.
-        :type name: string
-        :returns: list. The contributions associated with this name.
+        :params page: The purchasing site page number to check.
+        :type page: int.
+        :returns: boolean. True if need to scrape, False if not.
+        '''
+
+        log.debug('Checking if need to scrape page %d', page)
+
+        today_date = date.today()
+        week_ago_date = date.today() - timedelta(days=7)
+
+        date_last_scraped = self._check_when_last_scraped(page)
+
+        if date_last_scraped is None:
+            log.debug('Need to scrape')
+            return True  # Scrape this page
+        elif page <= 10:
+            if date_last_scraped < today_date:
+                log.debug('Need to scrape')
+                return True  # Scrape this page
+            else:
+                log.debug('Do not need to scrape')
+                print (
+                    'Skipping page %d because it has been scraped ' % page +
+                    'recently.')
+
+                return False
+        elif page > 10:
+            if date_last_scraped < week_ago_date:
+                log.debug('Need to scrape')
+                return True  # Scrape this page
+            else:
+                log.debug('Do not need to scrape')
+                print (
+                    'Skipping page %d because page has ' % page +
+                    'been scraped recently.')
+
+                return False
+
+    def _check_when_last_scraped(self, page):
+        '''
+        Looks up this page in scrape_log table to see when it was last scraped.
+
+        :params page: The purchasing site's page to check.
+        :type page: int.
+        :returns: date. When this page was last scraped. None if never.
         '''
 
         session = self.sn()
 
-        contributions = session.query(
-            EthicsRecord
+        query = session.query(
+            ScrapeLog
         ).filter(
-            EthicsRecord.contributorname == name
+            ScrapeLog.page == page
         ).all()
 
-        # TODO:
-        contributions.sort(key=lambda x: dateutil.parser.parse(x.receiptdate))
+        if len(query) == 0:  # No row yet for this page (total number varies)
+            return None
 
         session.close()
 
-        return contributions
+        # for row in query:
+        date_last_scraped = query.pop().last_scraped
 
-    def add_to_database(self, purchase_order_object):
-        '''
-        This was moved out from DocumentCloudProject since this has nothing to
-        do with DocumentCloud.
+        log.debug(
+            'This page was last scraped %s',
+            date_last_scraped.strftime('%Y-%m-%d')
+        )
 
-        :param purchase_order_number: The contract to add.
-        :type purchase_order_number: string.
-        '''
+        return date_last_scraped
+
+    def update_scrape_log(self, page):
+        '''dcostring'''
 
         session = self.sn()
 
-        contract = Contract()
+        query = session.query(
+            ScrapeLog
+        ).filter(
+            ScrapeLog.page == page
+        ).all()
 
-        # TODO: "Instance of 'Document' had no 'id' member". Might need to
-        # have a follow-up method that pulls from DocumentCloud project and
-        # inserts its ID into this row in the database.
-        # contract.doc_cloud_id = new_contract.id
+        if len(query) == 0:  # No row yet for this page (total number varies)
+            # Add this page to database
+            scrape_info = ScrapeLog(page, TODAY_DATE)
+            session.add(scrape_info)
+            session.commit()
+        else:
+            # Update this page in the database
+            update_query = session.query(
+                ScrapeLog
+            ).filter(
+                ScrapeLog.page == page
+            ).one()
+            # scrape_info = ScrapeLog(page, TODAY_DATE)
 
-        contract.contractnumber = purchase_order_object.k_number
-        contract.purchaseordernumber = purchase_order_object.purchaseorder
-        contract.description = purchase_order_object.description
-        contract.title = purchase_order_object.title
-        contract.dateadded = date.today()
-
-        self.add_department_if_missing(purchase_order_object.department)
-        self.add_vendor_if_missing(
-            purchase_order_object.vendor_name,
-            purchase_order_object.vendor_id_city
-        )
-
-        contract.departmentid = self.get_department_id(
-            purchase_order_object.department)
-        contract.vendorid = self.get_lens_vendor_id(
-            purchase_order_object.vendor_name)
-
-        self.add_contract_to_local_database(contract)
+            update_query.last_scraped = TODAY_DATE
+            session.commit()
 
         session.close()
+
+    def _add_department_if_missing(self, department):
+        '''
+        Calls on a check to see if the database needs to add the department.
+        If so, then calls a method to add the department to the database.
+
+        :param department: ???
+        :type department: ???
+        '''
+
+        department_exists = self._check_if_department_exists(department)
+        if department_exists is False:
+            self._add_department(department)
+
+    def _check_if_department_exists(self, department):
+        '''
+        Checks if database has this department.
+
+        :param department: ???
+        :type department: ???
+        :returns: boolean. True if it exists in the database, False if not.
+        '''
+
+        log.debug(
+            'Checking if department %s is missing from database',
+            department
+        )
+
+        session = self.sn()
+
+        department_count = session.query(
+            Department
+        ).filter(
+            Department.name == department
+        ).count()
+
+        session.close()
+
+        if department_count == 0:
+            log.debug('Department %s is missing from database', department)
+            return False
+        else:
+            log.debug('Database already has department %s', department)
+            return True
+
+    def _add_department(self, department):
+        '''
+        Add department to the local database.
+
+        :param meta_field: The department to add to local database.
+        :type meta_field: string
+        '''
+
+        log.debug('Adding department %s to database', department)
+
+        session = self.sn()
+
+        department = Department(department)
+        session.add(department)
+        session.commit()
+
+        session.close()
+
+    def _add_vendor_if_missing(self, vendor, vendor_id_city=None):
+        '''
+        Calls on a check to see if the database needs to add the vendor.
+        If so, then calls a method to add the vendor to the database.
+
+        :param vendor: ???
+        :type vendor: ???
+        :param vendor_id_city: ???
+        :type vendor_id_city: ???
+        '''
+
+        vendor_exists = self._check_if_vendor_exists(vendor)
+
+        if vendor_exists is False:
+            self._add_vendor(vendor, vendor_id_city=vendor_id_city)
+
+    def _check_if_vendor_exists(self, vendor):
+        '''
+        Checks if database has this vendor.
+
+        :param vendor: The vendor to check for.
+        :type vendor: string?
+        :returns: boolean. True if this vendor exists in the database, \
+                           False if not.
+        '''
+
+        log.debug('Checking if vendor %s is missing from database', vendor)
+
+        session = self.sn()
+
+        vendor_count = session.query(
+            Vendor
+        ).filter(
+            Vendor.name == vendor
+        ).count()
+
+        session.close()
+
+        if vendor_count == 0:
+            log.debug('Vendor %s is missing from database', vendor)
+            return False
+        else:
+            log.debug('Vendor %s is already in database', vendor)
+            return True
+
+    # refactor to take a type # TODO: What does this mean?
+    def _add_vendor(self, vendor, vendor_id_city=None):
+        '''
+        Add vendor to the local database.
+
+        :param vendor: The vendor to add to our database.
+        :type vendor: string
+        '''
+
+        log.debug('Adding vendor %s to database', vendor)
+
+        session = self.sn()
+
+        vendor = Vendor(vendor, vendor_id_city)
+
+        session.add(vendor)
+        session.commit()
+
+        session.close()
+
+    def _get_department_id(self, department):
+        '''
+        Get the department's ID from our database.
+
+        :param department: The department name.
+        :type department: string
+        :returns: string. The database ID for the department name.
+        '''
+
+        log.debug('Finding the ID for department %s in database', department)
+
+        session = self.sn()
+
+        department = session.query(
+            Department
+        ).filter(
+            Department.name == department
+        ).first()
+
+        department_id = department.id
+
+        session.close()
+
+        return department_id
+
+    def _get_database_vendor_id(self, vendor):
+        '''
+        Get a vendor's ID from our database.
+
+        :param vendor: The vendor name.
+        :type vendor: string
+        :returns: string. The database's vendor ID for this vendor.
+        '''
+
+        log.debug('Fetching the ID for vendor %s in database', vendor)
+
+        session = self.sn()
+
+        vendor = session.query(
+            Vendor
+        ).filter(
+            Vendor.name == vendor
+        ).first()
+
+        vendor_id = vendor.id
+
+        session.close()
+
+        return vendor_id
+
+    def _add_contract_to_local_database(self, contract):
+        '''
+        Add a contract to the local database.
+
+        :param contract: The contract to add to our database.
+        :type contract: A ___ class instance.
+        '''
+
+        # # TODO: Extract piece of info rather than add entire object
+        # log.debug(
+        #     'Adding contract (knumber %s, purchase order %s) to database',
+        #     contract.contractnumber,
+        #     contract.purchaseordernumber
+        # )
+
+        session = self.sn()
+
+        # contract_count = session.query(
+        #     Contract
+        # ).filter(
+        #     Contract.doc_cloud_id == contract.doc_cloud_id
+        # ).count()
+
+        # # Checking for the absence of this contract, meaning this contract is
+        # # not in our DB.
+        # if contract_count == 0:
+
+        session.add(contract)
+        session.commit()
+
+        session.close()
+
+    # Refactor to take a type  <-- TODO: What does this mean? Type of officer?
+    def _get_officers(self):
+        '''
+        Returns a list of all company officers in the database.
+
+        :returns: list. All of the company officers in our database.
+        '''
+
+        log.debug('Fetching a list of officers in the database')
+
+        # TODO: Test that this works correctly before using.
+
+        session = self.sn()
+
+        officers_query = session.query(
+            Person.name
+        ).all()
+        # TODO: need to sort (alphabetically)?
+
+        session.close()
+
+        officers = []
+
+        for row in officers_query:
+            officers.append(row.name)
+
+        # return officers  # TODO: Uncomment once tested and working.
+
+    # Not called in this class, nor elsewhere it seems.
+    def _update_contract_from_document_cloud(self, document_cloud_id, fields):
+        '''
+        Update an existing contract in the local database.
+        TODO: compare to add_contract(), because this doesn't update. It adds.
+
+        :param document_cloud_id: The unique ID in DocumentCloud.
+        :type document_cloud_id: string
+        :param fields: The metadata fields to add along with the contract?
+        :type fields: dict
+        '''
+
+        log.debug(
+            'Updating contract in database that has DocumentCloud ID %s',
+            document_cloud_id
+        )
+
+        session = self.sn()
+
+        contract = session.query(
+            Contract
+        ).filter(
+            Contract.doc_cloud_id == document_cloud_id
+        ).first()
+
+        contract.contractnumber = fields['contractno']
+        contract.vendorid = fields['vendor']
+        contract.departmentid = fields['department']
+        contract.dateadded = fields['dateadded']
+        contract.title = fields['title']
+        contract.purchaseordernumber = fields['purchaseno']
+        contract.description = fields['description']
+
+        session.add(contract)
+        session.commit()
+
+        session.close()
+
+    # Not called in this class, nor elsewhere it seems.
+    def _get_contract(self, purchase_order_number):
+        '''
+        Get a contract from the database.
+
+        :param purchase_order_no: The unique ID in the city's website.
+        :type purchase_order_no: string
+        :returns: dict. A dict (?) for the matching contract.
+        '''
+
+        log.debug('Fetch contract %s from database', purchase_order_number)
+
+        session = self.sn()
+
+        query = session.query(
+            Contract
+        ).filter(
+            Contract.purchaseordernumber == purchase_order_number
+        ).first()
+
+        session.close()
+
+        return query
+
+    # Not called in this class, nor elsewhere it seems.
+    def _get_contract_doc_cloud_id(self, document_cloud_id):
+        '''
+        Get a contract from the DocumentCloud project.
+
+        :param document_cloud_id: The unique ID in the DocumentCloud project.
+        :type document_cloud_id: string
+        :returns: dict. A dict (?) for the matching contract.
+        '''
+
+        log.debug(
+            'Find contract in database that has DocumentCloud ID %s',
+            document_cloud_id
+        )
+
+        session = self.sn()
+
+        query = session.query(
+            Contract
+        ).filter(
+            Contract.doc_cloud_id == document_cloud_id
+        ).first()
+
+        session.close()
+
+        return query
+
+    # Not called in this class, nor elsewhere it seems.
+    def _get_half_filled_contracts(self):
+        '''
+        A half-filled contract is when we know the DocumentCloud ID but don't
+        know purchase order number or any of the other metadata in the city's
+        purchase order system because when we upload the contract to
+        DocumentCloud...
+
+        DocumentCloud doesn't give immediate access to all document properties.
+        This pulls out the contracts in the database added during upload but
+        that still need to have their details filled in.
+
+        :returns: SQLAlchemy query result.
+        '''
+
+        log.debug('_get_half_filled_contracts')
+
+        session = self.sn()
+
+        query = session.query(
+            Contract
+        ).filter(
+            Contract.departmentid is None
+        ).all()
+
+        session.close()
+
+        return query
+
+# TODO: remove
+if __name__ == '__main__':
+    LensDatabase().update_scrape_log(1)

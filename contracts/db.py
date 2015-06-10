@@ -6,35 +6,57 @@ These classes that map to tables in the underlying database.
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from contracts import CONNECTION_STRING
+from contracts import CONNECTION_STRING, CAMPAIGN_CONNECTION_STRING
 
 Base = declarative_base()
 
 
+class ScrapeLog(Base):
+    '''
+    Keeps a record of the last time we checked each index page
+    on the city's purchasing site.
+    '''
+
+    __tablename__ = 'scrape_log'
+
+    pid = Column(Integer, primary_key=True)
+    page = Column(Integer, nullable=False)
+    last_scraped = Column(Date, nullable=False)
+
+    def __init__(self, page, last_scraped):
+        self.page = page
+        self.last_scraped = last_scraped
+
+    def __repr__(self):
+        return "<ScrapeLog (Page='%s', Last scraped=%s>" % (
+            self.page, self.last_scraped)
+
+
 class Vendor(Base):
     '''
-    A vendor sells goods or services to the city. [*] vendor_id_city is city's
-    ID number for the vendor.
+    A vendor is a company that sells goods or services to the city.
 
     :param id: The table's primary key, which is also our internal vendor ID.
     :type id: int
     :param name: The vendor's name.
     :type name: string
-    :param vendor_id_city: The city's vendor ID. TODO: Why is this needed?
+    :param vendor_id_city: The city purchasing site's vendor ID.
     :type vendor_id_city: string
     '''
 
     __tablename__ = 'vendors'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)  # Our internal unique ID
     name = Column(String)
     vendor_id_city = Column(String)
 
-    def __init__(self, name):
+    def __init__(self, name, vendor_id_city):
         self.name = name
+        self.vendor_id_city = vendor_id_city
 
     def __repr__(self):
-        return "<Vendor(Name='%s'>" % self.name
+        return "<Vendor(Name='%s', City vendor ID=%s>" % (
+            self.name, self.vendor_id_city)
 
 
 class Department(Base):
@@ -61,7 +83,9 @@ class Department(Base):
 
 class Person(Base):
     '''
-    A person is an officer of a company.
+    A person is a human officer of a company in the Secretary of State's
+    business database. Some of those businesses list a business as their
+    officer (`companies` table), but this is rare.
 
     :param id: The table's primary key.
     :type id: int
@@ -83,8 +107,11 @@ class Person(Base):
 
 class Company(Base):
     '''
-    A company does business with the city. TODO: How is this different from a
-    vendor?
+
+    A "company" in this table is a businnes that is the officer of a business
+    that listed in the Secretary of State's business system. Most businesses in
+    the Secretary of State's business system have human officers (`people`
+    table).
 
     :param id: The table's primary key.
     :type id: int
@@ -185,15 +212,18 @@ class Contract(Base):
 
     id = Column(Integer, primary_key=True)
     departmentid = Column(Integer, ForeignKey("departments.id"))
+    # Our database's internal vendor ID:
     vendorid = Column(Integer, ForeignKey("vendors.id"))
     contractnumber = Column(String)
     purchaseordernumber = Column(String)
+    # DocumentCloud project's vendor ID:
     doc_cloud_id = Column(String, nullable=False)
     description = Column(String)
     title = Column(String)
     dateadded = Column(Date)
 
-    def __init__(self, ponumber=None,
+    def __init__(self,
+                 ponumber=None,
                  contractnumber=None,
                  vendor_id=None,
                  department_id=None,
@@ -340,7 +370,7 @@ class VendorOfficerCompany(Base):
 
 class EthicsRecord(Base):
     '''
-    TK
+    A table with 1,856,193 rows of campaign contributions.
 
     :param primary_key: The table's primary key.
     :type primary_key: int
@@ -378,7 +408,7 @@ class EthicsRecord(Base):
 
     __tablename__ = 'ethics_records'
 
-    primary_key = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     last = Column(String)
     first = Column(String)
     reportno = Column(String)
@@ -443,6 +473,10 @@ def remake_db():
 
     engine = create_engine(CONNECTION_STRING)
     Base.metadata.create_all(engine)
+
+    # TODO: Will this work?
+    campaign_engine = create_engine(CAMPAIGN_CONNECTION_STRING)
+    Base.metadata.create_all(campaign_engine)
 
 if __name__ == "__main__":
     remake_db()

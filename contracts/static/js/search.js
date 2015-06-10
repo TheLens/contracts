@@ -168,7 +168,6 @@ function getSearch(keep_current_page) {
   // data = checkForNewSearchParameters(data);
 
   var query_string = buildSearch(data);
-  
   // console.log('Query string:', query_string);
   
   window.location.href = '/contracts/search/' + query_string;

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 '''
 Interacting with the DocumentCloud project.
@@ -9,7 +10,7 @@ from contracts.lib.utilities import Utilities
 from contracts import (
     DOC_CLOUD_USERNAME,
     DOC_CLOUD_PASSWORD,
-    BIDS_LOCATION,
+    ATTACHMENTS_LOCATION,
     PROJECT_URL,
     log
 )
@@ -36,6 +37,11 @@ class DocumentCloudProject(object):
         :returns: boolean. True if need to upload, False if don't need to.
         '''
 
+        log.debug(
+            'Checking if need to upload %s to DocumentCloud',
+            purchase_order_number
+        )
+
         validity = Utilities().check_that_contract_is_valid_and_public(
             purchase_order_number)
 
@@ -43,8 +49,19 @@ class DocumentCloudProject(object):
             "purchase order", purchase_order_number)
 
         if validity is False or contract_exists:
-            return False  # Do not upload contract
+            print (
+                '\xF0\x9F\x9A\xAB  ' +
+                'Not uploading to DocumentCloud. Purchase ' +
+                'order %s is invalid or already there.' % purchase_order_number
+            )
+            log.debug(
+                'Do not need to upload %s to DocumentCloud',
+                purchase_order_number
+            )
+            return False
         else:
+            log.debug(
+                'Need to upload %s to DocumentCloud', purchase_order_number)
             return True
 
     # def _search_for_contract(self, key, value):
@@ -103,22 +120,27 @@ class DocumentCloudProject(object):
         # Verify that there is at least one file to download.
         number_of_attachments = len(purchase_order_object.attachments)
 
+        log.debug('There are %d attachments to upload', number_of_attachments)
+
         if number_of_attachments > 0:
             for i, attachment in enumerate(purchase_order_object.attachments):
-                bid_number = re.search(
+                attachment_id = re.search(
                     '[0-9]+', attachment.get('href')).group()
-                bid_file_location = BIDS_LOCATION + '/' + bid_number + ".pdf"
+                attachment_location = (
+                    '%s/%s.pdf' % (ATTACHMENTS_LOCATION, attachment_id)
+                )
 
                 purchase_order_object = self.prepare_contract(
                     purchase_order_object,
                     i
                 )
                 self._upload_contract(
-                    bid_file_location,
+                    attachment_location,
                     purchase_order_object
                 )
 
-    def prepare_contract(self, purchase_order_object, iteration_value):
+    @staticmethod
+    def prepare_contract(purchase_order_object, iteration_value):
         '''
         Prepares to add a contract to our DocumentCloud project by making
         minor adjustments, such as changing the description and title language
@@ -128,13 +150,17 @@ class DocumentCloudProject(object):
         :returns: A modified PurchaseOrder object instance.
         '''
 
+        log.debug('Making modifications to contract data')
+
         number_of_attachments = len(purchase_order_object.attachments)
 
         # If multiple attachments, add language like "page 1 of 2":
         page_string = ""
         if number_of_attachments > 1:
-            page_string = str(iteration_value + 1) + " of " + \
+            page_string = "%s of %s" % (
+                str(iteration_value + 1),
                 str(number_of_attachments)
+            )
 
         purchase_order_object.description += page_string
 
@@ -154,18 +180,29 @@ class DocumentCloudProject(object):
         :type title: string.
         '''
 
-        log.debug(filename)
+        log.debug('Uploading %s to DocumentCloud', filename)
 
-        is_null = self.check_if_contract_number_is_null(purchase_order_object)
+        is_null = self._check_if_contract_number_is_null(purchase_order_object)
         if is_null:
             return
 
         purchase_order_object.title = purchase_order_object.title.replace(
             "/", "")  # TODO: Not sure why this is necessary.
 
+        title = str(purchase_order_object.title)
+
+        print (
+            '\xE2\x9C\x85  ' +
+            'Uploading attachment "%s" ' % title +
+            'to DocumentCloud...')
+        log.debug(
+            'Uploading %s to DocumentCloud...',
+            title
+        )
+
         self.api_connection.documents.upload(
             filename,
-            purchase_order_object.title,
+            title,
             'City of New Orleans',  # Source of this file
             purchase_order_object.description,
             None,  # Related article
@@ -176,7 +213,8 @@ class DocumentCloudProject(object):
             False  # Secure
         )
 
-    def check_if_contract_number_is_null(self, purchase_order_object):
+    @staticmethod
+    def _check_if_contract_number_is_null(purchase_order_object):
         '''
         Checks if this contract number is null.
 

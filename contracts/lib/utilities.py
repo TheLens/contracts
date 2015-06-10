@@ -52,6 +52,10 @@ class Utilities(object):
         :returns: boolean. True if a valid format, False if invalid format.
         '''
 
+        # TODO: Remove this? Why is this necessary?
+        # It caused scraper to miss "JOB123123".
+        # If only downside is adding too much, while upside is getting
+        # everything, then we should remove this filter.
         purchase_order_regex = r'[A-Z]{2}\d{3,}'
         # TODO: Other file had r'[A-Z]{2}\d+'. Determine which is correct.
         purchase_order_pattern = re.compile(purchase_order_regex)

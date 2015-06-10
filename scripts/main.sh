@@ -1,15 +1,24 @@
 #!/bin/bash
 
-# To be run from one level up
+# TODO:
+# This will be run multiple times per day in order to spread the views on the
+# city's website. Therefore, once-per-day scripts like daily_linker should go in
+# their own shell scripts.
+
+source `which virtualenvwrapper.sh`
+
+workon contracts
 
 echo "Checking the city's purchasing site for new contracts..."
-python contracts/lib/check_city.py
+python $PYTHONPATH/contracts/lib/check_city.py
 
 echo "Finding links between things..."
-python contracts/lib/daily_linker.py
+python $PYTHONPATH/contracts/lib/daily_linker.py
 
 echo "Sending an email with found links..."
-python contracts/lib/emailer.py
+python $PYTHONPATH/contracts/lib/emailer.py
 
 echo "Creating backups..."
-python contracts/lib/backup.py
+python $PYTHONPATH/contracts/lib/backup.py
+
+deactivate
