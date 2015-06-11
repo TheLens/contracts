@@ -110,7 +110,7 @@ class PurchaseOrder(object):
         vendor_ids = re.findall(pattern, html)
 
         if len(vendor_ids) == 0:
-            return ""
+            vendor_id = ""
         else:
             # You need to take the first one for this list or you'll sometimes
             # end up w/ the vendor_id for a subcontractor, which will sometimes
@@ -118,7 +118,11 @@ class PurchaseOrder(object):
             # view-source:http://www.purchasing.cityofno.
             # com/bso/external/purchaseorder/poSummary.
             # sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
-            return vendor_ids[0]
+            vendor_id = vendor_ids[0]
+
+        log.debug('Vendor ID: %s', vendor_id)
+
+        return vendor_id
 
     @staticmethod
     def _download_vendor_profile(city_vendor_id):
