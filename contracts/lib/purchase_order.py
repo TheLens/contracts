@@ -56,7 +56,8 @@ class PurchaseOrder(object):
         self.description = self._get_description(soup)
 
         try:
-            self.vendor_name = self._get_vendor_name(soup)
+            # self.vendor_name = self._get_vendor_name(soup)
+            self.vendor_name = self._get_vendor_name()
         except IOError, error:
             log.exception(error, exc_info=True)
 
@@ -180,7 +181,7 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
             return ""
 
-    def _get_vendor_name(self, soup):
+    def _get_vendor_name(self):  # , soup):
         '''
         Find the vendor name in the contract HTML. If that fails, then ___
 
@@ -189,45 +190,49 @@ class PurchaseOrder(object):
         :returns: string. The contract vendor's name.
         '''
 
-        try:
-            # regex_string = re.compile(r'Vendor:')
-            vendor_row = soup(text='Vendor:')[0].parent.parent
-            vendor_link_text = vendor_row.findChildren(
-                ['td']
-            )[1].findChildren(
-                ['a']
-            ).contents.pop().strip()  # pop() pulls out from list
+        # try:
+        #     # regex_string = re.compile(r'Vendor:')
+        #     vendor_row = soup(text='Vendor:')[0].parent.parent
+        #     vendor_link_text = vendor_row.findChildren(
+        #         ['td']
+        #     )[1].findChildren(
+        #         ['a']
+        #     )[0].contents.pop().strip()  # pop() pulls out from list
 
-            # Extract only the name, then remove periods.
-            vendor = vendor_link_text.split('-')[1].strip().replace(".", "")
+        #     # Extract only the name, then remove periods.
+        #     vendor = vendor_link_text.split('-')[1].strip().replace(".", "")
 
-            # Convert to uppercase for DocumentCloud project metadata.
-            # Search queries are also converted to uppercase
-            # so we can find matches.
-            vendor = vendor.upper()
+        #     # Convert to uppercase for DocumentCloud project metadata.
+        #     # Search queries are also converted to uppercase
+        #     # so we can find matches.
+        #     vendor = vendor.upper()
 
-            return str(vendor)
-        except IndexError, error:
-            # In cases of index error, go ahead and download the vendor page.
-            log.exception(error, exc_info=True)
+        #     return str(vendor)
+        # except IndexError, error:
+        #     # In cases of index error, go ahead and download the vendor page.
+        #     log.exception(error, exc_info=True)
 
-            vendor_file_location = (
-                '%s/%s.html' % (VENDORS_LOCATION, self.vendor_id_city)
-            )
+        vendor_file_location = (
+            '%s/%s.html' % (VENDORS_LOCATION, self.vendor_id_city)
+        )
 
-            # Downloaded this file in _download_vendor_profile()
-            with open(vendor_file_location, 'r') as myfile:
-                html = myfile.read()
+        # Downloaded this file in _download_vendor_profile()
+        with open(vendor_file_location, 'r') as myfile:
+            html = myfile.read()
 
-            new_soup = BeautifulSoup(html)
-            header = new_soup.select(".sectionheader-01")[0]
-            vendor_name = str(header).replace("Vendor Profile - ", "").strip()
+        soup = BeautifulSoup(html)
 
-            # Convert to uppercase for DocumentCloud. Search queries are also
-            # converted to uppercase so we can find matches.
-            vendor_name = vendor_name.upper()
+        vendor_row = soup(text='Company Name:')[0].parent
+        vendor_name = vendor_row.findChildren(
+            ['td']
+        )[5].contents.pop().strip()  # pop() pulls out from list
 
-            return vendor_name
+        # Convert to uppercase for DocumentCloud project metadata.
+        # Search queries are also converted to uppercase
+        # so we can find matches.
+        vendor_name = vendor_name.upper()
+
+        return vendor_name
 
     @staticmethod
     def _get_department(soup):
