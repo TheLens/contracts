@@ -355,7 +355,7 @@ class PurchaseOrder(object):
             return attachment_filenames_list
         except IndexError, error:
             log.exception(error, exc_info=True)
-            return []  # Sometimes the city does not include attachment files.
+            return []  # The city does not always include attachment files.
 
     def _get_data(self):
         '''
@@ -379,6 +379,9 @@ class PurchaseOrder(object):
         '''
         Cycles through all the found attachments and calls on download method.
         '''
+
+        if self.attachments == []:
+            return
 
         for attachment in self.attachments:
             self._download_attachment(attachment)
