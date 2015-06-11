@@ -12,9 +12,7 @@ from contracts.lib.lens_database import LensDatabase
 def send_email(title, message):
     '''Sends the email.'''
 
-    print os.environ.get('EMAIL_TO_LIST')
     for to in os.environ.get('EMAIL_TO_LIST').split(","):
-        print to
         gmail_user = os.environ.get('EMAIL_FROM')
         smtpserver = smtplib.SMTP('smtp.gmail.com', 587)
         smtpserver.ehlo()
@@ -22,7 +20,8 @@ def send_email(title, message):
         smtpserver.ehlo
         smtpserver.login(
             os.environ.get('GMAIL_USERNAME'),
-            os.environ.get('GMAIL_PASSWORD'))
+            os.environ.get('GMAIL_PASSWORD')
+        )
         msg = MIMEMultipart('alternative')
         msg['Subject'] = title
         msg['From'] = gmail_user
@@ -71,15 +70,19 @@ def get_message():
             "https://www.documentcloud.org/documents/" + cid + '</td>'
         output += '<td width="60%">'
         names = LensDatabase().get_people_associated_with_vendor(vendor)
+
         for name in names:
             contributions = LensDatabase().get_state_contributions(name)
             if len(contributions) > 0:
                 output += "<br><br>" + name + "<br><br>"
                 for contribution in contributions:
                     output += "<br>" + str(contribution)
+
         output += '</td>'
         output += '</tr>'
+
     output += '</table>'
+
     return output
 
 

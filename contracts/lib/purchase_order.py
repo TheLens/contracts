@@ -129,7 +129,8 @@ class PurchaseOrder(object):
         :type city_vendor_id: string.
         '''
 
-        vendor_file_location = '%s/%s' % (VENDORS_LOCATION, city_vendor_id)
+        vendor_file_location = '%s/%s.html' % (
+            VENDORS_LOCATION, city_vendor_id)
 
         if os.path.isfile(vendor_file_location):
             log.info('Vendor file for %s already present', city_vendor_id)
@@ -181,7 +182,7 @@ class PurchaseOrder(object):
 
     def _get_vendor_name(self, soup):
         '''
-        Find the vendor name in the contract HTML. If that fails, then
+        Find the vendor name in the contract HTML. If that fails, then ___
 
         :param soup: A BeautifulSoup object for the contract page HTML.
         :type soup: BeautifulSoup object.
@@ -195,7 +196,7 @@ class PurchaseOrder(object):
                 ['td']
             )[1].findChildren(
                 ['a']
-            )[0].contents.pop().strip()  # pop() pulls out from list
+            ).contents.pop().strip()  # pop() pulls out from list
 
             # Extract only the name, then remove periods.
             vendor = vendor_link_text.split('-')[1].strip().replace(".", "")
@@ -211,7 +212,7 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
 
             vendor_file_location = (
-                '%s/%s' % (VENDORS_LOCATION, self.vendor_id_city)  # + '.html'?
+                '%s/%s.html' % (VENDORS_LOCATION, self.vendor_id_city)
             )
 
             # Downloaded this file in _download_vendor_profile()
