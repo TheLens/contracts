@@ -238,6 +238,7 @@ class CheckCity(object):
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
         except IndexError, error:
+            print 'IndexError'
             log.exception(error, exc_info=True)
             log.info('Format error: %s.', purchase_order_number)
             return

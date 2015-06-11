@@ -222,14 +222,14 @@ class PurchaseOrder(object):
 
         soup = BeautifulSoup(html)
 
-        vendor_row = soup(text='Company Name:')[0].parent
+        vendor_row = soup(text='Company Name:')[0].parent.parent
+
         vendor_name = vendor_row.findChildren(
             ['td']
         )[5].contents.pop().strip()  # pop() pulls out from list
 
         # Convert to uppercase for DocumentCloud project metadata.
-        # Search queries are also converted to uppercase
-        # so we can find matches.
+        # Search queries are also converted to uppercase.
         vendor_name = vendor_name.upper()
 
         return vendor_name
