@@ -155,9 +155,12 @@ def scripts():
     '''/scripts/'''
 
     local('git add %s/backup.sh' % SCRIPTS_DIR)
+    local('git add %s/email.sh' % SCRIPTS_DIR)
     local('git add %s/local_backup.sh' % SCRIPTS_DIR)
     local('git add %s/main.sh' % SCRIPTS_DIR)
     local('git add %s/parserate.py' % SCRIPTS_DIR)
+    local('git add %s/sync_with_document_cloud.sh' % (
+        SCRIPTS_DIR))
     local('git add %s/train.sh' % SCRIPTS_DIR)
 
 

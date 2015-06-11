@@ -295,7 +295,6 @@ class LensDatabase(object):
             ).filter(
                 ScrapeLog.page == page
             ).one()
-            # scrape_info = ScrapeLog(page, TODAY_DATE)
 
             update_query.last_scraped = TODAY_DATE
             session.commit()
@@ -409,7 +408,6 @@ class LensDatabase(object):
             log.debug('Vendor %s is already in database', vendor)
             return True
 
-    # refactor to take a type # TODO: What does this mean?
     def _add_vendor(self, vendor, vendor_id_city=None):
         '''
         Add vendor to the local database.
@@ -511,7 +509,7 @@ class LensDatabase(object):
 
         session.close()
 
-    # Refactor to take a type  <-- TODO: What does this mean? Type of officer?
+    # Refactor to take a type TODO: What does this mean? Type of officer?
     def _get_officers(self):
         '''
         Returns a list of all company officers in the database.
@@ -656,7 +654,3 @@ class LensDatabase(object):
         session.close()
 
         return query
-
-# TODO: remove
-if __name__ == '__main__':
-    LensDatabase().update_scrape_log(1)

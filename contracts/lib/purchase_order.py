@@ -48,15 +48,15 @@ class PurchaseOrder(object):
 
         self.purchase_order_number = purchase_order_number
 
-        html = self.get_html(purchase_order_number)
-        self.vendor_id_city = self.get_city_vendor_id(html)
-        self.download_vendor_profile(self.vendor_id_city)
+        html = self._get_html(purchase_order_number)
+        self.vendor_id_city = self._get_city_vendor_id(html)
+        self._download_vendor_profile(self.vendor_id_city)
 
         soup = BeautifulSoup(html)
-        self.description = self.get_description(soup)
+        self.description = self._get_description(soup)
 
         try:
-            self.vendor_name = self.get_vendor_name(soup)
+            self.vendor_name = self._get_vendor_name(soup)
         except IOError, error:
             log.exception(error, exc_info=True)
 
@@ -69,15 +69,15 @@ class PurchaseOrder(object):
                 'No associated vendor info for %s', self.purchase_order_number)
             return
 
-        self.department = self.get_department(soup)
-        self.k_number = self.get_knumber(soup)
+        self.department = self._get_department(soup)
+        self.k_number = self._get_knumber(soup)
         self.purchaseorder = self.purchase_order_number
-        self.attachments = self.get_attachments(soup)
-        self.data = self.get_data()
+        self.attachments = self._get_attachments(soup)
+        self.data = self._get_data()
         self.title = "%s : %s" % (self.vendor_name, self.description)
 
     @staticmethod
-    def get_html(purchase_order_number):
+    def _get_html(purchase_order_number):
         '''
         Reads the HTML contents of this purchase order file.
 
@@ -96,7 +96,7 @@ class PurchaseOrder(object):
             return html
 
     @staticmethod
-    def get_city_vendor_id(html):
+    def _get_city_vendor_id(html):
         '''
         Parses the contract page's HTML to find the vendor ID.
 
@@ -120,7 +120,7 @@ class PurchaseOrder(object):
             return vendor_ids[0]
 
     @staticmethod
-    def download_vendor_profile(city_vendor_id):
+    def _download_vendor_profile(city_vendor_id):
         '''
         Download the vendor page associated with a purchase order, if we don't
         have the vendor page already.
@@ -149,13 +149,13 @@ class PurchaseOrder(object):
                 log.info('Could not download vendor file %s', city_vendor_id)
 
     @staticmethod
-    def get_description(soup):
+    def _get_description(soup):
         '''
         Find the description in the HTML.
 
         :param soup: A BeautifulSoup object for the contract page HTML.
         :type soup: BeautifulSoup object.
-        :returns: string. The description ____.
+        :returns: string. The contract description on the city purchasing site.
         '''
 
         try:
@@ -179,7 +179,7 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
             return ""
 
-    def get_vendor_name(self, soup):
+    def _get_vendor_name(self, soup):
         '''
         Find the vendor name in the contract HTML. If that fails, then
 
@@ -214,7 +214,7 @@ class PurchaseOrder(object):
                 '%s/%s' % (VENDORS_LOCATION, self.vendor_id_city)  # + '.html'?
             )
 
-            # Downloaded this file in download_vendor_profile()
+            # Downloaded this file in _download_vendor_profile()
             with open(vendor_file_location, 'r') as myfile:
                 html = myfile.read()
 
@@ -229,7 +229,7 @@ class PurchaseOrder(object):
             return vendor_name
 
     @staticmethod
-    def get_department(soup):
+    def _get_department(soup):
         '''
         Find the department in the contract page HTML. Ex. LW - LAW.
 
@@ -259,7 +259,7 @@ class PurchaseOrder(object):
         return department
 
     @staticmethod
-    def get_knumber(soup):
+    def _get_knumber(soup):
         '''
         Find the k number in the contract page HTML, under "Alternate ID."
 
@@ -298,7 +298,7 @@ class PurchaseOrder(object):
         return knumber
 
     @staticmethod
-    def get_purchase_order(soup):
+    def _get_purchase_order(soup):
         '''
         Find the purchase order in the contract page HTML.
 
@@ -324,7 +324,7 @@ class PurchaseOrder(object):
         return purchase_order
 
     @staticmethod
-    def get_attachments(soup):
+    def _get_attachments(soup):
         '''
         Find the attachments to download from the contract page HTML.
 
@@ -357,7 +357,7 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
             return []  # Sometimes the city does not include attachment files.
 
-    def get_data(self):
+    def _get_data(self):
         '''
         Returns metadata dictionary fields, which were scraped and parsed from
         the contract page HTML.
@@ -381,9 +381,9 @@ class PurchaseOrder(object):
         '''
 
         for attachment in self.attachments:
-            self.download_attachment(attachment)
+            self._download_attachment(attachment)
 
-    def download_attachment(self, attachment):
+    def _download_attachment(self, attachment):
         '''
         Download an attachment associated with a purchase order.
 
@@ -414,7 +414,7 @@ class PurchaseOrder(object):
         else:
             log.debug('Start downloading attachments')
 
-            self.download_attachment_file(
+            self._download_attachment_file(
                 city_attachment_id,
                 display_name,
                 attachment_id_path
@@ -447,10 +447,10 @@ class PurchaseOrder(object):
 
         return attachment_file_name
 
-    def download_attachment_file(self,
-                                 attachment_id,
-                                 display_name,
-                                 attachment_file_location):
+    def _download_attachment_file(self,
+                                  attachment_id,
+                                  display_name,
+                                  attachment_file_location):
         '''
         Download the attachment file found on contract page.
 

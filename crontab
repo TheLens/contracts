@@ -1,18 +1,13 @@
-# Stay in sync with GitHub master branch
 * * * * * cd /home/ubuntu/contracts && git fetch origin master && git reset --hard FETCH_HEAD
 
-# Check city's site five times per day:
 0 10 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
 0 12 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
-0 2 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
-0 4 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
-0 6 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
+0 14 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
+0 16 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
+0 18 * * * /home/ubuntu/contracts/main.sh  # Check for new contracts and ensure everything is in sync
 
-# Daily email
 0 6 * * * /home/ubuntu/contracts/email.sh  # Find connections and send email
 
-# Backups
-0 5 * * * /home/ubuntu/contracts/backup.sh  # Creates local and remote backups
+0 4 * * * /home/ubuntu/contracts/backup.sh  # Creates local and remote backups
 
-# Stay in sync with DocumentCloud
-/5 * * * * python /home/ubuntu/contracts/contracts/lib/sync_local_database_document_cloud.py # Syncs DocumentCloud project with local database
+*/5 * * * * /home/ubuntu/contracts/sync_with_document_cloud.sh # Syncs DocumentCloud project with local database

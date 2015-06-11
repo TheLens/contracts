@@ -187,7 +187,7 @@ class DocumentCloudProject(object):
             return
 
         purchase_order_object.title = purchase_order_object.title.replace(
-            "/", "")  # TODO: Not sure why this is necessary.
+            "/", "")  # Not sure why this is necessary
 
         title = str(purchase_order_object.title)
 

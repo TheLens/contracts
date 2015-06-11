@@ -8,8 +8,6 @@ This script is run every day and checks the 10 most recent pages on the city's
 purchasing website. This should capture everything, but the city occassionally
 uploads older contracts, which means some contracts do not fall within these 10
 pages.
-
-TODO: Create a system that routinely checks older pages in purchasing system.
 '''
 
 import re
@@ -71,7 +69,6 @@ class CheckCity(object):
             if new_counter == 2:
                 break
             time.sleep(60)
-            break  # TODO: Uncomment eventually
 
         old_counter = 0
         for old_page in old_pages:
@@ -98,7 +95,6 @@ class CheckCity(object):
             if old_counter == 13:
                 break
             time.sleep(60)
-            break  # TODO: Uncomment eventually
 
     def _find_number_of_pages(self):
         '''

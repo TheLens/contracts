@@ -1,7 +1,9 @@
 
 '''
 This script backs up a local file system with everything from the DocumentCloud
-repo.
+project. These go to /backups/contracts/documents on the server.
+This is different from local_backup.sh, which then copies this local
+file repository to a remote file repository (ex. server to local).
 '''
 
 import os
