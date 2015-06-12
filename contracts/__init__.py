@@ -50,7 +50,7 @@ CAMPAIGN_CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
 USER = getpass.getuser()
 
 if USER == 'ubuntu':  # Server
-    CORPUS_LOC = '/backups/contracts'
+    CORPUS_LOC = '%s/data' % PROJECT_DIR
 
     S3_URL = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
 
