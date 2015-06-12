@@ -180,7 +180,7 @@ class Models(object):
         output_data['updated_date'] = updated_date
 
         log.debug('end of get_search_page')
-        log.debug(output_data)
+        # log.debug(output_data)
         # log.debug('current_page: %d', output_data['current_page'])
 
         return output_data, incoming_data  # TODO: consolidate this
@@ -564,7 +564,7 @@ class Models(object):
             return sorted(officers)
 
     # @cache.memoize(timeout=100000)
-    def translate_to_vendor(self, officer_term):
+    def translate_officer_to_vendor(self, officer_term):
         '''
         Translates a request for an officer to a request for a vendor
         associated with a given officer.
@@ -641,20 +641,23 @@ class Models(object):
             self.dc_query.split(':')[1]
         )
 
-        terms = ['vendor', 'department']  # , 'officer']
+        terms = ['vendor', 'department']
 
         for term in terms:
             query_value = data[term]
             if query_value != "":
-                query_builder.add_term(term, query_value)
+                query_builder.add_term(term, query_value.upper())
 
         if len(data['officer']) > 0:
             officers = [data['officer']]
-            vendor = self.translate_to_vendor(officers[0])
-            query_builder.add_term("vendor", vendor)
+            log.debug('\xF0\x9F\x9A\xAB  officers:')
+            log.debug(officers)
+            vendor = self.translate_officer_to_vendor(officers[0])
+            query_builder.add_term("vendor", vendor.upper())
 
         output = query_builder.get_query()
 
+        log.debug('\xF0\x9F\x9A\xAB  output:')
         log.debug(output)
 
         return output
@@ -696,7 +699,7 @@ class QueryBuilder(object):
         output = ""
 
         for key in self.query.keys():
-            # TODO: Why trailing space?
+            # TODO: Is trailing space for Lucene syntax?
             output += '%s:"%s" ' % (key, self.query[key])
 
         output = output + self.text
