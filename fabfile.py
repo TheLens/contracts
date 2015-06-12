@@ -51,9 +51,11 @@ def data():
 
     local('git add %s/all-last.csv' % DATA_DIR)
     local('git add %s/female-first.csv' % DATA_DIR)
+
     # Keep these two off of GitHub for their privacy:
     # local('git add %s/known_companies.txt' % DATA_DIR)
     # local('git add %s/known_people.txt' % DATA_DIR)
+
     local('git add %s/male-first.csv' % DATA_DIR)
     local('git add %s/skip-list.csv' % DATA_DIR)
     local('git add %s/tags.json' % DATA_DIR)
@@ -100,7 +102,6 @@ def lib():
     local('git add %s/results_language.py' % LIB_DIR)
     local('git add %s/sync_local_database_document_cloud.py' % LIB_DIR)
     local('git add %s/utilities.py' % LIB_DIR)
-    local('git add %s/vendor_scraper.py' % LIB_DIR)
 
 
 def css():

@@ -46,8 +46,10 @@ class CheckCity(object):
 
         new_counter = 0
         for new_page in new_pages:
-            log.debug('\n')
-            log.debug('Checking city purchasing page %d', new_page)
+            log.debug('')
+            log.debug('========')
+            log.debug('Page %d', new_page)
+            log.debug('========')
             print (
                 '\n' +
                 '\n========' +
@@ -72,8 +74,10 @@ class CheckCity(object):
 
         old_counter = 0
         for old_page in old_pages:
-            log.debug('\n')
-            log.debug('Checking city purchasing page %d', old_page)
+            log.debug('')
+            log.debug('========')
+            log.debug('Page %d', new_page)
+            log.debug('========')
             print (
                 '\n' +
                 '\n========' +
@@ -136,8 +140,10 @@ class CheckCity(object):
         number_of_pages = re.search(
             '[0-9]+', href).group()
 
+        print 'There were %s pages found on the city\'s purchasing portal.' % (
+            number_of_pages)
         log.debug(
-            'There are %s pages found on the city\'s purchasing portal',
+            'There were %s pages found on the city\'s purchasing portal.',
             number_of_pages
         )
 
@@ -160,8 +166,12 @@ class CheckCity(object):
                 '\nPurchase order %s' % purchase_order_number +
                 '\n-----------------------' +
                 '\n(%d of %d)' % (i + 1, len(purchase_order_numbers)))
+            log.debug('')
+            log.debug('-----------------------')
+            log.debug('Purchase order %s', purchase_order_number)
+            log.debug('-----------------------')
             log.debug(
-                'Analyzing purchase order number %s', purchase_order_number)
+                '(%d of %d)' % (i + 1, len(purchase_order_numbers)))
 
             self._check_if_need_to_download_contract(purchase_order_number)
             time.sleep(10)
@@ -215,16 +225,19 @@ class CheckCity(object):
         '''
 
         log.info(
-            'Checking purchase order %s',
+            'Checking purchase order %s.',
             purchase_order_number)
 
         # Check local file repository
         try:
             print '\n*** LensRepository ***'
-            need_to_download = LensRepository().check_if_need_to_download(
-                purchase_order_number)
+            log.debug('')
+            log.debug('*** LensRepository ***')
+
+            need_to_download = LensRepository(
+                purchase_order_number).check_if_need_to_download()
             if need_to_download:
-                LensRepository().download_purchase_order(purchase_order_number)
+                LensRepository(purchase_order_number).download_purchase_order()
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
@@ -235,17 +248,23 @@ class CheckCity(object):
 
         try:
             print '\n*** PurchaseOrder ***'
+            log.debug('')
+            log.debug('*** PurchaseOrder ***')
+
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
         except IndexError, error:
             print 'IndexError'
             log.exception(error, exc_info=True)
-            log.info('Format error: %s.', purchase_order_number)
+            log.info('IndexError: %s.', purchase_order_number)
             return
 
         # Check DocumentCloud project
         try:
             print '\n*** DocumentCloudProject ***'
+            log.debug('')
+            log.debug('*** DocumentCloudProject ***')
+
             need_to_upload = DocumentCloudProject().check_if_need_to_upload(
                 purchase_order_number)
             if need_to_upload:
@@ -261,6 +280,9 @@ class CheckCity(object):
         # Check local database
         try:
             print '\n*** LensDatabase ***'
+            log.debug('')
+            log.debug('*** LensDatabase ***')
+
             contract_exist = LensDatabase().check_if_database_has_contract(
                 purchase_order_number)
             if contract_exist is False:
@@ -268,7 +290,7 @@ class CheckCity(object):
         except urllib2.HTTPError, error:
             log.exception(error, exc_info=True)
             log.exception(
-                'Purchase order %s not posted publically',
+                'Purchase order %s is not posted publically.',
                 purchase_order_number
             )
 
@@ -415,4 +437,5 @@ class CheckCity(object):
         return output
 
 if __name__ == '__main__':
+    print "\nChecking the city's purchasing site for new contracts..."
     CheckCity().check_pages()

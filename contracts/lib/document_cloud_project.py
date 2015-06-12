@@ -10,7 +10,7 @@ from contracts.lib.utilities import Utilities
 from contracts import (
     DOC_CLOUD_USERNAME,
     DOC_CLOUD_PASSWORD,
-    ATTACHMENTS_LOCATION,
+    DOCUMENTS_DIR,
     PROJECT_URL,
     log
 )
@@ -37,11 +37,6 @@ class DocumentCloudProject(object):
         :returns: boolean. True if need to upload, False if don't need to.
         '''
 
-        log.debug(
-            'Checking if need to upload %s to DocumentCloud',
-            purchase_order_number
-        )
-
         validity = Utilities().check_that_contract_is_valid_and_public(
             purchase_order_number)
 
@@ -55,13 +50,12 @@ class DocumentCloudProject(object):
                 'order %s is invalid or already there.' % purchase_order_number
             )
             log.debug(
-                'Do not need to upload %s to DocumentCloud',
-                purchase_order_number
-            )
+                '\xF0\x9F\x9A\xAB  ' +
+                'Not uploading to DocumentCloud. Purchase ' +
+                'order %s is invalid or already there.',
+                purchase_order_number)
             return False
         else:
-            log.debug(
-                'Need to upload %s to DocumentCloud', purchase_order_number)
             return True
 
     # def _search_for_contract(self, key, value):
@@ -120,14 +114,14 @@ class DocumentCloudProject(object):
         # Verify that there is at least one file to download.
         number_of_attachments = len(purchase_order_object.attachments)
 
-        log.debug('There are %d attachments to upload', number_of_attachments)
+        log.debug('There are %d attachments to upload.', number_of_attachments)
 
         if number_of_attachments > 0:
             for i, attachment in enumerate(purchase_order_object.attachments):
                 attachment_id = re.search(
                     '[0-9]+', attachment.get('href')).group()
                 attachment_location = (
-                    '%s/%s.pdf' % (ATTACHMENTS_LOCATION, attachment_id)
+                    '%s/%s.pdf' % (DOCUMENTS_DIR, attachment_id)
                 )
 
                 purchase_order_object = self.prepare_contract(
@@ -150,7 +144,7 @@ class DocumentCloudProject(object):
         :returns: A modified PurchaseOrder object instance.
         '''
 
-        log.debug('Making modifications to contract data')
+        log.debug('Making modifications to contract data before uploading.')
 
         number_of_attachments = len(purchase_order_object.attachments)
 
@@ -180,7 +174,7 @@ class DocumentCloudProject(object):
         :type title: string.
         '''
 
-        log.debug('Uploading %s to DocumentCloud', filename)
+        log.debug('Uploading purchase order %s to DocumentCloud.', filename)
 
         is_null = self._check_if_contract_number_is_null(purchase_order_object)
         if is_null:
@@ -189,16 +183,18 @@ class DocumentCloudProject(object):
         purchase_order_object.title = purchase_order_object.title.replace(
             "/", "")  # Not sure why this is necessary
 
+        purchase_order_number = str(purchase_order_object.purchaseorder)
         title = str(purchase_order_object.title)
 
         print (
             '\xE2\x9C\x85  ' +
-            'Uploading attachment "%s" ' % title +
-            'to DocumentCloud...')
+            'Uploading purchase order %s ' % purchase_order_number +
+            '("%s") to DocumentCloud...' % title)
         log.debug(
-            'Uploading %s to DocumentCloud...',
-            title
-        )
+            '\xE2\x9C\x85  ' +
+            'Uploading purchase order %s ("%s") to DocumentCloud...',
+            purchase_order_number,
+            title)
 
         self.api_connection.documents.upload(
             filename,
@@ -225,7 +221,8 @@ class DocumentCloudProject(object):
 
         if len(purchase_order_object.data['contract number']) < 1:
             log.info(
-                'Not adding %s to DocumentCloud. Contract number %s is null',
+                'Not uploading purchase order %s to DocumentCloud. ' +
+                'Contract number %s is null',
                 purchase_order_object.data['purchase order'],
                 purchase_order_object.data['contract number']
             )

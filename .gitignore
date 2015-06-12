@@ -4,11 +4,8 @@
 venv/*
 tests/misc
 tests/misc/*
-datamanagement/pdfs
-datamanagement/html*
-# docs/_build*
 
-# Files
+# File types
 
 *.crfsuite
 *.xml

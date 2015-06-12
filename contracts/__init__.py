@@ -88,7 +88,7 @@ elif USER == 'abe':  # Local
     RELOADER = False
     DEBUG = False
 else:  # USER == 'thomasthoren' or Read the Docs
-    CORPUS_LOC = '%s/backup' % PROJECT_DIR
+    CORPUS_LOC = '%s/data' % PROJECT_DIR
 
     # CSS
     BANNER_CSS = '/static/css/banner.css'
@@ -105,15 +105,16 @@ else:  # USER == 'thomasthoren' or Read the Docs
     RELOADER = True
     DEBUG = True
 
-ATTACHMENTS_LOCATION = '%s/attachments' % CORPUS_LOC
-DOCUMENTS_LOCATION = '%s/documents' % CORPUS_LOC
-PURCHASE_ORDER_LOCATION = '%s/purchase-orders' % CORPUS_LOC
-VENDORS_LOCATION = '%s/vendors' % CORPUS_LOC
+ATTACHMENTS_DIR = '%s/attachments' % CORPUS_LOC
+DOCUMENTS_DIR = '%s/documents' % CORPUS_LOC
+DOCUMENT_CLOUD_DIR = '%s/document-cloud' % CORPUS_LOC
+PURCHASE_ORDER_DIR = '%s/purchase-orders' % CORPUS_LOC
+VENDORS_DIR = '%s/vendors' % CORPUS_LOC
 
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
 
-if os.path.isfile(LOG_PATH):
+if os.path.isfile(LOG_PATH):  # TODO: Remove this once live.
     os.remove(LOG_PATH)
 
 log = logging.getLogger(__name__)
@@ -125,8 +126,8 @@ filehandler.setLevel(logging.DEBUG)
 
 # Create formatter and add it to the handlers
 formatter = logging.Formatter(
-    '%(asctime)s - %(filename)s - %(funcName)s - ' +
-    '%(levelname)s - %(lineno)d - %(message)s')
+    '%(asctime)s | %(filename)s | %(funcName)s | ' +
+    '%(levelname)s | %(lineno)d | %(message)s')
 filehandler.setFormatter(formatter)
 
 # Add the handlers to the logger

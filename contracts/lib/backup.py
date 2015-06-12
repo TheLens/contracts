@@ -12,7 +12,7 @@ import argparse
 from pythondocumentcloud import DocumentCloud
 from pythondocumentcloud.toolbox import DoesNotExistError
 from contracts.lib.lens_database import LensDatabase
-from contracts import DOCUMENTS_LOCATION, log
+from contracts import DOCUMENT_CLOUD_DIR, log
 
 
 class Backup(object):
@@ -84,7 +84,7 @@ class Backup(object):
         '''
 
         path = "%s/%s%s" % (
-            DOCUMENTS_LOCATION,
+            DOCUMENT_CLOUD_DIR,
             document_cloud_id.replace("/", ""),
             extension
         )

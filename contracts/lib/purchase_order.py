@@ -11,9 +11,10 @@ from subprocess import call
 from bs4 import BeautifulSoup
 from contracts.lib.utilities import Utilities
 from contracts import (
-    VENDORS_LOCATION,
-    PURCHASE_ORDER_LOCATION,
-    ATTACHMENTS_LOCATION,
+    ATTACHMENTS_DIR,
+    DOCUMENTS_DIR,
+    PURCHASE_ORDER_DIR,
+    VENDORS_DIR,
     log
 )
 
@@ -29,13 +30,7 @@ class PurchaseOrder(object):
     contracts.
     '''
 
-    def __str__(self):
-        return "<PurchaseOrder {}>".format(self.purchaseorder)
-
     def __init__(self, purchase_order_number):
-        log.debug(
-            'Building PurchaseOrder object for %s', purchase_order_number)
-
         validity = Utilities().check_if_valid_purchase_order_format(
             purchase_order_number)
         if validity is False:
@@ -43,7 +38,7 @@ class PurchaseOrder(object):
                 '\xF0\x9F\x9A\xAB  ' +
                 'Purchase order %s is invalid.' % purchase_order_number)
             log.debug(
-                'Purchase order %s format is invalid', purchase_order_number)
+                'Purchase order %s is invalid.', purchase_order_number)
             return
 
         self.purchase_order_number = purchase_order_number
@@ -62,12 +57,15 @@ class PurchaseOrder(object):
             log.exception(error, exc_info=True)
 
             self.vendor_name = "unknown"
+
             print (
                 '\xF0\x9F\x9A\xAB  ' +
                 'No vendor info for purchase order %s.' % (
                     purchase_order_number))
             log.info(
-                'No associated vendor info for %s', self.purchase_order_number)
+                'No vendor info for purchase order %s.',
+                self.purchase_order_number)
+
             return
 
         self.department = self._get_department(soup)
@@ -76,6 +74,9 @@ class PurchaseOrder(object):
         self.attachments = self._get_attachments(soup)
         self.data = self._get_data()
         self.title = "%s : %s" % (self.vendor_name, self.description)
+
+    def __str__(self):
+        return "<PurchaseOrder %s>" % self.purchaseorder
 
     @staticmethod
     def _get_html(purchase_order_number):
@@ -89,12 +90,33 @@ class PurchaseOrder(object):
         '''
 
         file_location = (
-            '%s/%s' % (PURCHASE_ORDER_LOCATION, purchase_order_number)
+            '%s/%s.html' % (PURCHASE_ORDER_DIR, purchase_order_number)
         )
 
         with open(file_location, 'r') as html_file:
+            log.info(
+                'Saving HTML for purchase order %s.',
+                purchase_order_number)
             html = html_file.read()
             return html
+
+        ######
+        response = urllib2.urlopen(
+            'http://www.purchasing.cityofno.com/bso/external/document/' +
+            'attachments/attachmentFileDetail.sdo?' +
+            'fileNbr=%s' % city_attachment_id +
+            '&docId=%s' % self.purchase_order_number +
+            '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
+            'poSummary.sdo&external=true'
+        )
+        html = response.read()
+
+        file_location = (
+            '%s/%s.html' % (ATTACHMENTS_DIR, city_attachment_id))
+
+        with open(file_location, 'w') as filename:
+            log.info('Saving HTML for attachment %s.', city_attachment_id)
+            filename.write(html)
 
     @staticmethod
     def _get_city_vendor_id(html):
@@ -110,17 +132,16 @@ class PurchaseOrder(object):
         vendor_ids = re.findall(pattern, html)
 
         if len(vendor_ids) == 0:
+            log.error('No vendor ID found.')
             vendor_id = ""
         else:
             # You need to take the first one for this list or you'll sometimes
             # end up w/ the vendor_id for a subcontractor, which will sometimes
-            # wash up on the vendor page
-            # view-source:http://www.purchasing.cityofno.
-            # com/bso/external/purchaseorder/poSummary.
-            # sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
+            # end up on the vendor page.
+            # http://www.purchasing.cityofno.com/bso/external/purchaseorder/
+            # poSummary.sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
             vendor_id = vendor_ids[0]
-
-        log.debug('Vendor ID: %s', vendor_id)
+            log.debug('Vendor ID: %s.', vendor_id)
 
         return vendor_id
 
@@ -135,10 +156,10 @@ class PurchaseOrder(object):
         '''
 
         vendor_file_location = '%s/%s.html' % (
-            VENDORS_LOCATION, city_vendor_id)
+            VENDORS_DIR, city_vendor_id)
 
         if os.path.isfile(vendor_file_location):
-            log.info('Vendor file for %s already present', city_vendor_id)
+            log.info('Already have HTML for vendor %s.', city_vendor_id)
         else:
             try:
                 response = urllib2.urlopen(
@@ -150,9 +171,9 @@ class PurchaseOrder(object):
                 with open(vendor_file_location, 'w') as filename:
                     filename.write(html)
 
-                log.info('Downloaded vendor file %s', city_vendor_id)
+                log.info('Saved HTML for vendor %s.', city_vendor_id)
             except urllib2.HTTPError:
-                log.info('Could not download vendor file %s', city_vendor_id)
+                log.info('Could not save HTML for vendor %s.', city_vendor_id)
 
     @staticmethod
     def _get_description(soup):
@@ -217,7 +238,7 @@ class PurchaseOrder(object):
         #     log.exception(error, exc_info=True)
 
         vendor_file_location = (
-            '%s/%s.html' % (VENDORS_LOCATION, self.vendor_id_city)
+            '%s/%s.html' % (VENDORS_DIR, self.vendor_id_city)
         )
 
         # Downloaded this file in _download_vendor_profile()
@@ -409,33 +430,26 @@ class PurchaseOrder(object):
         # locally so we can have a list of the attachments we have on hand.
         city_attachment_id = re.search(
             '[0-9]+', attachment.get('href')).group()
-        log.debug('Gathering data for attachment %s', city_attachment_id)
+        log.debug('Gathering data for attachment %s.', city_attachment_id)
 
-        attachment_id_path = '%s/%s.pdf' % (
-            ATTACHMENTS_LOCATION, city_attachment_id)
+        document_path = '%s/%s.pdf' % (
+            DOCUMENTS_DIR, city_attachment_id)
 
         display_name = self._get_attachment_display_name(city_attachment_id)
 
-        if os.path.isfile(attachment_id_path):  # Have already downloaded
+        if os.path.isfile(document_path):  # Have already downloaded
             print (
                 '\xF0\x9F\x9A\xAB  ' +
-                'Already have attachment %s. Skipping.' % city_attachment_id)
+                'Already have PDF for attachment %s.' % city_attachment_id)
             log.info(
-                'Already have attachment ID %s for purchase order %s',
-                city_attachment_id,
-                self.purchaseorder)
+                '\xF0\x9F\x9A\xAB  ' +
+                'Already have PDF for attachment %s.',
+                city_attachment_id)
         else:
-            log.debug('Start downloading attachments')
-
             self._download_attachment_file(
                 city_attachment_id,
                 display_name,
-                attachment_id_path
-            )
-            log.info(
-                'Downloaded attachment ID %s for purchase order %s',
-                city_attachment_id,
-                self.purchaseorder
+                document_path
             )
 
     def _get_attachment_display_name(self, city_attachment_id):
@@ -451,6 +465,13 @@ class PurchaseOrder(object):
         )
         html = response.read()
 
+        file_location = (
+            '%s/%s.html' % (ATTACHMENTS_DIR, city_attachment_id))
+
+        with open(file_location, 'w') as filename:
+            log.info('Saving HTML for attachment %s.', city_attachment_id)
+            filename.write(html)
+
         soup = BeautifulSoup(html)
         header = soup.select(".sectionheader-01")[0].contents.pop()
         header = ' '.join(header.split())
@@ -463,32 +484,31 @@ class PurchaseOrder(object):
     def _download_attachment_file(self,
                                   attachment_id,
                                   display_name,
-                                  attachment_file_location):
+                                  document_file_path):
         '''
         Download the attachment file found on contract page.
 
         :param attachment_id: The city's internal attachment ID.
         :type attachment_id: string
-        :param attachment_file_location: The path for where to save the \
+        :param document_file_path: The path for where to save the \
                                          attachment file.
-        :type attachment_file_location: string
+        :type document_file_path: string
         '''
 
         print (
             '\xE2\x9C\x85  ' +
-            'Downloading "%s" with city ID %s...' % (
+            'Saving PDF for attachment "%s" with city ID %s...' % (
                 display_name, attachment_id))
         log.debug(
-            'Downloading attachment %s with city ID %s',
+            'Saving PDF for attachment "%s" with city ID %s.',
             display_name,
-            attachment_id
-        )
+            attachment_id)
 
         if not os.path.exists(attachment_id):
             call([
                 'curl',
                 '-o',
-                attachment_file_location,
+                document_file_path,
                 'http://www.purchasing.cityofno.com/bso/external/document/' +
                 'attachments/attachmentFileDetail.sdo',
                 '-H',

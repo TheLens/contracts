@@ -36,11 +36,6 @@ class LensDatabase(object):
         :returns: boolean. True if the contract is present, False if not.
         '''
 
-        log.debug(
-            'Checking if local database has purchase order %s',
-            purchase_order_number
-        )
-
         session = self.sn()
 
         query_count = session.query(
@@ -53,12 +48,14 @@ class LensDatabase(object):
 
         if query_count == 1:  # Database has the contract
             print (
+                '\xF0\x9F\x9A\xAB  Database already has purchase ' +
+                'order %s in contracts table.' % purchase_order_number)
+            log.debug(
                 '\xF0\x9F\x9A\xAB  ' +
-                'Database already has %s.' % purchase_order_number)
-            log.debug('Database already has %s', purchase_order_number)
+                'Database already has purchase order %s in contracts table.',
+                purchase_order_number)
             return True
         else:
-            log.debug('Database needs %s', purchase_order_number)
             return False
 
     def add_to_database(self, purchase_order_object):
@@ -71,13 +68,13 @@ class LensDatabase(object):
         '''
 
         print (
-            '\xE2\x9C\x85  ' +
-            'Adding purchase order %s to database...' % (
+            "\xE2\x9C\x85  " +
+            "Adding purchase order %s to database's contracts table..." % (
                 purchase_order_object.purchase_order_number))
         log.debug(
-            'Adding %s to database',
-            purchase_order_object.purchase_order_number
-        )
+            "\xE2\x9C\x85  " +
+            "Adding purchase order %s to database's contracts table.",
+            purchase_order_object.purchase_order_number)
 
         session = self.sn()
 
@@ -118,7 +115,7 @@ class LensDatabase(object):
         :returns: A list of dicts (?) for the daily contracts.
         '''
 
-        log.debug('Getting today\'s contracts')
+        log.debug('Getting a list of today\'s contracts for email.')
 
         session = self.sn()
 
@@ -144,7 +141,7 @@ class LensDatabase(object):
         :returns: list. A list of all IDs in our DocumentCloud project.
         '''
 
-        log.debug('Fetching a list of all contract IDs in database')
+        log.debug('Fetching a list of all contract IDs in database.')
 
         session = self.sn()
 
@@ -174,7 +171,7 @@ class LensDatabase(object):
         :returns: list. The people who are associated with this vendor (how?).
         '''
 
-        log.debug('Finding people associated with %s', name)
+        log.debug('Finding people associated with %s.', name)
 
         session = self.sn()
 
@@ -207,36 +204,33 @@ class LensDatabase(object):
         :returns: boolean. True if need to scrape, False if not.
         '''
 
-        log.debug('Checking if need to scrape page %d', page)
-
         today_date = date.today()
         week_ago_date = date.today() - timedelta(days=7)
 
         date_last_scraped = self._check_when_last_scraped(page)
 
         if date_last_scraped is None:
-            log.debug('Need to scrape')
             return True  # Scrape this page
         elif page <= 10:
             if date_last_scraped < today_date:
-                log.debug('Need to scrape')
                 return True  # Scrape this page
             else:
-                log.debug('Do not need to scrape')
+                log.debug(
+                    'Page %d has been scraped recently. Skipping.',
+                    page)
                 print (
-                    'Skipping page %d because it has been scraped ' % page +
-                    'recently.')
+                    'Page %d has been scraped recently. Skipping.' % page)
 
                 return False
         elif page > 10:
             if date_last_scraped < week_ago_date:
-                log.debug('Need to scrape')
                 return True  # Scrape this page
             else:
-                log.debug('Do not need to scrape')
+                log.debug(
+                    'Page %d has been scraped recently. Skipping.',
+                    page)
                 print (
-                    'Skipping page %d because page has ' % page +
-                    'been scraped recently.')
+                    'Page %d has been scraped recently. Skipping.' % page)
 
                 return False
 
@@ -267,8 +261,7 @@ class LensDatabase(object):
 
         log.debug(
             'This page was last scraped %s',
-            date_last_scraped.strftime('%Y-%m-%d')
-        )
+            date_last_scraped.strftime('%Y-%m-%d'))
 
         return date_last_scraped
 
@@ -323,11 +316,6 @@ class LensDatabase(object):
         :returns: boolean. True if it exists in the database, False if not.
         '''
 
-        log.debug(
-            'Checking if department %s is missing from database',
-            department
-        )
-
         session = self.sn()
 
         department_count = session.query(
@@ -339,10 +327,9 @@ class LensDatabase(object):
         session.close()
 
         if department_count == 0:
-            log.debug('Department %s is missing from database', department)
+            log.debug('Department %s is missing from database.', department)
             return False
         else:
-            log.debug('Database already has department %s', department)
             return True
 
     def _add_department(self, department):
@@ -353,7 +340,7 @@ class LensDatabase(object):
         :type meta_field: string
         '''
 
-        log.debug('Adding department %s to database', department)
+        log.debug('Adding department "%s" to database.', department)
 
         session = self.sn()
 
@@ -389,8 +376,6 @@ class LensDatabase(object):
                            False if not.
         '''
 
-        log.debug('Checking if vendor %s is missing from database', vendor)
-
         session = self.sn()
 
         vendor_count = session.query(
@@ -402,10 +387,9 @@ class LensDatabase(object):
         session.close()
 
         if vendor_count == 0:
-            log.debug('Vendor %s is missing from database', vendor)
+            log.debug('Vendor "%s" is missing from database.', vendor)
             return False
         else:
-            log.debug('Vendor %s is already in database', vendor)
             return True
 
     def _add_vendor(self, vendor, vendor_id_city=None):
@@ -416,7 +400,7 @@ class LensDatabase(object):
         :type vendor: string
         '''
 
-        log.debug('Adding vendor %s to database', vendor)
+        log.debug('Adding vendor "%s" to database.', vendor)
 
         session = self.sn()
 
@@ -436,7 +420,7 @@ class LensDatabase(object):
         :returns: string. The database ID for the department name.
         '''
 
-        log.debug('Finding the ID for department %s in database', department)
+        log.debug('Finding ID for department "%s" in database.', department)
 
         session = self.sn()
 
@@ -461,7 +445,7 @@ class LensDatabase(object):
         :returns: string. The database's vendor ID for this vendor.
         '''
 
-        log.debug('Fetching the ID for vendor %s in database', vendor)
+        log.debug('Fetching database ID for vendor "%s".', vendor)
 
         session = self.sn()
 
@@ -516,8 +500,6 @@ class LensDatabase(object):
 
         :returns: list. All of the company officers in our database.
         '''
-
-        log.debug('Fetching a list of officers in the database')
 
         # TODO: Test that this works correctly before using.
 
@@ -585,8 +567,6 @@ class LensDatabase(object):
         :returns: dict. A dict (?) for the matching contract.
         '''
 
-        log.debug('Fetch contract %s from database', purchase_order_number)
-
         session = self.sn()
 
         query = session.query(
@@ -610,7 +590,7 @@ class LensDatabase(object):
         '''
 
         log.debug(
-            'Find contract in database that has DocumentCloud ID %s',
+            'Find contract in database that has DocumentCloud ID %s.',
             document_cloud_id
         )
 

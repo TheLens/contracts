@@ -38,11 +38,10 @@ def intro():
     """
 
     log.debug('/')
-    log.debug(os.environ)
 
     data = Models().get_home()
 
-    log.debug('/ data:')
+    # log.debug('/ data:')
     # log.debug(data)
 
     view = Views().get_home(data)

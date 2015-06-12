@@ -7,7 +7,7 @@ Keeping the local contracts collection in sync with our DocumentCloud project.
 import os
 import urllib2
 from contracts.lib.utilities import Utilities
-from contracts import PURCHASE_ORDER_LOCATION, log
+from contracts import PURCHASE_ORDER_DIR, log
 
 
 class LensRepository(object):
@@ -17,64 +17,63 @@ class LensRepository(object):
     DocumentCloud project.
     '''
 
-    @staticmethod
-    def check_if_need_to_download(purchase_order_number):
+    def __init__(self, purchase_order_number):
+        self.purchase_order_number = purchase_order_number
+
+    def check_if_need_to_download(self):
         '''
         Checks local directory to determine whether a local copy is needed.
 
-        :param purchase_order_number: The contract's purchase order number.
-        :type purchase_order_number: string.
         :returns: boolean. True if need to download, False if don't need to.
         '''
 
         # Check if contract has valid format and is public
         validity = Utilities().check_that_contract_is_valid_and_public(
-            purchase_order_number)
+            self.purchase_order_number)
 
         file_location = (
-            '%s/%s' % (PURCHASE_ORDER_LOCATION, purchase_order_number))
+            '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number))
         local_copy_exists = os.path.isfile(file_location)
 
         if validity is False or local_copy_exists:
-            log.debug("Don't need to download %s", purchase_order_number)
+            log.debug(
+                "\xF0\x9F\x9A\xAB  " +
+                "Don't download. Contract is invalid, private or we " +
+                "already the HTML.")
             print (
                 "\xF0\x9F\x9A\xAB  " +  # Do not enter
                 "Don't download. Contract is invalid, private or we " +
-                "already have it.")
+                "already the HTML.")
             return False  # Don't download
         else:
-            log.debug('Need to download %s', purchase_order_number)
             return True
 
-    def download_purchase_order(self, purchase_order_number):
+    def download_purchase_order(self):
         '''
         Download the contract matching this purchase order number, but first
         check if it is valid, not in the skip list and not already downloaded.
-
-        :param purchase_order_number: The contract's unique ID for \
-                                      DocumentCloud.
-        :type purchase_order_number: string.
         '''
 
-        log.debug('Downloading purchase order %s', purchase_order_number)
-        print (
+        log.debug(
             '\xE2\x9C\x85  ' +
-            'Downloading purchase order %s...' % purchase_order_number)
+            'Saving HTML for purchase order %s.', self.purchase_order_number)
+        print (
+            '\xE2\x9C\x85  Saving ' +
+            'HTML for purchase order %s...' % self.purchase_order_number)
 
         file_location = (
-            '%s/%s' % (PURCHASE_ORDER_LOCATION, purchase_order_number)
+            '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number)
         )
 
         response = urllib2.urlopen(
-            'http://www.purchasing.cityofno.com/bso/external/' +
-            'purchaseorder/poSummary.sdo?docId=%s' % purchase_order_number +
+            'http://www.purchasing.cityofno.com/bso/external/purchaseorder/' +
+            'poSummary.sdo?docId=%s' % self.purchase_order_number +
             '&releaseNbr=0&parentUrl=contract')
         html = response.read()
 
         self._write_purchase_order(html, file_location)
 
-    @staticmethod
-    def _write_purchase_order(html, file_location):
+    def _write_purchase_order(self, html, file_location):
         '''
         This takes an individual contract page's HTML and writes it out to an
         HTML file in the proper location.
@@ -86,5 +85,7 @@ class LensRepository(object):
         '''
 
         with open(file_location, 'w') as filename:
-            log.info('Saving file %s', file_location)
+            log.info(
+                'Saving HTML for purchase order %s.',
+                self.purchase_order_number)
             filename.write(html)
