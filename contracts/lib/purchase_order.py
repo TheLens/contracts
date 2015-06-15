@@ -51,7 +51,6 @@ class PurchaseOrder(object):
         self.description = self._get_description(soup)
 
         try:
-            # self.vendor_name = self._get_vendor_name(soup)
             self.vendor_name = self._get_vendor_name()
         except IOError, error:
             log.exception(error, exc_info=True)
@@ -65,8 +64,6 @@ class PurchaseOrder(object):
             log.info(
                 'No vendor info for purchase order %s.',
                 self.purchase_order_number)
-
-            return
 
         self.department = self._get_department(soup)
         self.k_number = self._get_knumber(soup)
@@ -93,30 +90,13 @@ class PurchaseOrder(object):
             '%s/%s.html' % (PURCHASE_ORDER_DIR, purchase_order_number)
         )
 
+        # Purchase order HTML saved in PurchaseOrder class
         with open(file_location, 'r') as html_file:
             log.info(
                 'Saving HTML for purchase order %s.',
                 purchase_order_number)
             html = html_file.read()
             return html
-
-        ######
-        response = urllib2.urlopen(
-            'http://www.purchasing.cityofno.com/bso/external/document/' +
-            'attachments/attachmentFileDetail.sdo?' +
-            'fileNbr=%s' % city_attachment_id +
-            '&docId=%s' % self.purchase_order_number +
-            '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
-            'poSummary.sdo&external=true'
-        )
-        html = response.read()
-
-        file_location = (
-            '%s/%s.html' % (ATTACHMENTS_DIR, city_attachment_id))
-
-        with open(file_location, 'w') as filename:
-            log.info('Saving HTML for attachment %s.', city_attachment_id)
-            filename.write(html)
 
     @staticmethod
     def _get_city_vendor_id(html):
@@ -173,7 +153,8 @@ class PurchaseOrder(object):
 
                 log.info('Saved HTML for vendor %s.', city_vendor_id)
             except urllib2.HTTPError:
-                log.info('Could not save HTML for vendor %s.', city_vendor_id)
+                log.info(
+                    'Could not save HTML for vendor "%s".', city_vendor_id)
 
     @staticmethod
     def _get_description(soup):
@@ -384,8 +365,11 @@ class PurchaseOrder(object):
             )
 
             return attachment_filenames_list
-        except IndexError, error:
-            log.exception(error, exc_info=True)
+        except IndexError:
+            # log.exception(error, exc_info=True)
+            print '\xF0\x9F\x9A\xAB  No attachments found.'
+            log.info('No attachments found.')
+
             return []  # The city does not always include attachment files.
 
     def _get_data(self):
@@ -594,3 +578,6 @@ class PurchaseOrder(object):
                 '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP--\r\n\'',
                 '--compressed'
             ])
+
+if __name__ == '__main__':
+    PurchaseOrder('PW258818').download_attachments()

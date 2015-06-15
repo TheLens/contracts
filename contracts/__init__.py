@@ -47,69 +47,40 @@ CAMPAIGN_CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
     'campaigncontributions',
 )
 
-USER = getpass.getuser()
-
-if USER == 'ubuntu':  # Server
-    CORPUS_LOC = '%s/data' % PROJECT_DIR
-
-    S3_URL = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
-
-    # CSS
-    BANNER_CSS = '%s/css/banner.css' % S3_URL
-    CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
-    LENS_CSS = '%s/css/lens.css' % S3_URL
-
-    # JavaScript
-    LENS_JS = '%s/js/lens.js' % S3_URL
-    PARSERATOR_JS = '%s/js/parserator.js' % S3_URL
-    RESULTS_JS = '%s/js/results.js' % S3_URL
-    SEARCH_JS = '%s/js/search.js' % S3_URL
-
-    # Flask config
-    RELOADER = False
-    DEBUG = False
-elif USER == 'abe':  # Local
-    CORPUS_LOC = '%s/backups/contracts' % PROJECT_DIR
-
-    S3_URL = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
-
-    # CSS
-    BANNER_CSS = '%s/css/banner.css' % S3_URL
-    CONTRACTS_CSS = '%s/css/contracts.css' % S3_URL
-    LENS_CSS = '%s/css/lens.css' % S3_URL
-
-    # JavaScript
-    LENS_JS = '%s/js/lens.js' % S3_URL
-    PARSERATOR_JS = '%s/js/parserator.js' % S3_URL
-    RESULTS_JS = '%s/js/results.js' % S3_URL
-    SEARCH_JS = '%s/js/search.js' % S3_URL
-
-    # Flask config
-    RELOADER = False
-    DEBUG = False
-else:  # USER == 'thomasthoren' or Read the Docs
-    CORPUS_LOC = '%s/data' % PROJECT_DIR
-
-    # CSS
-    BANNER_CSS = '/static/css/banner.css'
-    CONTRACTS_CSS = '/static/css/contracts.css'
-    LENS_CSS = '/static/css/lens.css'
-
-    # JavaScript
-    LENS_JS = '/static/js/lens.js'
-    PARSERATOR_JS = '/static/js/parserator.js'
-    RESULTS_JS = '/static/js/results.js'
-    SEARCH_JS = '/static/js/search.js'
-
-    # Flask config
-    RELOADER = True
-    DEBUG = True
+# Data files
+CORPUS_LOC = '%s/data' % PROJECT_DIR
 
 ATTACHMENTS_DIR = '%s/attachments' % CORPUS_LOC
 DOCUMENTS_DIR = '%s/documents' % CORPUS_LOC
 DOCUMENT_CLOUD_DIR = '%s/document-cloud' % CORPUS_LOC
 PURCHASE_ORDER_DIR = '%s/purchase-orders' % CORPUS_LOC
 VENDORS_DIR = '%s/vendors' % CORPUS_LOC
+
+USER = getpass.getuser()
+
+if USER == 'ubuntu':  # Server
+    STATIC_ASSET_PATH = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
+
+    # Flask config
+    RELOADER = False
+    DEBUG = False
+else:
+    STATIC_ASSET_PATH = '/static'
+
+    # Flask config
+    RELOADER = True
+    DEBUG = True
+
+# CSS
+BANNER_CSS = '%s/css/banner.css' % STATIC_ASSET_PATH
+CONTRACTS_CSS = '%s/css/contracts.css' % STATIC_ASSET_PATH
+LENS_CSS = '%s/css/lens.css' % STATIC_ASSET_PATH
+
+# JavaScript
+LENS_JS = '%s/js/lens.js' % STATIC_ASSET_PATH
+PARSERATOR_JS = '%s/js/parserator.js' % STATIC_ASSET_PATH
+RESULTS_JS = '%s/js/results.js' % STATIC_ASSET_PATH
+SEARCH_JS = '%s/js/search.js' % STATIC_ASSET_PATH
 
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
