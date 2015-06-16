@@ -85,8 +85,8 @@ SEARCH_JS = '%s/js/search.js' % STATIC_ASSET_PATH
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
 
-if os.path.isfile(LOG_PATH):  # TODO: Remove this once live.
-    os.remove(LOG_PATH)
+# if os.path.isfile(LOG_PATH):
+#     os.remove(LOG_PATH)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
