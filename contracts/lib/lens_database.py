@@ -606,13 +606,14 @@ class LensDatabase(object):
 
         return query
 
-    # Not called in this class, nor elsewhere it seems.
-    def _get_half_filled_contracts(self):
+    def get_half_filled_contracts(self):
         '''
         A half-filled contract is when we know the DocumentCloud ID but don't
         know purchase order number or any of the other metadata in the city's
         purchase order system because when we upload the contract to
         DocumentCloud...
+
+        Called on by sync_local_database_document_cloud.py.
 
         DocumentCloud doesn't give immediate access to all document properties.
         This pulls out the contracts in the database added during upload but
