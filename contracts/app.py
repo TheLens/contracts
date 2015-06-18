@@ -43,6 +43,7 @@ def intro():
 
     # log.debug('/ data:')
     # log.debug(data)
+    print data['documents'][0].id
 
     view = Views().get_home(data)
 

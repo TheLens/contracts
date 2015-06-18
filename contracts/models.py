@@ -78,12 +78,17 @@ class Models(object):
         '''
         Getting 10 most recent contracts
         '''
-        documents = self.get_contracts(limit=self.pagelength)
-        log.debug(documents)
+        # documents = self.get_contracts(limit=self.pagelength)
+        # log.debug(documents)
+        # print documents
 
-        # Fixing IDs:
-        documents = self.translate_to_doc_cloud_form(documents)
-        log.debug(documents)
+        # # Fixing IDs:
+        # documents = self.translate_to_doc_cloud_form(documents)
+        # log.debug(documents)
+        # print documents
+
+        # Get a list of contracts by querying our project on DocCloud:
+        documents = self.query_document_cloud(self.dc_query, page=1)
 
         number_of_documents = self.pagelength
         log.debug(number_of_documents)
@@ -91,6 +96,8 @@ class Models(object):
         data['number_of_documents'] = number_of_documents
         data['results_language'] = (
             "Showing %d most recent sales." % number_of_documents)
+
+        print documents
         data['documents'] = documents
 
         log.debug('Done collecting home data')
@@ -119,28 +126,32 @@ class Models(object):
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
+        print search_term
         log.debug(search_term)
 
-        if search_term == self.dc_query:  # If no search input
-            log.debug('No search parameters entered.')
+        # if search_term == self.dc_query:  # If no search input
+        #     log.debug('No search parameters entered.')
 
-            # Get a list of contracts from local DB, without any search filter:
-            documents = self.get_contracts(limit=self.pagelength)
+        #     # Get a list of contracts from local DB, without any search filter:
+        #     documents = self.get_contracts(limit=self.pagelength)
 
-            log.debug(documents)
+        #     log.debug(documents)
 
-            # Fixing IDs:
-            documents = self.translate_to_doc_cloud_form(documents)
+        #     # Fixing IDs:
+        #     documents = self.translate_to_doc_cloud_form(documents)
 
-            log.debug(documents)
-        else:
-            log.debug('Some search parameters entered.')
+        #     log.debug(documents)
+        # else:
+        log.debug('Some search parameters entered.')
 
-            # Get a list of contracts by querying our project on DocCloud:
-            documents = self.query_document_cloud(
-                search_term, page=data['current_page'])
+        # Get a list of contracts by querying our project on DocCloud:
+        documents = self.query_document_cloud(
+            search_term, page=data['current_page'])
 
-            log.debug(documents)
+        print 'hey'
+        log.debug(documents)
+
+        print documents
 
         number_of_documents = self.find_number_of_documents(search_term)
 
