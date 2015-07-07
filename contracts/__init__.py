@@ -92,7 +92,11 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 # Create file handler which logs debug messages or higher
-filehandler = logging.FileHandler(LOG_PATH)
+filehandler = logging.handlers.RotatingFileHandler(
+    LOG_PATH,
+    maxBytes=(5 * 1024 * 1024),  # 5 MB
+    backupCount=5
+)
 filehandler.setLevel(logging.DEBUG)
 
 # Create formatter and add it to the handlers
