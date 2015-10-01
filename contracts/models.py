@@ -95,7 +95,7 @@ class Models(object):
 
         data['number_of_documents'] = number_of_documents
         data['results_language'] = (
-            "Showing %d most recent sales." % number_of_documents)
+            "Showing %d most recent contracts." % number_of_documents)
 
         print documents
         data['documents'] = documents
@@ -132,7 +132,7 @@ class Models(object):
         # if search_term == self.dc_query:  # If no search input
         #     log.debug('No search parameters entered.')
 
-        #     # Get a list of contracts from local DB, without any search filter:
+        #     # Get a list of contracts from local DB without any search filter:
         #     documents = self.get_contracts(limit=self.pagelength)
 
         #     log.debug(documents)
