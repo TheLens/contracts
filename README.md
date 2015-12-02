@@ -6,9 +6,7 @@ A permanent collection of the City of New Orleans contracts that is fully search
 
 Not sure how to read a government contract? Our city hall reporter wrote a detailed guide [here](http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/). You can read more about this project [here](http://thelensnola.org/search-new-orleans-government-contracts/) and [here](http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/).
 
-[![Build Status](https://travis-ci.org/TheLens/contracts.svg?branch=master)](https://travis-ci.org/TheLens/contracts) [![Documentation Status](https://readthedocs.org/projects/city-of-new-orleans-contracts/badge/?version=latest)](https://readthedocs.org/projects/city-of-new-orleans-contracts/?badge=latest) [![Coverage Status](https://coveralls.io/repos/TheLens/contracts/badge.svg)](https://coveralls.io/r/TheLens/contracts)
-
-Documentation: https://city-of-new-orleans-contracts.readthedocs.org/
+[![Build Status](https://travis-ci.org/TheLens/contracts.svg?branch=master)](https://travis-ci.org/TheLens/contracts) [![Coverage Status](https://coveralls.io/repos/TheLens/contracts/badge.svg)](https://coveralls.io/r/TheLens/contracts)
 
 Issues, suggestions and requests: https://github.com/TheLens/contracts/issues
 
@@ -46,4 +44,4 @@ Add these as part of your virtual environment (`~/.virtualenvs/contracts/bin/pos
 
 ### Credit
 
-Abe Handler built The Vault and continues to contribute to the project. Thomas Thoren is now the main developer, and can be reached at tthoren@thelensnola.org. 
+Abe Handler built The Vault and continues to contribute to the project. Thomas Thoren is now the main developer, and can be reached at tthoren@thelensnola.org.

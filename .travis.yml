@@ -17,12 +17,17 @@ deploy:
   access_key_id: AKIAIWQKYAETOQ2N7CBQ
   secret_access_key:
     secure: PlDoe6znlyTyHx/mgVTnZ2l1zOoGnHn7d7Is8UEUml3Bu7MD68XrAAlDCHZPL8qfXGD2FADfaMCmu17dYs0zeJJPKVbuMpZgLljjqHPpJQwQC9frKEaRoxHKy+LXutujKu6nFG8yZbW0JnIYchoj8g1XCkcu437XKqK5eiW1Pa8=
-  bucket: lensnola
+  bucket: projects.thelensnola.org
+  endpoint: projects.thelensnola.org.s3-website-us-west-2.amazonaws.com
+  region: us-west-2
   local-dir: contracts/static
   upload-dir: contracts
+  detect_encoding: true
+  skip_cleanup: true
   acl: public_read
   on:
     repo: TheLens/contracts
+    branch: master
 notifications:
   slack:
     secure: EMQHDyRlv/8yxYc0RPGqLvuO5IPAApbiNXco55jvmqpr1LHMawaa4v05bjq01HiHbd4sgugVnzg+9ghAggPDYbBEJIJCE8v+/JKHKfWNyyihqHcb8g4UsYdJNo74bwzi2FwFEZN4t9vgXYdFewHy7jZG/AiD9gzU0GRGq91xvQk=

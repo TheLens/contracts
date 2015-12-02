@@ -59,7 +59,8 @@ VENDORS_DIR = '%s/vendors' % CORPUS_LOC
 USER = getpass.getuser()
 
 if USER == 'ubuntu':  # Server
-    STATIC_ASSET_PATH = 'https://s3-us-west-2.amazonaws.com/lensnola/contracts'
+    STATIC_ASSET_PATH = 'https://s3-us-west-2.amazonaws.com/' + \
+        'projects.thelensnola.org/contracts'
 
     # Flask config
     RELOADER = False
@@ -85,8 +86,8 @@ SEARCH_JS = '%s/js/search.js' % STATIC_ASSET_PATH
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
 
-# if os.path.isfile(LOG_PATH):
-#     os.remove(LOG_PATH)
+if not os.path.isfile(LOG_PATH):
+    file(LOG_PATH, "w")
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Creates the results language on the /search page, such as, "10 sales found
+Creates the results language on the /search page, such as, "10 contracts found
 for keyword 'LLC.'"
 '''
 

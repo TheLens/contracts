@@ -2,12 +2,12 @@
 <html>
   <head>
 
-    {% include 'head.html' %}
+    {% include '_head.html' %}
 
   </head>
   <body>
 
-    {% include 'banner.html' %}
+    {% include '_banner.html' %}
 
     <div class="row">
 			<div class="small-6 columns">
@@ -25,9 +25,9 @@
       </div>
     </div>
 
-    {% include 'footer.html' %}
+    {% include '_footer.html' %}
 
-    {% include 'js.html' %}
+    {% include '_js.html' %}
 
     <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript" charset="utf-8"></script>
     <script>
@@ -39,7 +39,6 @@
         container: "#DV-container"
       });
     </script>
-    <script type="text/javascript" src={{ lens_js }}></script>
-    <script type="text/javascript" src={{ download_js }}></script>
+    <script type="text/javascript" src={{ contracts_js }}></script>
   </body>
 </html>

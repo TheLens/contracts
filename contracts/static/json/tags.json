@@ -1,3 +1,6 @@
+// This contains the labels for the tokens in the parserator.
+// It also defines the colors for each kind of tag.
+
 [
     {
         "name": "contract_amount", 

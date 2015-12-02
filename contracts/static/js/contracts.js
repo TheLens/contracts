@@ -1,3 +1,172 @@
+function changeBannerImage() {
+  // console.log('changeBannerImage');
+  var header_img;
+  var screenWidth = document.documentElement.clientWidth;
+
+  if (screenWidth <= 500) {
+    header_img = 'https://s3-us-west-2.amazonaws.com/lensnola/realestate/css/images/lens-logo-magnifying-glass-only.png';
+    document.getElementById('banner-image').src = header_img;
+    document.getElementById('banner-image').width = '35';
+    document.getElementById('banner-logo').style.width = '40px';
+    document.getElementById('banner-logo').style.marginTop = '0px';
+  } else {
+    header_img = 'https://s3-us-west-2.amazonaws.com/lensnola/realestate/css/images/lens-logo-retina.png';
+    document.getElementById('banner-image').src = header_img;
+    document.getElementById('banner-image').width = '100';
+    document.getElementById('banner-logo').style.width = '100px';
+    document.getElementById('banner-logo').style.marginTop = '5px';
+  }
+
+  if (screenWidth <= 600) {
+    document.getElementById('banner-title').innerHTML = 'City contracts';
+  } else {
+    document.getElementById('banner-title').innerHTML = 'City of New Orleans contracts';
+  }
+}
+
+var window_resize_timeout;
+
+window.addEventListener('resize', function(e) {
+  clearTimeout(window_resize_timeout);
+  window_resize_timeout = setTimeout(changeBannerImage, 100);
+});
+
+changeBannerImage();
+
+
+window.downloadFile = function (sUrl) {
+
+  // iOS devices do not support downloading.
+  if (/(iP)/g.test(navigator.userAgent)) {
+    alert('Your device does not support files downloading. Please try again in desktop browser.');
+    return false;
+  }
+
+  // If in Chrome or Safari - download via virtual link click
+  if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
+    // Creating new link node.
+    var link = document.createElement('a');
+    link.href = sUrl;
+
+    if (link.download !== undefined) {
+      // Set HTML5 download attribute. This will prevent file from opening if supported.
+      var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
+      link.download = fileName;
+    }
+
+    // Dispatching click event.
+    if (document.createEvent) {
+      var e = document.createEvent('MouseEvents');
+      e.initEvent('click', true, true);
+      link.dispatchEvent(e);
+
+      return true;
+    }
+  }
+
+  // Force file download (whether supported by server).
+  if (sUrl.indexOf('?') === -1) {
+    sUrl += '?download';
+  }
+
+  window.open(sUrl, '_self');
+  return true;
+};
+
+window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+
+$(".download").on("click", function(event) {
+  var id = $(this).parents(".contract-row").attr("id");
+  downloadFile("/contracts/download/" + id);
+});
+
+function previous() {
+  var current_page = $('#pagination').attr('data-current-page');
+  current_page = current_page.toString();
+
+  var number_of_pages = $('#pagination').attr('data-number-of-pages');
+  number_of_pages = number_of_pages.toString();
+
+  if (current_page === '1' || current_page === '0') {
+    return;
+  }
+
+  var new_current_page = parseInt($("#pagination").attr("data-current-page"), 10) - 1;
+  document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
+
+  getSearch(1); // keep_current_page == 1 tells getSearch reset to page 1
+}
+
+function next() {
+  var current_page = $('#pagination').attr('data-current-page');
+  current_page = current_page.toString();
+
+  var number_of_pages = $('#pagination').attr('data-number-of-pages');
+  number_of_pages = number_of_pages.toString();
+
+  if (current_page === number_of_pages) {
+    return;
+  }
+
+  var new_current_page = parseInt($("#pagination").attr("data-current-page"), 10) + 1;
+  document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
+
+  getSearch(1); // keep_current_page == 1 tells getSearch reset to page 1
+}
+
+function checkPagerButtons() {//current_page, number_of_pages) {
+  var current_page;
+  var number_of_pages;
+
+  if (typeof current_page === 'undefined') {
+    current_page = $('#pagination').attr('data-current-page');
+  }
+
+  if (typeof number_of_pages === 'undefined') {
+    number_of_pages = $('#pagination').attr('data-number-of-pages');
+  }
+
+  current_page = current_page.toString();
+  number_of_pages = number_of_pages.toString();
+
+  if (current_page === '1' || current_page === '0') {
+    document.getElementById('previous').style.color = 'gray';
+    document.getElementById('previous').style.cursor = 'default';
+  } else {
+    document.getElementById('previous').style.color = '#222';
+    document.getElementById('previous').style.cursor = 'pointer';
+  }
+
+  if (current_page === number_of_pages) {
+    document.getElementById('next').style.color = 'gray';
+    document.getElementById('next').style.cursor = 'default';
+  } else {
+    document.getElementById('next').style.color = '#222';
+    document.getElementById('next').style.cursor = 'pointer';
+  }
+}
+
+function checkNumberOfResults() {
+  var number_of_results = $('#pagination').attr('data-number-of-documents');
+  var number_of_pages = $('#pagination').attr('data-number-of-pages');
+
+  if (number_of_results !== '0') {
+    document.getElementById('pagination').style.display = 'block';
+  }
+
+  if (number_of_pages !== '1') {
+    document.getElementById('previous').style.display = 'block';
+    document.getElementById('next').style.display = 'block';
+  }
+}
+
+$(document).ready(function() {
+  checkPagerButtons();
+  checkNumberOfResults();
+});
+
+
 function prepareData() {
   var data = {};
 
@@ -169,7 +338,7 @@ function getSearch(keep_current_page) {
 
   var query_string = buildSearch(data);
   // console.log('Query string:', query_string);
-  
+
   window.location.href = '/contracts/search/' + query_string;
 }
 
