@@ -1,11 +1,5 @@
 #!/bin/bash
 
-source `which virtualenvwrapper.sh`
-
-workon contracts
-
-# TODO: okay?
+# TODO: Is this still necessary?
 echo "Creating backups..."
-python $PYTHONPATH/contracts/lib/backup.py
-
-deactivate
+python $PROJECT_DIRECTORY/contracts/lib/_backup.py

@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 
-'''Renders CSS for front-end.'''
+'''Renders front-end assets.'''
 
 from subprocess import call
+
 from contracts import PROJECT_DIR
 
 
-def render_sass():
+def render_scss():
     '''Render SCSS files.'''
 
     call([
@@ -16,4 +16,4 @@ def render_sass():
     ])
 
 if __name__ == '__main__':
-    render_sass()
+    render_scss()

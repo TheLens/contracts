@@ -1,5 +1,9 @@
+/*global $ */
+/*jslint browser: true*/
+/*jslint node: true*/
+'use strict';
+
 function changeBannerImage() {
-  // console.log('changeBannerImage');
   var header_img;
   var screenWidth = document.documentElement.clientWidth;
 
@@ -24,17 +28,7 @@ function changeBannerImage() {
   }
 }
 
-var window_resize_timeout;
-
-window.addEventListener('resize', function(e) {
-  clearTimeout(window_resize_timeout);
-  window_resize_timeout = setTimeout(changeBannerImage, 100);
-});
-
-changeBannerImage();
-
-
-window.downloadFile = function (sUrl) {
+function downloadFile(sUrl) {
 
   // iOS devices do not support downloading.
   if (/(iP)/g.test(navigator.userAgent)) {
@@ -43,7 +37,10 @@ window.downloadFile = function (sUrl) {
   }
 
   // If in Chrome or Safari - download via virtual link click
-  if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
+  var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+  var isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+
+  if (isChrome || isSafari) {
     // Creating new link node.
     var link = document.createElement('a');
     link.href = sUrl;
@@ -70,16 +67,9 @@ window.downloadFile = function (sUrl) {
   }
 
   window.open(sUrl, '_self');
+
   return true;
-};
-
-window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
-
-$(".download").on("click", function(event) {
-  var id = $(this).parents(".contract-row").attr("id");
-  downloadFile("/contracts/download/" + id);
-});
+}
 
 function previous() {
   var current_page = $('#pagination').attr('data-current-page');
@@ -112,10 +102,10 @@ function next() {
   var new_current_page = parseInt($("#pagination").attr("data-current-page"), 10) + 1;
   document.querySelector('#pagination').setAttribute('data-current-page', new_current_page);
 
-  getSearch(1); // keep_current_page == 1 tells getSearch reset to page 1
+  getSearch(1);  // keep_current_page == 1 tells getSearch reset to page 1
 }
 
-function checkPagerButtons() {//current_page, number_of_pages) {
+function checkPagerButtons() {  // current_page, number_of_pages) {
   var current_page;
   var number_of_pages;
 
@@ -161,12 +151,6 @@ function checkNumberOfResults() {
   }
 }
 
-$(document).ready(function() {
-  checkPagerButtons();
-  checkNumberOfResults();
-});
-
-
 function prepareData() {
   var data = {};
 
@@ -176,26 +160,17 @@ function prepareData() {
   data.officer = encodeURIComponent($('#officers').val());
   data.current_page = document.querySelector('#pagination');
 
-  // console.log(document.querySelector('#pagination'));
-  // console.log(typeof document.querySelector('#pagination'));
-
   if (data.current_page === null) {
-    // console.log(data.current_page);
-    // console.log(typeof data.current_page);
     data.current_page = 1;
   } else {
-    // console.log(data.current_page);
-    // console.log(typeof data.current_page);
     var current_page = document.querySelector('#pagination').getAttribute('data-current-page');
     data.current_page = parseInt(current_page, 10);
   }
 
-  // console.log('Parameters collected:', data);
-
   return data;
 }
 
-function buildSearch(data) {
+function buildQueryString(data) {
   var query_string = '?';
 
   if (data.search_input !== '') {
@@ -237,19 +212,31 @@ function buildSearch(data) {
   return query_string;
 }
 
-function setHandlers() {
+/*
+ * Event listeners
+ */
+function downloadListener() {
+  $(".download").on("click", function(event) {
+    var id = $(this).parents(".contract-row").attr("id");
+    downloadFile("/contracts/download/" + id);
+  });
+}
+function nextListener() {
   $("#next").on("click", function() {
     next();
   });
-
+}
+function previousListener() {
   $("#previous").on("click", function() {
     previous();
   });
-
+}
+function searchButtonClickListener() {
   $(".search-button").on("click", function() {
     getSearch();
   });
-
+}
+function advancedSearchListener() {
   $("#advanced-search").on("click", function() {
     var display = document.getElementById("filters").style.display;
     if (display === "block") {
@@ -260,7 +247,8 @@ function setHandlers() {
       document.getElementById('advanced-search').innerHTML = 'Hide advanced search <i class="fa fa-caret-up"></i>';
     }
   });
-
+}
+function clearAllListener() {
   $(".clear-all").on("click", function() {
     document.getElementById('text-box').value = '';
     document.getElementById('vendors').value = '';
@@ -269,9 +257,19 @@ function setHandlers() {
   });
 }
 
-function populateSearchParameters(data) {
+function setEventListeners() {
+  // Sets event listeners.
 
-  // console.log('Parameter data returned:', data);
+  downloadListener();
+  nextListener();
+  previousListener();
+  searchButtonClickListener();
+  advancedSearchListener();
+  clearAllListener();
+}
+
+function populateSearchParameters(data) {
+  // Update search form's fields.
 
   document.getElementById('text-box').value = data.search_input;
   document.getElementById('vendors').value = data.vendor;
@@ -327,6 +325,19 @@ function populateSearchParameters(data) {
 //   return data;
 // }
 
+function bannerCheck() {
+  // Checks page width to see if banner should update.
+
+  var window_resize_timeout;
+
+  window.addEventListener('resize', function(e) {
+    clearTimeout(window_resize_timeout);
+    window_resize_timeout = setTimeout(changeBannerImage, 100);
+  });
+
+  changeBannerImage();
+}
+
 function getSearch(keep_current_page) {
   var data = prepareData();
 
@@ -334,31 +345,23 @@ function getSearch(keep_current_page) {
     data.current_page = 1;
   }
 
-  // data = checkForNewSearchParameters(data);
-
-  var query_string = buildSearch(data);
-  // console.log('Query string:', query_string);
+  var query_string = buildQueryString(data);
 
   window.location.href = '/contracts/search/' + query_string;
 }
 
-$(document).ready(function() {
+function enterDefinition() {
   $(document).keypress(function(e) {
     if (e.which == 13) {
       getSearch();
     }
   });
+}
 
-  setHandlers();
+$(document).ready(function() {
+  enterDefinition();
+
+  setEventListeners();
+  checkPagerButtons();
+  checkNumberOfResults();
 });
-
-// function checkForChanges() {
-//   if ($('.t402-elided').length > 0) {
-//     setTimeout(checkForChanges, 1000);
-//     console.log('Trying again in one second.');
-//   } else {
-//     console.log('Survey completed or skipped. Adding in advancedsearch');
-//     //var html = $("#blockOfStuff").html();
-//     //$("#post-gcs").html(html);
-//   }
-// }

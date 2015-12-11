@@ -1,12 +1,19 @@
 # Directories
+backups/*
+data/*
+misc/*
+parser/*
+logs/*
 
-.idea/
-venv/*
+.idea/*
+.sass-cache/*
+
 tests/misc
 tests/misc/*
 
 # File types
 
+*.sql
 *.crfsuite
 *.xml
 *.iml
@@ -17,3 +24,5 @@ tests/misc/*
 *.log
 *.cfg
 *.secret
+
+fabfile.py

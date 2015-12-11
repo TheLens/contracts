@@ -6,9 +6,8 @@
     height: 40px;
     overflow: hidden;
     border-bottom: 3px solid #B33125;
-    background: #FFFFFF;
+    background: #FFF;
     box-shadow: 0 0 0.9px 1px rgba(0,0,0,.8);
-    /*top: 0;*/
 }
 .banner .sponsor-image {
     margin: 3px 10px 0 10px;
@@ -29,10 +28,6 @@
     font-family: "news-gothic-std", Helvetica, Arial, sans-serif;
     font-size: 16px;
 }
-/*.banner-social {
-    float: right;
-    font-family: "minion-pro", Georgia, "Times New Roman", Times, serif;
-}*/
 .banner .banner-social-email,
 .banner .banner-social-twitter,
 .banner .banner-social-facebook,
@@ -58,9 +53,7 @@
     font-weight: normal;
     color: #5A5A54;
 }
-/*#banner-logo:hover, #banner-social-twitter:hover, #banner-social-facebook:hover, #banner-social-email:hover, #banner-title:hover, #banner-support:hover {
-    opacity: 0.7;
-}*/
+
 .banner .banner-title:hover,
 .banner .banner-support:hover {
     text-decoration: underline;
@@ -68,21 +61,8 @@
 }
 
 
-@media screen and (max-width: 725px) {  
-    /*.banner .banner-social-facebook,
-    .banner .banner-social-twitter {
-        font-size: 20px;
-        margin-top: 7px;
-    }*/
+@media screen and (max-width: 725px) {
     .banner .banner-sponsor {
         display: none;
-    }
-}
-
-/* To match page title resizing with logo resizing in lens.js */
-@media screen and (max-width: 600px) {
-    .banner .banner-title {
-        /*font-size: 16px;*/
-        /*margin: 8px 12px 0 6px;*/
     }
 }

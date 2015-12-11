@@ -22,11 +22,6 @@ PROJECT_URL = 'http://vault.thelensnola.org/contracts'
 TODAY_DATE_STRING = date.today().strftime('%Y-%m-%d')
 TODAY_DATE = date.today()
 
-# Parserator
-TAGS_URL = '%s/data/tags.json' % PROJECT_DIR  # JSON for parserator tokens.
-XML_LOCATION = '%s/data/parseratorxml' % PROJECT_DIR
-NUMBER_WORDS_LOCATION = '%s/parser/number_words.txt' % PROJECT_DIR
-
 # DocumentCloud
 DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
 DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
@@ -78,10 +73,7 @@ CONTRACTS_CSS = '%s/css/contracts.css' % STATIC_ASSET_PATH
 LENS_CSS = '%s/css/lens.css' % STATIC_ASSET_PATH
 
 # JavaScript
-LENS_JS = '%s/js/lens.js' % STATIC_ASSET_PATH
-PARSERATOR_JS = '%s/js/parserator.js' % STATIC_ASSET_PATH
-RESULTS_JS = '%s/js/results.js' % STATIC_ASSET_PATH
-SEARCH_JS = '%s/js/search.js' % STATIC_ASSET_PATH
+CONTRACTS_JS = '%s/js/contracts.js' % STATIC_ASSET_PATH
 
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR

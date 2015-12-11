@@ -17,11 +17,9 @@ setup(
     ),
     data_files=[
         (".", ["README.md", "requirements.txt"]),
-        # ("logs", ["logs/contracts.log"]),
         ("scripts", [
             "scripts/main.sh",
-            "scripts/sync_with_document_cloud.sh",
-            "scripts/updatebackup.sh"])
+            "scripts/sync_with_document_cloud.sh"])
     ],
     package_data={
         "": ['logs/contracts.log']
