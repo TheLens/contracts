@@ -10,7 +10,8 @@ class Slack(object):
     '''Methods for sending Slack webhooks.'''
 
     def _send_slack_webhook(self, fallback="", pretext="", text="", title="",
-                            color='#36a64f', emoji=':oncoming_police_car:'):
+                            color='#36a64f', emoji=':oncoming_police_car:',
+                            username="Contracts app", title_link="Contracts"):
         '''Sends webhook to Slack channel.'''
 
         command = (
@@ -19,7 +20,7 @@ class Slack(object):
             'POST ' +
             '--data-urlencode ' +
             '\'payload={' +
-            '"username": "Contracts app", ' +
+            '"username": "%s", ' % username +
             '"icon_emoji": "%s", ' % emoji +
             '"attachments": [{' +
             '"fallback": "%s", ' % fallback +
@@ -27,7 +28,7 @@ class Slack(object):
             '"pretext": "%s", ' % pretext +
             '"text": "%s", ' % text +
             '"title": "%s", ' % title +
-            '"title_link": "Contracts", ' +
+            '"title_link": "%s", ' % title_link +
             '"mrkdwn_in": ["text", "pretext"]' +
             '}]}\' ' +
             WEBHOOK_URL)
