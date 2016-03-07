@@ -7,7 +7,6 @@ import time
 import json
 import urllib2
 import httplib
-from flask import make_response
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
@@ -196,8 +195,7 @@ class Models(object):
 
         return output_data, incoming_data  # TODO: consolidate this
 
-    @staticmethod
-    def get_contracts_page(doc_cloud_id):
+    def get_contracts_page(self, doc_cloud_id):
         '''
         Get data necessary for the single contract page. This only gets the
         updated date, so it is mostly a placeholder for now.
@@ -221,7 +219,11 @@ class Models(object):
         data['doc_cloud_id'] = doc_cloud_id
         data['updated_date'] = updated_date
 
+        docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
+        data['pdf_url'] = docs[0].resources.pdf
+
         return data
+
 
     def get_admin_home(self):
         '''
@@ -289,22 +291,6 @@ class Models(object):
             log.debug("HTTPError error %s" % str(e.code))
             computer_generated_tags = None
         return spanify(page_text, page, computer_generated_tags)
-
-    def get_download(self, doc_cloud_id):
-        '''
-        ???
-
-        :param doc_cloud_id: The unique ID for this contract in DocumentCloud.
-        :type doc_cloud_id: string
-        :returns: PDF. The PDF file for this contract (?).
-        '''
-
-        docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
-        response = make_response(docs.pop().pdf)
-        disposition_header = "attachment; filename=%s.pdf" % doc_cloud_id
-        response.headers["Content-Disposition"] = disposition_header
-
-        return response
 
     @staticmethod
     def parse_query_string(request):
