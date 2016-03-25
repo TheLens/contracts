@@ -107,24 +107,6 @@ def tags(doc_cloud_id):
     return spanified_text
 
 
-@app.route('/contracts/download/<string:docid>', methods=['GET', 'POST'])
-def download(docid):
-    """
-    Download a requested contract. This is triggered during 'download' clicks.
-
-    :returns: PDF. The contract's PDF file.
-    """
-
-    log.debug('/download')
-
-    data = Models().get_download(docid)
-    # log.debug(data)
-
-    # view = Views().get_download(data)
-
-    return data
-
-
 def check_auth(username, password):
     """
     Checks if given username and password match correct credentials.

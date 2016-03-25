@@ -14,9 +14,7 @@
         <a href="/contracts"><i class="fa fa-arrow-left"></i> Back to search</a>
 			</div>
 			<div class="small-6 text-right columns">
-				<a class="download" id="download" href="/contracts/download/{{ doc_cloud_id }}">
-          Download
-        </a>
+				<a class="download" id="download" download="{{data.doc_cloud_id}}" href="{{data.pdf_url}}">Download</a>
       </div>
     </div>
     <div class="row">
@@ -31,15 +29,14 @@
 
     <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript" charset="utf-8"></script>
     <script>
-      console.log('{{ doc_cloud_id }}');
-      DV.load("https://www.documentcloud.org/documents/{{ doc_cloud_id }}.json", {
+      DV.load("https://www.documentcloud.org/documents/{{data.doc_cloud_id}}.json", {
         sidebar: false,
         text: true,
         pdf: true,
         container: "#DV-container"
       });
     </script>
-    <script type="text/javascript" src={{ lens_js }}></script>
-    <script type="text/javascript" src={{ download_js }}></script>
+    <script type="text/javascript" src="{{ lens_js }}"></script>
+    <script type="text/javascript" src="{{ download_js }}"></script>
   </body>
 </html>

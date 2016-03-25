@@ -119,14 +119,10 @@ class Views(object):
         :returns: HTML. Rendered and ready for display.
         '''
 
-        doc_cloud_id = data['doc_cloud_id']
-        updated_date = data['updated_date']
-
         response = make_response(
             render_template(
                 'contract.html',
-                doc_cloud_id=doc_cloud_id,
-                updated_date=updated_date,
+                data=data,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
