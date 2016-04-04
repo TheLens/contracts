@@ -47,19 +47,15 @@ class Models(object):
         log.debug('get_home')
 
         data = {}
-        log.debug(data)
 
         # Get a list of vendors for dropdown
         data['vendors'] = self.get_vendors()
-        log.debug(data)
 
         # Get a list of departments for dropdown
         data['departments'] = self.get_departments()
-        log.debug(data)
 
         # Get a list of officers for dropdown
         data['officers'] = self.get_officers()
-        log.debug(data)
 
         # Find the last updated date for footer
         updated_date = time.strftime("%b. %-d, %Y")
@@ -72,7 +68,6 @@ class Models(object):
         updated_date = updated_date.replace('Jul.', 'July')
 
         data['updated_date'] = updated_date
-        log.debug(data)
 
         '''
         Getting 10 most recent contracts
