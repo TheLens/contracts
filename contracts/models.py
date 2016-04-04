@@ -91,7 +91,7 @@ class Models(object):
         data['results_language'] = (
             "Showing %d most recent contracts." % number_of_documents)
 
-        print documents
+        # print documents
         data['documents'] = documents
 
         log.debug('Done collecting home data')
@@ -120,7 +120,7 @@ class Models(object):
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
-        print search_term
+        # print search_term
         log.debug(search_term)
 
         # if search_term == self.dc_query:  # If no search input
@@ -142,10 +142,7 @@ class Models(object):
         documents = self.query_document_cloud(
             search_term, page=data['current_page'])
 
-        print 'hey'
-        log.debug(documents)
-
-        print documents
+        # print documents
 
         number_of_documents = self.find_number_of_documents(search_term)
 
@@ -336,16 +333,13 @@ class Models(object):
         '''
 
         log.debug('search_term: "%s"', search_term)
-
         log.debug('Page: %d', page)
 
         output = self.document_cloud_client.documents.search(
             search_term, page=page, per_page=self.pagelength)
 
         log.debug('len(output): %d', len(output))
-
         log.debug('query_document_cloud output:')
-        log.debug(output)
 
         return output
 
@@ -552,7 +546,7 @@ class Models(object):
             ).all()
             session.close()
             officers = list(set([o[1].name for o in officers]))
-            # print officers
+
             return sorted(officers)
 
     # @cache.memoize(timeout=100000)
