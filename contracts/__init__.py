@@ -35,18 +35,18 @@ DOC_CLOUD_USERNAME = os.environ.get('DOCUMENT_CLOUD_USERNAME')
 DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
 
 # Database
-DATABASE_NAME = 'contracts'
-DATABASE_SERVER = 'localhost'
+CONTRACTS_DATABASE_NAME = 'contracts'
+CONTRACTS_DATABASE_SERVER = 'localhost'
 CONNECTION_STRING = 'postgresql://{0}:{1}@{2}:5432/{3}'.format(
-    os.environ.get('DATABASE_USERNAME'),
-    os.environ.get('DATABASE_PASSWORD'),
-    DATABASE_SERVER,
-    DATABASE_NAME)
+    os.environ.get('CONTRACTS_DATABASE_USERNAME'),
+    os.environ.get('CONTRACTS_DATABASE_PASSWORD'),
+    CONTRACTS_DATABASE_SERVER,
+    CONTRACTS_DATABASE_NAME)
 
 CAMPAIGN_CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
-    os.environ.get('DATABASE_USERNAME'),
-    os.environ.get('DATABASE_PASSWORD'),
-    DATABASE_SERVER,
+    os.environ.get('CONTRACTS_DATABASE_USERNAME'),
+    os.environ.get('CONTRACTS_DATABASE_PASSWORD'),
+    CONTRACTS_DATABASE_SERVER,
     'campaigncontributions',
 )
 
