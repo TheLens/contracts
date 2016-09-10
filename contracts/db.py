@@ -6,7 +6,7 @@ These classes that map to tables in the underlying database.
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from contracts import CONNECTION_STRING, CAMPAIGN_CONNECTION_STRING
+from contracts import CAMPAIGN_CONNECTION_STRING, CONNECTION_STRING
 
 Base = declarative_base()
 

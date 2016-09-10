@@ -19,7 +19,7 @@ from contracts.db import (
     VendorOfficer
 )
 from pythondocumentcloud import DocumentCloud
-from contracts import CONNECTION_STRING, log
+from contracts import log, SESSION
 from contracts.lib.parserator_utils import get_document_page, spanify
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -31,8 +31,6 @@ class Models(object):
 
     def __init__(self):
         '''docstring'''
-
-        self.engine = create_engine(CONNECTION_STRING)
         self.pagelength = 10  # DocumentCloud API default is 10
         self.dc_query = 'projectid:1542-city-of-new-orleans-contracts'
         self.document_cloud_client = DocumentCloud()
@@ -261,10 +259,7 @@ class Models(object):
 
         c = httplib.HTTPConnection('www.abc.com')
         c.request("HEAD", '')
-        if c.getresponse().status == 200:
-            return True
-        else:
-            return False
+        return c.getresponse().status == 200
 
     def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
         url = (
@@ -399,11 +394,12 @@ class Models(object):
 
         log.debug('get_contracts')
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
+
         offset = offset * self.pagelength
 
-        contracts = session.query(
+        contracts = SESSION.query(
             Contract
         ).order_by(
             Contract.dateadded.desc()
@@ -413,7 +409,7 @@ class Models(object):
             limit
         ).all()
 
-        session.close()
+        SESSION.close()
 
         contracts = self.translate_to_doc_cloud_form(contracts)
 
@@ -431,14 +427,14 @@ class Models(object):
 
         log.debug('Start get_contracts_count')
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
 
-        total = session.query(
+        total = SESSION.query(
             Contract
         ).count()
 
-        session.close()
+        SESSION.close()
 
         log.debug('End of get_contracts_count')
 
@@ -452,10 +448,10 @@ class Models(object):
         :returns: list. (?) The vendors that are linked to a contract.
         '''
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
 
-        vendors = session.query(
+        vendors = SESSION.query(
             Vendor.name
         ).filter(
             Vendor.id == Contract.vendorid
@@ -465,7 +461,7 @@ class Models(object):
 
         vendors = [vendor[0].strip() for vendor in vendors]
 
-        session.close()
+        SESSION.close()
 
         return vendors
 
@@ -477,10 +473,10 @@ class Models(object):
         :returns: list. All departments in our database.
         '''
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
 
-        departments = session.query(
+        departments = SESSION.query(
             Department.name
         ).distinct().order_by(
             Department.name
@@ -494,7 +490,7 @@ class Models(object):
 
         # log.debug(departments)
 
-        session.close()
+        SESSION.close()
 
         return departments
 
@@ -509,11 +505,11 @@ class Models(object):
         the Secretary of State's database.
         '''
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
 
         if vendor is None:
-            officers = session.query(
+            officers = SESSION.query(
                 VendorOfficer,
                 Person
             ).filter(
@@ -521,7 +517,7 @@ class Models(object):
             ).order_by(
                 Person.name
             )
-            session.close()
+            SESSION.close()
             officers = sorted(
                 list(
                     set(
@@ -533,7 +529,7 @@ class Models(object):
             return officers
         else:
             vendor = vendor.replace("vendor:", "")
-            officers = session.query(
+            officers = SESSION.query(
                 VendorOfficer,
                 Person,
                 Vendor
@@ -544,7 +540,7 @@ class Models(object):
             ).filter(
                 Vendor.name == vendor
             ).all()
-            session.close()
+            SESSION.close()
             officers = list(set([o[1].name for o in officers]))
 
             return sorted(officers)
@@ -560,13 +556,13 @@ class Models(object):
         :returns: ???
         '''
 
-        sn = sessionmaker(bind=self.engine)
-        session = sn()
+        # sn = sessionmaker(bind=self.engine)
+        # session = sn()
 
         officer_term = officer_term.replace(
             '"', "").replace("officers:", "").strip()
 
-        results = session.query(
+        results = SESSION.query(
             Person,
             VendorOfficer,
             Vendor
@@ -580,6 +576,8 @@ class Models(object):
 
         output = results.pop()[2].name
         log.info("translating %s to %s", officer_term, output)
+
+        SESSION.close()
 
         return output
 

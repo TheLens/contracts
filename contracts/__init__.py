@@ -12,6 +12,9 @@ import logging
 import logging.handlers
 import getpass
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 # Project directory paths
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..'))
@@ -34,12 +37,12 @@ DOC_CLOUD_PASSWORD = os.environ.get('DOCUMENT_CLOUD_PASSWORD')
 # Database
 DATABASE_NAME = 'contracts'
 DATABASE_SERVER = 'localhost'
-CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
+CONNECTION_STRING = 'postgresql://{0}:{1}@{2}:5432/{3}'.format(
     os.environ.get('DATABASE_USERNAME'),
     os.environ.get('DATABASE_PASSWORD'),
     DATABASE_SERVER,
-    DATABASE_NAME,
-)
+    DATABASE_NAME)
+
 CAMPAIGN_CONNECTION_STRING = 'postgresql://%s:%s@%s:5432/%s' % (
     os.environ.get('DATABASE_USERNAME'),
     os.environ.get('DATABASE_PASSWORD'),
@@ -82,11 +85,17 @@ PARSERATOR_JS = '%s/js/parserator.js' % STATIC_ASSET_PATH
 RESULTS_JS = '%s/js/results.js' % STATIC_ASSET_PATH
 SEARCH_JS = '%s/js/search.js' % STATIC_ASSET_PATH
 
+# SQLAlchemy session
+engine = create_engine(CONNECTION_STRING)
+sn = sessionmaker(bind=engine)
+SESSION = sn()  # Import this to any files that need database
+
+engine = create_engine(CAMPAIGN_CONNECTION_STRING)
+campaign_sn = sessionmaker(bind=engine)
+CAMPAIGN_SESSION = campaign_sn()
+
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
-
-# if os.path.isfile(LOG_PATH):
-#     os.remove(LOG_PATH)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)

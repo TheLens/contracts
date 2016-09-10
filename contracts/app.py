@@ -43,7 +43,7 @@ def intro():
 
     # log.debug('/ data:')
     # log.debug(data)
-    print data['documents'][0].id
+    print(data['documents'][0].id)
 
     view = Views().get_home(data)
 
@@ -58,7 +58,6 @@ def query_docs():
 
     :returns: HTML. The search page (/contracts/search/).
     """
-
     log.debug('/search/')
 
     data, parameter_data = Models().get_search_page(request)
