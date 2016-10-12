@@ -20,7 +20,7 @@ from contracts.db import (
 )
 from pythondocumentcloud import DocumentCloud
 from contracts import log, SESSION
-from contracts.lib.parserator_utils import get_document_page, spanify
+# from contracts.lib.parserator_utils import get_document_page, spanify
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
@@ -261,23 +261,23 @@ class Models(object):
         c.request("HEAD", '')
         return c.getresponse().status == 200
 
-    def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
-        url = (
-            "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
-            "contract_amounts/computer_labels/%s" % doc_cloud_id
-        )
+    # def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
+    #     url = (
+    #         "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
+    #         "contract_amounts/computer_labels/%s" % doc_cloud_id
+    #     )
 
-        page = request.args.get('page')
-        page_text = get_document_page(doc_cloud_id, page)
+    #     page = request.args.get('page')
+    #     page_text = get_document_page(doc_cloud_id, page)
 
-        try:
-            response = urllib2.urlopen(url)
-            computer_generated_tags = response.read()
-            computer_generated_tags = json.loads(computer_generated_tags)
-        except urllib2.HTTPError, e:
-            log.debug("HTTPError error %s" % str(e.code))
-            computer_generated_tags = None
-        return spanify(page_text, page, computer_generated_tags)
+    #     try:
+    #         response = urllib2.urlopen(url)
+    #         computer_generated_tags = response.read()
+    #         computer_generated_tags = json.loads(computer_generated_tags)
+    #     except urllib2.HTTPError, e:
+    #         log.debug("HTTPError error %s" % str(e.code))
+    #         computer_generated_tags = None
+    #     return spanify(page_text, page, computer_generated_tags)
 
     @staticmethod
     def parse_query_string(request):
