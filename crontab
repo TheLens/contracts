@@ -1,10 +1,6 @@
-* * * * * cd /home/ubuntu/contracts && git fetch origin master && git reset --hard FETCH_HEAD
+*/5 * * * * cd /home/ubuntu/contracts && git fetch origin master && git reset --hard FETCH_HEAD
 
-0 10 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
-0 12 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
-0 14 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
-0 16 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
-0 18 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
+0 */2 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
 
 0 6 * * * /home/ubuntu/contracts/scripts/email.sh  # Find connections and send email
 

@@ -1,21 +1,11 @@
 [run]
 include =
-    __init__.py
-    contracts/app.py
-    contracts/db.py
-    contracts/models.py
-    contracts/views.py
-    contracts/lib/backup.py
-    contracts/lib/daily_linker.py
-    contracts/lib/emailer.py
-    contracts/lib/lens_doc_cloud_sync.py
-    contracts/lib/main.py
-    contracts/lib/models.py
-    contracts/lib/vendor_scraper.py
-    tests/test_pep8.py
-    tests/test_pylint.py
+  contracts/*.py
+  contracts/lib/*.py
+  scripts/*.py
+  tests/*.py
 
 [report]
 exclude_lines =
-    pragma: no cover
-    add_introspection_rules
+  pragma: no cover
+  if __name__ == "__main__":

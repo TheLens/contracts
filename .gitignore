@@ -1,11 +1,6 @@
-# Directories
-
 .idea/
-venv/*
-tests/misc
-tests/misc/*
-
-# File types
+.sass_cache/
+.tox/
 
 *.crfsuite
 *.xml
