@@ -148,6 +148,10 @@ class PurchaseOrder(object):
                     city_vendor_id
                 )
                 html = response.read()
+
+                if not os.path.exists(os.path.dirname(vendor_file_location)):
+                    os.makedirs(os.path.dirname(vendor_file_location))
+
                 with open(vendor_file_location, 'w') as filename:
                     filename.write(html)
 
