@@ -58,7 +58,7 @@ class DailyLinker(object):
         search_results = self.search_sos(vendor_name)
         total_hits = self.get_total_hits(search_results)
         if total_hits == 1:
-            print("perfect hit for {}".format(vendor_name))
+            log.info("perfect hit for {}".format(vendor_name))
             self.process_direct_hit(search_results, vendor_name)
 
     def get_daily_contracts(self, today_string=TODAY_DATE):
@@ -288,7 +288,7 @@ class DailyLinker(object):
                 SESSION.close()
                 return
 
-        print("Could not link {}".format(name))
+        log.info("Could not link {}".format(name))
 
         SESSION.close()
 
@@ -302,47 +302,6 @@ class DailyLinker(object):
             SESSION.commit()
         else:
             SESSION.close()
-
-    # def add_address(street, city, state, zipcode):  # , sourcefile):
-    #     # convert address from pyaddress to the address model from our db
-    #     indb = SESSION.query(
-    #         Address
-    #     ).filter(
-    #         Address.street == street,
-    #         Address.city == city,
-    #         Address.state == state,
-    #         Address.zipcode == zipcode
-    #     ).count()
-
-    #     if indb == 0:
-    #         address = Address(street, city, state, zipcode)  # , sourcefile)
-    #         SESSION.add(address)
-    #         SESSION.commit()
-    #     else:
-    #         SESSION.close()
-
-    # def add_addresses(o):
-    #     name, title, address1, citystatezip, country, extrafield = [
-    #         l.text for l in o.select("span")]
-    #     if len(re.findall('[0-9]{5}-[0-9]{4}', citystatezip)):
-    #         # parser fails on 9 digit zip codes
-
-    #         end = re.findall(
-    #             '[0-9]{5}-[0-9]{4}', citystatezip
-    #         ).pop().split("-")[1].encode("UTF-8")
-    #         citystatezip = citystatezip.replace("-", "").replace(end, "")
-    #     string = address1 + " " + citystatezip
-    #     address = ap.parse_address(string)
-    #     add_address(
-    #         address1,
-    #         citystatezip.split(",")[0],
-    #         address.state,
-    #         address.zip,
-    #         # directory + "/page.html"
-    #     )
-    #     # print "Address is: {0} {1} {2} {3} {4}".format(
-    #     #    address.house_number, address.street,
-    #     #    address.city, address.state, address.zip)
 
     def link(self, name, vendor):
         """Link the vendor to the company."""
@@ -377,7 +336,7 @@ class DailyLinker(object):
                 VendorOfficer.personid == personindb.id
             ).count()
             if vendorindb is not None and personindb is not None and link < 1:
-                print("Linking {0} to {1}".format(
+                log.info("Linking {0} to {1}".format(
                     str(vendorindb.id), str(personindb.id)
                 ))
                 link = VendorOfficer(vendorindb.id, personindb.id)
@@ -394,7 +353,7 @@ class DailyLinker(object):
                 VendorOfficerCompany.companiesid == companyindb.id
             ).count()
             if vendorindb is not None and companyindb is not None and link < 1:
-                print("Linking {0} to {1}".format(
+                log.info("Linking {0} to {1}".format(
                     str(vendorindb.id), str(companyindb.id)
                 ))
                 link = VendorOfficerCompany(vendorindb.id, companyindb.id)
@@ -574,8 +533,7 @@ class DailyLinker(object):
         """TODO."""
         vendor_name = vendor_name.strip("\n").replace(".", "")
 
-        print("Adding {}".format(vendor_name))
-        log.debug("Adding %s", vendor_name)
+        log.debug("Adding {}".format(vendor_name))
 
         self.add_vendor(vendor_name)
         soup = BeautifulSoup(raw_html)

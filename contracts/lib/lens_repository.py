@@ -40,10 +40,6 @@ class LensRepository(object):
                 "\xF0\x9F\x9A\xAB  " +
                 "Don't download. Contract is invalid, private or we " +
                 "already the HTML.")
-            print (
-                "\xF0\x9F\x9A\xAB  " +  # Do not enter
-                "Don't download. Contract is invalid, private or we " +
-                "already the HTML.")
             return False  # Don't download
         else:
             return True
@@ -57,9 +53,6 @@ class LensRepository(object):
         log.debug(
             '\xE2\x9C\x85  ' +
             'Saving HTML for purchase order %s.', self.purchase_order_number)
-        print (
-            '\xE2\x9C\x85  Saving ' +
-            'HTML for purchase order %s...' % self.purchase_order_number)
 
         file_location = (
             '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number)

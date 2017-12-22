@@ -70,14 +70,6 @@ class Models(object):
         '''
         Getting 10 most recent contracts
         '''
-        # documents = self.get_contracts(limit=self.pagelength)
-        # log.debug(documents)
-        # print documents
-
-        # # Fixing IDs:
-        # documents = self.translate_to_doc_cloud_form(documents)
-        # log.debug(documents)
-        # print documents
 
         # Get a list of contracts by querying our project on DocCloud:
         documents = self.query_document_cloud(self.dc_query, page=1)
@@ -89,7 +81,6 @@ class Models(object):
         data['results_language'] = (
             "Showing %d most recent contracts." % number_of_documents)
 
-        # print documents
         data['documents'] = documents
 
         log.debug('Done collecting home data')
@@ -118,29 +109,11 @@ class Models(object):
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
-        # print search_term
         log.debug(search_term)
-
-        # if search_term == self.dc_query:  # If no search input
-        #     log.debug('No search parameters entered.')
-
-        #     # Get a list of contracts from local DB without any search filter:
-        #     documents = self.get_contracts(limit=self.pagelength)
-
-        #     log.debug(documents)
-
-        #     # Fixing IDs:
-        #     documents = self.translate_to_doc_cloud_form(documents)
-
-        #     log.debug(documents)
-        # else:
-        log.debug('Some search parameters entered.')
 
         # Get a list of contracts by querying our project on DocCloud:
         documents = self.query_document_cloud(
             search_term, page=data['current_page'])
-
-        # print documents
 
         number_of_documents = self.find_number_of_documents(search_term)
 
@@ -180,8 +153,6 @@ class Models(object):
         output_data['updated_date'] = updated_date
 
         log.debug('end of get_search_page')
-        # log.debug(output_data)
-        # log.debug('current_page: %d', output_data['current_page'])
 
         return output_data, incoming_data  # TODO: consolidate this
 
@@ -229,9 +200,7 @@ class Models(object):
         # check s3 for the tags for a given contract
         # return those tags to the view.
 
-        data = None
-
-        return data
+        return None
 
     def get_parserator_page(self, doc_cloud_id):
         '''
@@ -243,13 +212,9 @@ class Models(object):
         :type doc_cloud_id: string
         :returns: dict. A dict with the updated date.
         '''
-
         # check s3 for the tags for a given contract
         # return those tags to the view.
-
-        tags = {'doc_cloud_id': doc_cloud_id}
-
-        return tags
+        return {'doc_cloud_id': doc_cloud_id}
 
     def do_tags_exist(self, doc_cloud_id):
         # url = (

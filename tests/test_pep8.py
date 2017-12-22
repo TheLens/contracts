@@ -33,15 +33,10 @@ class TestPep8(TestCase):
         # Find all .py files
         files_list = []
         for root, dirnames, filenames in os.walk(PROJECT_DIR):
-            # print root
-            # print dirnames
-            # print filenames
-            # print '========'
             if ignore(root):
                 continue
 
             for filename in fnmatch.filter(filenames, '*.py'):
-                # print filename
                 files_list.append(os.path.join(root, filename))
 
         errors = pep8style.check_files(files_list).total_errors

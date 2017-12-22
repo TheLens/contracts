@@ -34,9 +34,6 @@ class PurchaseOrder(object):
         validity = Utilities().check_if_valid_purchase_order_format(
             purchase_order_number)
         if validity is False:
-            print (
-                '\xF0\x9F\x9A\xAB  ' +
-                'Purchase order %s is invalid.' % purchase_order_number)
             log.debug(
                 'Purchase order %s is invalid.', purchase_order_number)
             return
@@ -57,10 +54,6 @@ class PurchaseOrder(object):
 
             self.vendor_name = "unknown"
 
-            print (
-                '\xF0\x9F\x9A\xAB  ' +
-                'No vendor info for purchase order %s.' % (
-                    purchase_order_number))
             log.info(
                 'No vendor info for purchase order %s.',
                 self.purchase_order_number)
@@ -370,8 +363,7 @@ class PurchaseOrder(object):
 
             return attachment_filenames_list
         except IndexError:
-            # log.exception(error, exc_info=True)
-            print '\xF0\x9F\x9A\xAB  No attachments found.'
+            log.exception(error, exc_info=True)
             log.info('No attachments found.')
 
             return []  # The city does not always include attachment files.
@@ -426,13 +418,7 @@ class PurchaseOrder(object):
         display_name = self._get_attachment_display_name(city_attachment_id)
 
         if os.path.isfile(document_path):  # Have already downloaded
-            print (
-                '\xF0\x9F\x9A\xAB  ' +
-                'Already have PDF for attachment %s.' % city_attachment_id)
-            log.info(
-                '\xF0\x9F\x9A\xAB  ' +
-                'Already have PDF for attachment %s.',
-                city_attachment_id)
+            log.info('Already have PDF for attachment %s.', city_attachment_id)
         else:
             self._download_attachment_file(
                 city_attachment_id,
@@ -485,11 +471,6 @@ class PurchaseOrder(object):
                                          attachment file.
         :type document_file_path: string
         '''
-
-        print (
-            '\xE2\x9C\x85  ' +
-            'Saving PDF for attachment "%s" with city ID %s...' % (
-                display_name, attachment_id))
         log.debug(
             'Saving PDF for attachment "%s" with city ID %s.',
             display_name,

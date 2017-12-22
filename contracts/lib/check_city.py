@@ -46,15 +46,7 @@ class CheckCity(object):
 
         new_counter = 0
         for new_page in new_pages:
-            log.debug('')
-            log.debug('========')
             log.debug('Page %d', new_page)
-            log.debug('========')
-            print (
-                '\n' +
-                '\n========' +
-                '\nPage %s' % new_page +
-                '\n========')
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(new_page)
 
@@ -74,15 +66,7 @@ class CheckCity(object):
 
         old_counter = 0
         for old_page in old_pages:
-            log.debug('')
-            log.debug('========')
             log.debug('Page %d', new_page)
-            log.debug('========')
-            print (
-                '\n' +
-                '\n========' +
-                '\nPage %s' % old_page +
-                '\n========')
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(old_page)
 
@@ -137,17 +121,12 @@ class CheckCity(object):
             ['a']
         )[-1].get('href')
 
-        number_of_pages = re.search(
-            '[0-9]+', href).group()
+        num_of_pages = re.search('[0-9]+', href).group()
 
-        print 'There were %s pages found on the city\'s purchasing portal.' % (
-            number_of_pages)
         log.debug(
-            'There were %s pages found on the city\'s purchasing portal.',
-            number_of_pages
-        )
+            "{} pages found on city's purchasing portal".format(num_of_pages))
 
-        return int(number_of_pages)
+        return int(num_of_pages)
 
     def _scan_index_page(self, page_number):
         '''
@@ -161,17 +140,8 @@ class CheckCity(object):
         purchase_order_numbers = self._get_purchase_order_numbers(html)
 
         for i, purchase_order_number in enumerate(purchase_order_numbers):
-            print (
-                '\n-----------------------' +
-                '\nPurchase order %s' % purchase_order_number +
-                '\n-----------------------' +
-                '\n(%d of %d)' % (i + 1, len(purchase_order_numbers)))
-            log.debug('')
-            log.debug('-----------------------')
-            log.debug('Purchase order %s', purchase_order_number)
-            log.debug('-----------------------')
-            log.debug(
-                '(%d of %d)' % (i + 1, len(purchase_order_numbers)))
+            log.debug('Purchase order {} ({} of {})'.format(
+                purchase_order_number, i + 1, len(purchase_order_numbers)))
 
             self._check_if_need_to_download_contract(purchase_order_number)
             time.sleep(10)
@@ -230,9 +200,7 @@ class CheckCity(object):
 
         # Check local file repository
         try:
-            print '\n*** LensRepository ***'
-            log.debug('')
-            log.debug('*** LensRepository ***')
+            log.debug('LensRepository')
 
             need_to_download = LensRepository(
                 purchase_order_number).check_if_need_to_download()
@@ -244,26 +212,20 @@ class CheckCity(object):
                 'Purchase order %s not posted publically',
                 purchase_order_number
             )
-            print 'Purchase order not posted publically.'
+            log.info('Purchase order not posted publically.')
 
         try:
-            print '\n*** PurchaseOrder ***'
-            log.debug('')
-            log.debug('*** PurchaseOrder ***')
+            log.info('PurchaseOrder: %s', purchase_order_number)
 
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
         except IndexError, error:
-            print 'IndexError'
             log.exception(error, exc_info=True)
-            log.info('IndexError: %s.', purchase_order_number)
             return
 
         # Check DocumentCloud project
         try:
-            print '\n*** DocumentCloudProject ***'
-            log.debug('')
-            log.debug('*** DocumentCloudProject ***')
+            log.debug('DocumentCloudProject')
 
             need_to_upload = DocumentCloudProject().check_if_need_to_upload(
                 purchase_order_number)
@@ -279,9 +241,7 @@ class CheckCity(object):
 
         # Check local database
         try:
-            print '\n*** LensDatabase ***'
-            log.debug('')
-            log.debug('*** LensDatabase ***')
+            log.debug('LensDatabase')
 
             contract_exist = LensDatabase().check_if_database_has_contract(
                 purchase_order_number)
@@ -437,5 +397,5 @@ class CheckCity(object):
         return output
 
 if __name__ == '__main__':
-    print "\nChecking the city's purchasing site for new contracts..."
+    log.info("Checking the city's purchasing site for new contracts")
     CheckCity().check_pages()

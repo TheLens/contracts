@@ -44,15 +44,7 @@ class DocumentCloudProject(object):
             "purchase order", purchase_order_number)
 
         if validity is False or contract_exists:
-            print (
-                '\xF0\x9F\x9A\xAB  ' +
-                'Not uploading to DocumentCloud. Purchase ' +
-                'order %s is invalid or already there.' % purchase_order_number
-            )
-            log.debug(
-                '\xF0\x9F\x9A\xAB  ' +
-                'Not uploading to DocumentCloud. Purchase ' +
-                'order %s is invalid or already there.',
+            log.debug('Not uploading purchase order {} to DocumentCloud'.format(
                 purchase_order_number)
             return False
         else:
@@ -186,15 +178,8 @@ class DocumentCloudProject(object):
         purchase_order_number = str(purchase_order_object.purchaseorder)
         title = str(purchase_order_object.title)
 
-        print (
-            '\xE2\x9C\x85  ' +
-            'Uploading purchase order %s ' % purchase_order_number +
-            '("%s") to DocumentCloud...' % title)
-        log.debug(
-            '\xE2\x9C\x85  ' +
-            'Uploading purchase order %s ("%s") to DocumentCloud...',
-            purchase_order_number,
-            title)
+        log.debug('Uploading purchase order {} ({}) to DocumentCloud'.format(
+            purchase_order_number, title)
 
         self.api_connection.documents.upload(
             filename,

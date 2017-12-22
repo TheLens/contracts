@@ -28,15 +28,9 @@ def intro():
 
     :returns: HTML. The homepage (/contracts/).
     """
-
     log.debug('/')
 
     data = Models().get_home()
-
-    # log.debug('/ data:')
-    # log.debug(data)
-    # print(data['documents'][0].id)
-
     view = Views().get_home(data)
 
     return view
@@ -55,7 +49,6 @@ def query_docs():
     data, parameter_data = Models().get_search_page(request)
 
     log.debug('/search/ data:')
-    # log.debug(data)
 
     view = Views().get_search_page(data, parameter_data)
 

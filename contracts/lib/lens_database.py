@@ -39,9 +39,6 @@ class LensDatabase(object):
         SESSION.close()
 
         if query_count == 1:  # Database has the contract
-            print(
-                '\xF0\x9F\x9A\xAB  Database already has purchase ' +
-                'order %s in contracts table.' % purchase_order_number)
             log.debug(
                 '\xF0\x9F\x9A\xAB  ' +
                 'Database already has purchase order %s in contracts table.',
@@ -60,10 +57,6 @@ class LensDatabase(object):
         :param purchase_order_object: The PurchaseOrder object instance.
         :type purchase_order_object: A PurchaseOrder object instance.
         """
-        print(
-            "\xE2\x9C\x85  " +
-            "Adding purchase order %s to database's contracts table..." % (
-                purchase_order_object.purchase_order_number))
         log.debug(
             "\xE2\x9C\x85  " +
             "Adding purchase order %s to database's contracts table.",
@@ -195,22 +188,14 @@ class LensDatabase(object):
             if date_last_scraped < today_date:
                 return True  # Scrape this page
             else:
-                log.debug(
-                    'Page %d has been scraped recently. Skipping.',
-                    page)
-                print(
-                    'Page %d has been scraped recently. Skipping.' % page)
+                log.debug('Page %d has been scraped recently. Skipping.', page)
 
                 return False
         elif page > 10:
             if date_last_scraped < week_ago_date:
                 return True  # Scrape this page
             else:
-                log.debug(
-                    'Page %d has been scraped recently. Skipping.',
-                    page)
-                print(
-                    'Page %d has been scraped recently. Skipping.' % page)
+                log.debug('Page %d has been scraped recently. Skipping.', page)
 
                 return False
 
