@@ -97,6 +97,12 @@ CAMPAIGN_SESSION = campaign_sn()
 # Logging
 LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
 
+if not os.path.exists(os.path.dirname(LOG_PATH)):
+    os.makedirs(os.path.dirname(LOG_PATH))
+
+if not os.path.isfile(LOG_PATH):
+    open(LOG_PATH, "w").close()
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
