@@ -45,7 +45,7 @@ class DocumentCloudProject(object):
 
         if validity is False or contract_exists:
             log.debug('Not uploading purchase order {} to DocumentCloud'.format(
-                purchase_order_number)
+                purchase_order_number))
             return False
         else:
             return True
