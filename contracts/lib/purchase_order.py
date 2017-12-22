@@ -456,6 +456,9 @@ class PurchaseOrder(object):
         file_location = (
             '%s/%s.html' % (ATTACHMENTS_DIR, city_attachment_id))
 
+        if not os.path.exists(os.path.dirname(file_location)):
+            os.makedirs(os.path.dirname(file_location))
+
         with open(file_location, 'w') as filename:
             log.info('Saving HTML for attachment %s.', city_attachment_id)
             filename.write(html)
