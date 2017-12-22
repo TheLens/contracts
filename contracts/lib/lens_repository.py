@@ -84,6 +84,9 @@ class LensRepository(object):
         :type file_location: string.
         '''
 
+        if not os.path.exists(os.path.dirname(file_location)):
+            os.makedirs(os.path.dirname(file_location))
+
         with open(file_location, 'w') as filename:
             log.info(
                 'Saving HTML for purchase order %s.',
