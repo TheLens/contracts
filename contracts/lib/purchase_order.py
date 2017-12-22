@@ -34,8 +34,8 @@ class PurchaseOrder(object):
         validity = Utilities().check_if_valid_purchase_order_format(
             purchase_order_number)
         if validity is False:
-            log.debug(
-                'Purchase order %s is invalid.', purchase_order_number)
+            log.debug('Purchase order {} is invalid'.format(
+                purchase_order_number))
             return
 
         self.purchase_order_number = purchase_order_number
@@ -54,9 +54,8 @@ class PurchaseOrder(object):
 
             self.vendor_name = "unknown"
 
-            log.info(
-                'No vendor info for purchase order %s.',
-                self.purchase_order_number)
+            log.info('No vendor info for purchase order {}'.format(
+                self.purchase_order_number))
 
         self.department = self._get_department(soup)
         self.k_number = self._get_knumber(soup)
@@ -85,9 +84,8 @@ class PurchaseOrder(object):
 
         # Purchase order HTML saved in PurchaseOrder class
         with open(file_location, 'r') as html_file:
-            log.info(
-                'Saving HTML for purchase order %s.',
-                purchase_order_number)
+            log.info('Saving HTML for purchase order {}'.format(
+                purchase_order_number))
             html = html_file.read()
             return html
 
@@ -105,7 +103,7 @@ class PurchaseOrder(object):
         vendor_ids = re.findall(pattern, html)
 
         if len(vendor_ids) == 0:
-            log.error('No vendor ID found.')
+            log.info('No vendor ID found')
             vendor_id = ""
         else:
             # You need to take the first one for this list or you'll sometimes
@@ -114,7 +112,7 @@ class PurchaseOrder(object):
             # http://www.purchasing.cityofno.com/bso/external/purchaseorder/
             # poSummary.sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
             vendor_id = vendor_ids[0]
-            log.debug('Vendor ID: %s.', vendor_id)
+            log.info('Vendor ID {}'.format(vendor_id))
 
         return vendor_id
 
@@ -132,7 +130,7 @@ class PurchaseOrder(object):
             VENDORS_DIR, city_vendor_id)
 
         if os.path.isfile(vendor_file_location):
-            log.info('Already have HTML for vendor %s.', city_vendor_id)
+            log.info('Already have HTML for vendor {}'.format(city_vendor_id))
         else:
             try:
                 response = urllib2.urlopen(
@@ -148,10 +146,10 @@ class PurchaseOrder(object):
                 with open(vendor_file_location, 'w') as filename:
                     filename.write(html)
 
-                log.info('Saved HTML for vendor %s.', city_vendor_id)
+                log.info('Saved HTML for vendor {}'.format(city_vendor_id))
             except urllib2.HTTPError:
-                log.info(
-                    'Could not save HTML for vendor "%s".', city_vendor_id)
+                log.info('Could not save HTML for vendor {}'.format(
+                    city_vendor_id))
 
     @staticmethod
     def _get_description(soup):
@@ -192,28 +190,6 @@ class PurchaseOrder(object):
         :type soup: BeautifulSoup object.
         :returns: string. The contract vendor's name.
         '''
-
-        # try:
-        #     # regex_string = re.compile(r'Vendor:')
-        #     vendor_row = soup(text='Vendor:')[0].parent.parent
-        #     vendor_link_text = vendor_row.findChildren(
-        #         ['td']
-        #     )[1].findChildren(
-        #         ['a']
-        #     )[0].contents.pop().strip()  # pop() pulls out from list
-
-        #     # Extract only the name, then remove periods.
-        #     vendor = vendor_link_text.split('-')[1].strip().replace(".", "")
-
-        #     # Convert to uppercase for DocumentCloud project metadata.
-        #     # Search queries are also converted to uppercase
-        #     # so we can find matches.
-        #     vendor = vendor.upper()
-
-        #     return str(vendor)
-        # except IndexError, error:
-        #     # In cases of index error, go ahead and download the vendor page.
-        #     log.exception(error, exc_info=True)
 
         vendor_file_location = (
             '%s/%s.html' % (VENDORS_DIR, self.vendor_id_city)
@@ -364,7 +340,7 @@ class PurchaseOrder(object):
             return attachment_filenames_list
         except IndexError:
             log.exception(error, exc_info=True)
-            log.info('No attachments found.')
+            log.info('No attachments found')
 
             return []  # The city does not always include attachment files.
 
@@ -410,7 +386,8 @@ class PurchaseOrder(object):
         # locally so we can have a list of the attachments we have on hand.
         city_attachment_id = re.search(
             '[0-9]+', attachment.get('href')).group()
-        log.debug('Gathering data for attachment %s.', city_attachment_id)
+        log.debug('Gathering data for attachment {}'.format(
+            city_attachment_id))
 
         document_path = '%s/%s.pdf' % (
             DOCUMENTS_DIR, city_attachment_id)
@@ -418,7 +395,8 @@ class PurchaseOrder(object):
         display_name = self._get_attachment_display_name(city_attachment_id)
 
         if os.path.isfile(document_path):  # Have already downloaded
-            log.info('Already have PDF for attachment %s.', city_attachment_id)
+            log.info('Already have PDF for attachment {}'.format(
+                city_attachment_id))
         else:
             self._download_attachment_file(
                 city_attachment_id,
@@ -446,7 +424,8 @@ class PurchaseOrder(object):
             os.makedirs(os.path.dirname(file_location))
 
         with open(file_location, 'w') as filename:
-            log.info('Saving HTML for attachment %s.', city_attachment_id)
+            log.info('Saving HTML for attachment {}'.format(
+                city_attachment_id))
             filename.write(html)
 
         soup = BeautifulSoup(html)
@@ -471,10 +450,8 @@ class PurchaseOrder(object):
                                          attachment file.
         :type document_file_path: string
         '''
-        log.debug(
-            'Saving PDF for attachment "%s" with city ID %s.',
-            display_name,
-            attachment_id)
+        log.debug('Saving PDF for attachment {} with city ID {}'.format(
+            display_name, attachment_id))
 
         if not os.path.exists(attachment_id):
             call([
