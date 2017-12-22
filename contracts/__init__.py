@@ -116,7 +116,7 @@ filehandler.setLevel(logging.DEBUG)
 
 # Create formatter and add it to the handlers
 formatter = logging.Formatter(
-    '%(asctime)s | %(filename)s | %(funcName)s | ' +
+    '%(asctime)s | %(module)s.%(funcName)s | ' +
     '%(levelname)s | %(lineno)d | %(message)s')
 filehandler.setFormatter(formatter)
 
