@@ -179,7 +179,7 @@ class DocumentCloudProject(object):
         title = str(purchase_order_object.title)
 
         log.debug('Uploading purchase order {} ({}) to DocumentCloud'.format(
-            purchase_order_number, title)
+            purchase_order_number, title))
 
         self.api_connection.documents.upload(
             filename,
