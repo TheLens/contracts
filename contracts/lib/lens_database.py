@@ -142,7 +142,7 @@ class LensDatabase(object):
         :type name: string
         :returns: list. The people who are associated with this vendor (how?).
         """
-        log.debug('Finding people associated with {}'.format(name)
+        log.debug('Finding people associated with {}'.format(name))
 
         query_people = SESSION.query(
             Person.name

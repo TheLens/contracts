@@ -37,39 +37,20 @@ class DocumentCloudProject(object):
         :returns: boolean. True if need to upload, False if don't need to.
         '''
 
-        validity = Utilities().check_that_contract_is_valid_and_public(
+        is_valid = Utilities().check_that_contract_is_valid_and_public(
             purchase_order_number)
 
         contract_exists = self._check_if_document_cloud_has_contract(
             "purchase order", purchase_order_number)
 
-        if validity is False or contract_exists:
-            log.debug('Not uploading purchase order {} to DocumentCloud'.format(
-                purchase_order_number))
+        if not is_valid:
+            log.info('Purchase order is invalid or private. Not uploading')
+            return False
+        elif contract_exists:
+            log.info('Purchase order is on DocumentCloud. Not uploading')
             return False
         else:
             return True
-
-    # def _search_for_contract(self, key, value):
-    #     '''
-    #     Fetches the contract with the specified key and value from the
-    #     DocumentCloud project.
-
-    #     :param key: The key for searching through the DocumentCloud API.
-    #     :type key: string.
-    #     :param value: The key's value.
-    #     :type value: string.
-    #     :returns: A PythonDocumentCloud.Document class instance for the \
-    #     matching contract.
-    #     '''
-
-    #     # Ex. "'%s':'%s'" % ('purchase order', purchase_order_number)
-    #     # Ex. "'%s':'%s'" % ('contract number', k_number)
-
-    #     search_term = "'%s':'%s'" % (key, value)
-    #     document = self.api_connection.documents.search(search_term).pop()
-
-    #     return document
 
     def _check_if_document_cloud_has_contract(self, key, value):
         '''
@@ -214,57 +195,3 @@ class DocumentCloudProject(object):
             return True  # Contract number is null. Do not upload.
         else:
             return False
-
-    # def _get_all_contracts(self):
-    #     '''
-    #     Runs a query for all of the contracts in our DocumentCloud project.
-
-    #     :returns: A list of all of the project's contracts, stored as \
-    #     PythonDocumentCloud instances.
-    #     '''
-
-    #     contracts = self.api_connection.documents.search(
-    #         'projectid:%s' % self.project_id)
-
-    #     return contracts
-
-    # def _get_metadata(self, document_cloud_id):
-    #     '''
-    #     Fetches the metadata associated with this contract on our
-    #     DocumentCloud project.
-
-    #     :param document_cloud_id: The contract's unique ID in DocumentCloud.
-    #     :type document_cloud_id: string
-    #     :returns: dict? The contract's metadata.
-    #     '''
-
-    #     contract = self.api_connection.documents.get(document_cloud_id)
-    #     metadata = contract.data
-
-    #     return metadata
-
-    # def _update_metadata(self, document_cloud_id, meta_key, meta_value):
-    #     '''
-    #     Updates the metadata associated with the contracts on DocumentCloud.
-
-    #     :param document_cloud_id: The contract's unique ID in DocumentCloud.
-    #     :type document_cloud_id: string
-    #     :param meta_key: The specific metadata field for this contract.
-    #     :type meta_key: string
-    #     :param meta_value: The new metadata value for this field.
-    #     :type meta_value: string
-    #     '''
-
-    #     # log.info(
-    #     #     '{} | {} | updating {} on DocumentCloud. ' +
-    #     #     'Changing {} to {}'.format(
-    #     #         run_id,
-    #     #         get_timestamp(),
-    #     #         doc_cloud_id,
-    #     #         meta_field,
-    #     #         new_meta_data_value
-    #     #     )
-    #     # )
-    #     contract = self.api_connection.documents.get(document_cloud_id)
-    #     contract.data[meta_key] = meta_value
-    #     contract.put()

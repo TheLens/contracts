@@ -84,7 +84,7 @@ class PurchaseOrder(object):
 
         # Purchase order HTML saved in PurchaseOrder class
         with open(file_location, 'r') as html_file:
-            log.info('Saving HTML for purchase order {}'.format(
+            log.info('Reading HTML for purchase order {}'.format(
                 purchase_order_number))
             html = html_file.read()
             return html
@@ -112,7 +112,6 @@ class PurchaseOrder(object):
             # http://www.purchasing.cityofno.com/bso/external/purchaseorder/
             # poSummary.sdo?docId=FC154683&releaseNbr=0&parentUrl=contract
             vendor_id = vendor_ids[0]
-            log.info('Vendor ID {}'.format(vendor_id))
 
         return vendor_id
 
@@ -454,6 +453,7 @@ class PurchaseOrder(object):
             display_name, attachment_id))
 
         if not os.path.exists(attachment_id):
+            # TODO: Refactor to use pycurl or requests
             call([
                 'curl',
                 '-o',

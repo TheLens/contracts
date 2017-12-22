@@ -28,19 +28,19 @@ class LensRepository(object):
         '''
 
         # Check if contract has valid format and is public
-        validity = Utilities().check_that_contract_is_valid_and_public(
+        is_valid = Utilities().check_that_contract_is_valid_and_public(
             self.purchase_order_number)
 
         file_location = (
             '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number))
         local_copy_exists = os.path.isfile(file_location)
 
-        if validity is False or local_copy_exists:
-            log.debug(
-                "\xF0\x9F\x9A\xAB  " +
-                "Don't download. Contract is invalid, private or we " +
-                "already the HTML.")
-            return False  # Don't download
+        if not is_valid:
+            log.info("Contract is invalid or private. Not downloading.")
+            return False
+        elif local_copy_exists:
+            log.info("Contract is already in archive. Not downloading.")
+            return False
         else:
             return True
 
@@ -49,11 +49,6 @@ class LensRepository(object):
         Download the contract matching this purchase order number, but first
         check if it is valid, not in the skip list and not already downloaded.
         '''
-
-        log.debug(
-            '\xE2\x9C\x85  ' +
-            'Saving HTML for purchase order %s.', self.purchase_order_number)
-
         file_location = (
             '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number)
         )
@@ -81,7 +76,6 @@ class LensRepository(object):
             os.makedirs(os.path.dirname(file_location))
 
         with open(file_location, 'w') as filename:
-            log.info(
-                'Saving HTML for purchase order %s.',
-                self.purchase_order_number)
+            log.info('Saving HTML for purchase order {}'.format(
+                self.purchase_order_number))
             filename.write(html)
