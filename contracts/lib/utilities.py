@@ -9,9 +9,7 @@ from contracts import PROJECT_DIR
 
 
 class Utilities(object):
-    '''
-    Methods used by multiple classes.
-    '''
+    '''Methods used by multiple classes.'''
 
     @staticmethod
     def get_skip_list():
@@ -27,8 +25,8 @@ class Utilities(object):
         :returns: list. A list of the purchase order numbers of contracts to \
         skip.
         '''
-
-        skip_list_location = PROJECT_DIR + '/data/skip-list.csv'
+        # TODO: os.path
+        skip_list_location = '{}/data/skip-list.csv'.format(PROJECT_DIR)
 
         with open(skip_list_location, "r") as fname:
             reader = csv.reader(fname)
@@ -59,6 +57,7 @@ class Utilities(object):
         purchase_order_regex = r'[A-Z]{2}\d{3,}'
         # TODO: Other file had r'[A-Z]{2}\d+'. Determine which is correct.
         purchase_order_pattern = re.compile(purchase_order_regex)
+
         if purchase_order_pattern.match(purchase_order_number):
             return True
         else:
@@ -78,10 +77,9 @@ class Utilities(object):
         skip_list = self.get_skip_list()
 
         if purchase_order_number in skip_list:
-            # log.warning(
-            #     '{} | {} | Contract is in the skiplist | {}'.format(
-            #         run_id, get_timestamp(), purchase_order_number)
-            # )
+            log.info('Purchase order {} is in skip list'.format(
+                purchase_order_number))
+
             return False
         else:
             return True
@@ -102,7 +100,9 @@ class Utilities(object):
             self.check_if_not_in_skip_list(purchase_order_number),
         ]
 
-        if any(checks) is False:
-            return False
-        else:
-            return True
+        return any(checks)
+
+        # if any(checks) is False:
+        #     return False
+        # else:
+        #     return True

@@ -41,17 +41,14 @@ class Backup(object):
             try:
                 self._backup(document_cloud_id)
             except DoesNotExistError:
-                log.exception("DoesNotExistError: %s", document_cloud_id)
+                log.exception('Document Cloud ID {}'.format(document_cloud_id))
 
     def _backup(self, document_cloud_id):
-        '''
-        Backup a contract.
-        '''
-
+        '''Back up a contract.'''
         needs_backup = self._needs_to_be_backed_up(document_cloud_id)
 
         if needs_backup or self.force:
-            log.info("Creating backup for %s", document_cloud_id)
+            log.info('Creating backup for DC ID {}'.format(document_cloud_id))
 
             document = self.client.documents.get(document_cloud_id)
             metadata = self._get_meta_data(document)
@@ -75,21 +72,17 @@ class Backup(object):
                 with open(text_txt_path, "wb") as outfile:
                     outfile.write(json.dumps(document.full_text))
         else:
-            log.info("%s is already is backed up", document_cloud_id)
+            log.info('{} is already backed up'.format(document_cloud_id))
 
     @staticmethod
     def _get_path(document_cloud_id, extension):
         '''
         Return the appropriate path for a file with a certain extension.
         '''
-
-        path = "%s/%s%s" % (
-            DOCUMENT_CLOUD_DIR,
-            document_cloud_id.replace("/", ""),
-            extension
-        )
-
-        return path
+        # TODO: os.path
+        return "{}/{}{}".format(DOCUMENT_CLOUD_DIR,
+                                document_cloud_id.replace("/", ""),
+                                extension)
 
     @staticmethod
     def _get_meta_data(document):
@@ -97,30 +90,34 @@ class Backup(object):
         Return the metadata associated with a DocumentCloud contract.
         '''
 
-        metadata = {}
+        metadata = {
+            'contract number': document.data.get('contract number', ''),
+            'department': document.data.get('department', 'unknown'),
+            'description': document.description,
+            'purchase order': document.data.get('purchase order', ''),
+            'title': document.title,
+            'vendor': document.data.get('vendor', 'unknown')
+        }
 
-        try:
-            metadata['vendor'] = document.data['vendor']
-        except KeyError:
-            metadata['vendor'] = "unknown"
+        # try:
+        #     metadata['vendor'] = document.data['vendor']
+        # except KeyError:
+        #     metadata['vendor'] = "unknown"
 
-        try:
-            metadata['department'] = document.data['department']
-        except KeyError:
-            metadata['department'] = "unknown"
+        # try:
+        #     metadata['department'] = document.data['department']
+        # except KeyError:
+        #     metadata['department'] = "unknown"
 
-        try:
-            metadata['contract number'] = document.data['contract number']
-        except KeyError:
-            metadata['contract number'] = ""
+        # try:
+        #     metadata['contract number'] = document.data['contract number']
+        # except KeyError:
+        #     metadata['contract number'] = ""
 
-        try:
-            metadata['purchase order'] = document.data['purchase order']
-        except KeyError:
-            metadata['purchase order'] = ""
-
-        metadata['title'] = document.title
-        metadata['description'] = document.description
+        # try:
+        #     metadata['purchase order'] = document.data['purchase order']
+        # except KeyError:
+        #     metadata['purchase order'] = ""
 
         return metadata
 
@@ -142,15 +139,26 @@ class Backup(object):
         # else:
         #     return False
 
-        condition = (
-            os.path.exists(self._get_path(document_cloud_id, ".pdf")) and
-            os.path.exists(self._get_path(document_cloud_id, ".txt")) and
-            os.path.exists(self._get_path(document_cloud_id, "_text.txt"))
+        # all_exist = (
+        #     os.path.exists(self._get_path(document_cloud_id, ".pdf")) and
+        #     os.path.exists(self._get_path(document_cloud_id, ".txt")) and
+        #     os.path.exists(self._get_path(document_cloud_id, "_text.txt"))
+        # )
+
+        # return not all_exist
+
+        # if condition:
+        #     return False
+        # else:
+        #     return True
+
+        at_least_one_does_not_exist = (
+            not os.path.exists(self._get_path(document_cloud_id, ".pdf")) or
+            not os.path.exists(self._get_path(document_cloud_id, ".txt")) or
+            not os.path.exists(self._get_path(document_cloud_id, "_text.txt"))
         )
-        if condition:
-            return False
-        else:
-            return True
+
+        return at_least_one_does_not_exist
 
 if __name__ == "__main__":
     Backup()

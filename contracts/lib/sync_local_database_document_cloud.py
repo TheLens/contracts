@@ -25,8 +25,8 @@ class SyncLocalDatabaseDocumentCloud(object):
             output = document.data[field]
             if len(output) == 0:
                 output = "unknown"
-        except Exception, error:
-            log.exception(error, exc_info=True)
+        except Exception:  # TODO: Be more specific
+            log.exception()
             output = "unknown"
 
         return output
@@ -39,7 +39,7 @@ class SyncLocalDatabaseDocumentCloud(object):
         :type document: Python-DocumentCloud object.
         '''
 
-        log.info('Syncing %s', document.id)
+        log.info('Syncing {}'.format(document.id))
 
         fields = {}
         fields['purchaseno'] = self._get_metadata(document, "purchase order")
@@ -80,8 +80,8 @@ class SyncLocalDatabaseDocumentCloud(object):
                     half_filled_contract.doc_cloud_id
                 )
                 self._match_contract(contract)
-            except Exception, error:
-                log.exception(error, exc_info=True)
+            except Exception:
+                log.exception()
 
 if __name__ == '__main__':
     SyncLocalDatabaseDocumentCloud().match_local_database_to_document_cloud()

@@ -165,14 +165,14 @@ class DocumentCloudProject(object):
         self.api_connection.documents.upload(
             filename,
             title,
-            'City of New Orleans',  # Source of this file
+            'City of New Orleans',       # Source of this file
             purchase_order_object.description,
-            None,  # Related article
-            PROJECT_URL,  # Published URL
-            'public',  # Access
-            self.project_id,  # Project
+            None,                        # Related article
+            PROJECT_URL,                 # Published URL
+            'public',                    # Access
+            self.project_id,             # Project
             purchase_order_object.data,  # Data
-            False  # Secure
+            False                        # Secure
         )
 
     @staticmethod
