@@ -38,53 +38,61 @@ class CheckCity(object):
 
         number_of_pages = self._find_number_of_pages()
 
-        new_pages = range(1, 11)
-        old_pages = range(11, number_of_pages + 1)
+        number_new_pages = 10
 
-        log.info('Randomly selecting pages')
+        new_pages = range(1, number_new_pages + 1)
+        old_pages = range(number_new_pages + 1, number_of_pages + 1)
+
+        log.info('Shuffling new and old pages')
 
         shuffle(new_pages)
         shuffle(old_pages)
 
-        new_counter = 0
-        for new_page in new_pages:
+        # Want to visit all 10 pages per day. Run five times with 2 pages each
+        new_page_selection = 2
+
+        log.info('Selecting {} of the {} new pages'.format(
+            new_page_selection, number_new_pages))
+
+        for i, new_page in enumerate(new_pages):
             log.info('Page {}'.format(new_page))
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(new_page)
 
-            if need_to_scrape is False:
+            if not need_to_scrape:
                 continue
 
             self._scan_index_page(new_page)
 
             LensDatabase().update_scrape_log(new_page)
-            new_counter += 1
 
-            # Run five times per day, so break after 2 pages in order to reach
-            # 10 pages per day.
-            if new_counter == 2:
+            if i == new_page_selection:  # i starts at 1
                 break
-            time.sleep(60)
 
-        old_counter = 0
-        for old_page in old_pages:
-            log.debug('Page {}'.format(new_page))
+            time.sleep(60)  # TODO
+
+        # 13 pages 5x per day 7x per week = ~450 pages per week
+        old_page_selection = 13
+
+        log.info('Selecting {} of the {} older pages'.format(
+            old_page_selection, number_of_pages - number_new_pages))
+
+        for i, old_page in enumerate(old_pages):
+            log.debug('Page {}'.format(old_page))
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(old_page)
 
-            if need_to_scrape is False:
+            if not need_to_scrape:
                 continue
 
             self._scan_index_page(old_page)
 
             LensDatabase().update_scrape_log(old_page)
-            old_counter += 1
 
-            # Run five times per day, seven days per week, so break after 13
-            # pages in order to reach about 450 pages per week.
-            if old_counter == 13:
+            if i == old_page_selection:
                 break
-            time.sleep(60)
+
+            time.sleep(60)  # TODO
 
     def _find_number_of_pages(self):
         '''
@@ -125,7 +133,7 @@ class CheckCity(object):
 
         num_of_pages = re.search('[0-9]+', href).group()
 
-        log.debug('Found {} pages'.format(num_of_pages))
+        log.debug('Found {} total pages'.format(num_of_pages))
 
         return int(num_of_pages)
 
@@ -175,43 +183,40 @@ class CheckCity(object):
         :param purchase_order_number: The contract's purchase order number.
         :type purchase_order_number: string
         '''
-        # Check local file repository
+        # Check file repository
         try:
             need_to_download = LensRepository(
                 purchase_order_number).check_if_need_to_download()
             if need_to_download:
                 LensRepository(purchase_order_number).download_purchase_order()
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.info('Purchase order not in local archives')
+        except urllib2.HTTPError:
+            log.exception('Purchase order not in local archives')
 
         try:
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
-        except IndexError, error:
-            log.exception(error, exc_info=True)
+        except IndexError:
+            log.exception()
             return
 
-        # Check DocumentCloud project
+        # Check DocumentCloud
         try:
             need_to_upload = DocumentCloudProject().check_if_need_to_upload(
                 purchase_order_number)
             if need_to_upload:
                 DocumentCloudProject().prepare_then_add_contract(
                     purchase_order_object)
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.info('Purchase order not on DocumentCloud')
+        except urllib2.HTTPError:
+            log.exception('Purchase order not on DocumentCloud')
 
-        # Check local database
+        # Check database
         try:
             contract_exist = LensDatabase().check_if_database_has_contract(
                 purchase_order_number)
             if contract_exist is False:
                 LensDatabase().add_to_database(purchase_order_object)
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.info('Purchase order is not in database')
+        except urllib2.HTTPError:
+            log.exception('Purchase order is not in database')
 
     @staticmethod
     def _get_index_page(page_number):
@@ -334,21 +339,18 @@ class CheckCity(object):
         req.add_header('Origin', 'http://www.purchasing.cityofno.com')
         req.add_header('AcceptEncoding', 'gzip, deflate')
         req.add_header('ContentType', 'application/xwwwformurlencoded')
+        req.add_header('CacheControl', 'nocache')
+        req.add_header('Connection', 'keepalive')
+        req.add_header('DNT', '1')
         req.add_header(
             'Accept',
             'text/add_contracthtml,application/xhtml+xml,application/xml;' +
-            'q=0.9,image/webp,*/*;q=0.8'
-        )
-        req.add_header('CacheControl', 'nocache')
+            'q=0.9,image/webp,*/*;q=0.8')
         req.add_header(
             'Referer',
             'http://www.purchasing.cityofno.com/bso/external/advsearch/' +
-            'searchContract.sdo'
-        )
-        req.add_header('Connection', 'keepalive')
-        req.add_header('DNT', '1')
+            'searchContract.sdo')
 
-        output = ""
         response = urllib2.urlopen(req)
         output = response.read()
         response.close()
