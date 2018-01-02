@@ -7,13 +7,11 @@ Interacting with the DocumentCloud project.
 import re
 from pythondocumentcloud import DocumentCloud
 from contracts.lib.utilities import Utilities
-from contracts import (
-    DOC_CLOUD_USERNAME,
-    DOC_CLOUD_PASSWORD,
-    DOCUMENTS_DIR,
-    PROJECT_URL,
-    log
-)
+from contracts import (DOC_CLOUD_USERNAME,
+                       DOC_CLOUD_PASSWORD,
+                       DOCUMENTS_DIR,
+                       PROJECT_URL,
+                       log)
 
 
 class DocumentCloudProject(object):
@@ -24,8 +22,8 @@ class DocumentCloudProject(object):
 
     def __init__(self):
         self.project_id = '1542-city-of-new-orleans-contracts'
-        self.api_connection = DocumentCloud(
-            DOC_CLOUD_USERNAME, DOC_CLOUD_PASSWORD)
+        self.api_connection = DocumentCloud(DOC_CLOUD_USERNAME,
+                                            DOC_CLOUD_PASSWORD)
 
     def check_if_need_to_upload(self, purchase_order_number):
         '''
@@ -87,24 +85,21 @@ class DocumentCloudProject(object):
         # Verify that there is at least one file to download.
         number_of_attachments = len(purchase_order_object.attachments)
 
-        log.debug('There are %d attachments to upload.', number_of_attachments)
+        log.debug('There are %d attachments to upload', number_of_attachments)
 
         if number_of_attachments > 0:
             for i, attachment in enumerate(purchase_order_object.attachments):
                 attachment_id = re.search(
                     '[0-9]+', attachment.get('href')).group()
-                attachment_location = (
-                    '%s/%s.pdf' % (DOCUMENTS_DIR, attachment_id)
-                )
+                attachment_location = '%s/%s.pdf' % (DOCUMENTS_DIR,
+                                                     attachment_id)
 
                 purchase_order_object = self.prepare_contract(
                     purchase_order_object,
                     i
                 )
-                self._upload_contract(
-                    attachment_location,
-                    purchase_order_object
-                )
+                self._upload_contract(attachment_location,
+                                      purchase_order_object)
 
     @staticmethod
     def prepare_contract(purchase_order_object, iteration_value):
@@ -124,10 +119,8 @@ class DocumentCloudProject(object):
         # If multiple attachments, add language like "page 1 of 2":
         page_string = ""
         if number_of_attachments > 1:
-            page_string = "%s of %s" % (
-                str(iteration_value + 1),
-                str(number_of_attachments)
-            )
+            page_string = "%s of %s" % (str(iteration_value + 1),
+                                        str(number_of_attachments))
 
         purchase_order_object.description += page_string
 
@@ -150,11 +143,13 @@ class DocumentCloudProject(object):
         log.debug('Uploading purchase order %s to DocumentCloud.', filename)
 
         is_null = self._check_if_contract_number_is_null(purchase_order_object)
+
         if is_null:
             return
 
-        purchase_order_object.title = purchase_order_object.title.replace(
-            "/", "")  # Not sure why this is necessary
+        # Not sure why this is necessary
+        purchase_order_object.title = purchase_order_object.title.replace("/",
+                                                                          "")
 
         purchase_order_number = str(purchase_order_object.purchaseorder)
         title = str(purchase_order_object.title)
@@ -186,12 +181,10 @@ class DocumentCloudProject(object):
         '''
 
         if len(purchase_order_object.data['contract number']) < 1:
-            log.info(
-                'Not uploading purchase order %s to DocumentCloud. ' +
-                'Contract number %s is null',
-                purchase_order_object.data['purchase order'],
-                purchase_order_object.data['contract number']
-            )
-            return True  # Contract number is null. Do not upload.
+            log.info('Contract number %s is null',
+                     purchase_order_object.data['contract number'])
+            log.info('Not uploading purchase order %s to DocumentCloud',
+                     purchase_order_object.data['purchase order'])
+            return True
         else:
             return False

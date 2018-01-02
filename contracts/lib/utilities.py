@@ -31,7 +31,7 @@ class Utilities(object):
         with open(skip_list_location, "r") as fname:
             reader = csv.reader(fname)
             next(reader, None)  # Skip header row
-            skip_list = list(row[0] for row in reader)
+            skip_list = list(row[0] for row in reader)  # TODO
 
             return skip_list
 

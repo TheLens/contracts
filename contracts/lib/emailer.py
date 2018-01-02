@@ -17,11 +17,9 @@ def send_email(title, message):
         smtpserver = smtplib.SMTP('smtp.gmail.com', 587)
         smtpserver.ehlo()
         smtpserver.starttls()
-        smtpserver.ehlo
-        smtpserver.login(
-            os.environ.get('GMAIL_USERNAME'),
-            os.environ.get('GMAIL_PASSWORD')
-        )
+        smtpserver.ehlo  # TODO?
+        smtpserver.login(os.environ.get('GMAIL_USERNAME'),
+                         os.environ.get('GMAIL_PASSWORD'))
         msg = MIMEMultipart('alternative')
         msg['Subject'] = title
         msg['From'] = gmail_user
@@ -35,8 +33,9 @@ def send_email(title, message):
         msg.attach(part1)
         msg.attach(part2)
 
-        smtpserver.sendmail(
-            os.environ.get('GMAIL_USERNAME'), to, msg.as_string())
+        smtpserver.sendmail(os.environ.get('GMAIL_USERNAME'),
+                            to,
+                            msg.as_string())
         smtpserver.close()
 
 
@@ -87,7 +86,5 @@ def get_message():
 
 
 if __name__ == '__main__':
-    send_email(
-        'Contracts from The Vault: ' + time.strftime("%x"),
-        get_message()
-    )
+    send_email('Contracts from The Vault: ' + time.strftime("%x"),
+               get_message())

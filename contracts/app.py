@@ -7,15 +7,19 @@ structure from the Flask tutorials. The front end is built with Foundation.
 It uses SQLAlchemy to connect to a PostgreSQL database.
 """
 
+import os
+import sys
+
 from flask import Flask, request
 # from flask.ext.cache import Cache
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from contracts.constants import log, RELOADER, DEBUG
 from contracts.models import Models
-# from parserator.data_prep_utils import appendListToXMLfile
 from contracts.views import Views
-from contracts import (
-    log,
-    RELOADER,
-    DEBUG)
+
 
 app = Flask(__name__)
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -28,11 +32,8 @@ def intro():
 
     :returns: HTML. The homepage (/contracts/).
     """
-    log.debug('/')
-
     data = Models().get_home()
     view = Views().get_home(data)
-
     return view
 
 
@@ -44,16 +45,8 @@ def query_docs():
 
     :returns: HTML. The search page (/contracts/search/).
     """
-    log.debug('/search/')
-
-    data, parameter_data = Models().get_search_page(request)
-
-    log.debug('/search/ data:')
-
-    view = Views().get_search_page(data, parameter_data)
-
-    log.debug('/search/ view:')
-
+    data, parameters = Models().get_search_page(request)
+    view = Views().get_search_page(data, parameters)
     return view
 
 
@@ -65,17 +58,11 @@ def contract(doc_cloud_id):
     :returns: HTML. The single contract page \
     (/contracts/contract/<doc_cloud_id>).
     """
-
-    log.debug('/contract/')
-
     data = Models().get_contracts_page(doc_cloud_id)
-
     view = Views().get_contract(data)
-
     return view
 
 if __name__ == '__main__':
     app.run(
         use_reloader=RELOADER,
-        debug=DEBUG
-    )
+        debug=DEBUG)

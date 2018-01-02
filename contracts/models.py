@@ -3,13 +3,15 @@
 The web app that runs at vault.thelensnola.org/contracts.
 '''
 
-import time
+import http.client
 import json
-import urllib2
-import httplib
+import time
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
+
+from contracts.constants import log, SESSION
 from contracts.lib.results_language import ResultsLanguage
 from contracts.db import (
     Vendor,
@@ -19,7 +21,7 @@ from contracts.db import (
     VendorOfficer
 )
 from pythondocumentcloud import DocumentCloud
-from contracts import log, SESSION
+
 # from contracts.lib.parserator_utils import get_document_page, spanify
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -27,10 +29,10 @@ from contracts import log, SESSION
 
 class Models(object):
 
-    '''doctstring'''
+    '''TODO'''
 
     def __init__(self):
-        '''docstring'''
+        '''TODO'''
         self.pagelength = 10  # DocumentCloud API default is 10
         self.dc_query = 'projectid:1542-city-of-new-orleans-contracts'
         self.document_cloud_client = DocumentCloud()
@@ -41,9 +43,6 @@ class Models(object):
 
         :returns: dict. A dict with data for dropdowns and dates.
         '''
-
-        log.debug('get_home')
-
         data = {}
 
         # Get a list of vendors for dropdown
@@ -75,15 +74,13 @@ class Models(object):
         documents = self.query_document_cloud(self.dc_query, page=1)
 
         number_of_documents = self.pagelength
-        log.debug(number_of_documents)
+        log.debug("Number of documents: %d", number_of_documents)
 
         data['number_of_documents'] = number_of_documents
         data['results_language'] = (
             "Showing %d most recent contracts." % number_of_documents)
 
         data['documents'] = documents
-
-        log.debug('Done collecting home data')
 
         return data
 
@@ -96,20 +93,17 @@ class Models(object):
         :returns: dict. Two dicts: one for newly gather data, and the other \
         an altered version of the incoming search parameters.
         '''
-
-        log.debug('start get_search_page')
-
         # Extract search parameters (text input and dropdown selections)
         data = self.parse_query_string(request)
 
-        log.debug(data)
+        log.debug("Query string data: ", data)
 
         incoming_data = data
 
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
-        log.debug(search_term)
+        log.debug("Search term:", search_term)
 
         # Get a list of contracts by querying our project on DocCloud:
         documents = self.query_document_cloud(
@@ -117,13 +111,13 @@ class Models(object):
 
         number_of_documents = self.find_number_of_documents(search_term)
 
-        log.debug(number_of_documents)
+        log.debug("Number of documents: %d", number_of_documents)
 
         number_of_pages = number_of_documents / self.pagelength
 
         # Increment by 1 to correct zero-indexing:
         number_of_pages = number_of_pages + 1
-        log.debug('number_of_pages: %d', number_of_pages)
+        log.debug('Number of pages: %d', number_of_pages)
 
         updated_date = time.strftime("%b. %-d, %Y")
 
@@ -152,8 +146,6 @@ class Models(object):
         output_data['documents'] = documents
         output_data['updated_date'] = updated_date
 
-        log.debug('end of get_search_page')
-
         return output_data, incoming_data  # TODO: consolidate this
 
     def get_contracts_page(self, doc_cloud_id):
@@ -165,9 +157,6 @@ class Models(object):
         :type doc_cloud_id: string
         :returns: dict. A dict with the updated date.
         '''
-
-        data = {}
-
         updated_date = time.strftime("%b. %-d, %Y")
 
         # Correct for AP Style
@@ -177,11 +166,13 @@ class Models(object):
         updated_date = updated_date.replace('Jun.', 'June')
         updated_date = updated_date.replace('Jul.', 'July')
 
-        data['doc_cloud_id'] = doc_cloud_id
-        data['updated_date'] = updated_date
-
         docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
-        data['pdf_url'] = docs[0].resources.pdf
+
+        data = {
+            'doc_cloud_id': doc_cloud_id,
+            'updated_date': updated_date,
+            'pdf_url': docs[0].resources.pdf
+        }
 
         return data
 
@@ -226,24 +217,6 @@ class Models(object):
         c.request("HEAD", '')
         return c.getresponse().status == 200
 
-    # def get_tags_for_doc_cloud_id(self, doc_cloud_id, request):
-    #     url = (
-    #         "https://s3-us-west-2.amazonaws.com/lensnola/contracts/" +
-    #         "contract_amounts/computer_labels/%s" % doc_cloud_id
-    #     )
-
-    #     page = request.args.get('page')
-    #     page_text = get_document_page(doc_cloud_id, page)
-
-    #     try:
-    #         response = urllib2.urlopen(url)
-    #         computer_generated_tags = response.read()
-    #         computer_generated_tags = json.loads(computer_generated_tags)
-    #     except urllib2.HTTPError, e:
-    #         log.debug("HTTPError error %s" % str(e.code))
-    #         computer_generated_tags = None
-    #     return spanify(page_text, page, computer_generated_tags)
-
     @staticmethod
     def parse_query_string(request):
         '''
@@ -268,7 +241,7 @@ class Models(object):
         else:
             data['current_page'] = int(data['current_page'])
 
-        log.debug('current_page: %d', data['current_page'])
+        log.debug('Current page: %d', data['current_page'])
 
         # Change any missing parameters to 0-length string
         for key in data:
@@ -292,14 +265,13 @@ class Models(object):
         :returns: dict. (?) The output that matches the query.
         '''
 
-        log.debug('search_term: "%s"', search_term)
+        log.debug('Search term: "%s"', search_term)
         log.debug('Page: %d', page)
 
         output = self.document_cloud_client.documents.search(
             search_term, page=page, per_page=self.pagelength)
 
-        log.debug('len(output): %d', len(output))
-        log.debug('query_document_cloud output:')
+        log.debug('Number of returned documents: %d', len(output))
 
         return output
 
@@ -314,13 +286,11 @@ class Models(object):
         :returns: int. The number of records that match this query.
         '''
 
-        log.debug(
-            'query_document_cloud_count with search_term: %s', search_term)
+        log.debug('Getting DC count with search_term: %s', search_term)
 
         output = self.document_cloud_client.documents.search_count(search_term)
 
-        log.debug('output')
-        log.debug(output)
+        log.debug('output: ', output)
 
         return output
 
@@ -336,9 +306,6 @@ class Models(object):
         :type documents: list
         :returns: list. A list of documents, with corrected IDs (how?).
         '''
-
-        log.debug('translate_to_doc_cloud_form')
-
         for document in documents:
             document.id = document.doc_cloud_id
 
@@ -356,9 +323,6 @@ class Models(object):
         :type limit: int
         :returns: list. (?) The contracts that matched the query.
         '''
-
-        log.debug('get_contracts')
-
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
@@ -378,7 +342,7 @@ class Models(object):
 
         contracts = self.translate_to_doc_cloud_form(contracts)
 
-        log.debug(contracts)
+        # log.debug(contracts)
 
         return contracts
 
@@ -389,9 +353,6 @@ class Models(object):
 
         :returns: int. The total number of contracts in the database.
         '''
-
-        log.debug('Start get_contracts_count')
-
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
@@ -400,8 +361,6 @@ class Models(object):
         ).count()
 
         SESSION.close()
-
-        log.debug('End of get_contracts_count')
 
         return total
 
@@ -449,11 +408,7 @@ class Models(object):
 
         departments = [department[0].strip() for department in departments]
 
-        # log.debug(departments)
-
         # departments = sorted(list(set(departments)))
-
-        # log.debug(departments)
 
         SESSION.close()
 
@@ -483,13 +438,7 @@ class Models(object):
                 Person.name
             )
             SESSION.close()
-            officers = sorted(
-                list(
-                    set(
-                        [o[1].name for o in officers]
-                    )
-                )
-            )
+            officers = sorted(list(set([o[1].name for o in officers])))
 
             return officers
         else:
@@ -556,16 +505,11 @@ class Models(object):
         :type search_term: string
         :returns: int. The number of matching documents.
         '''
-
-        log.debug('find_number_of_documents')
-
         if search_term == self.dc_query:
-            log.debug('if')
-            # Get count for local DB:
+            # Get count for local DB
             return self.get_contracts_count()
         else:
-            log.debug('else')
-            # Get count for DocumentCloud output:
+            # Get count for DocumentCloud output
             return self.query_document_cloud_count(search_term)
 
     def translate_web_query_to_dc_query(self, data):
@@ -580,9 +524,6 @@ class Models(object):
         :type data: dict
         :returns: string. The query string ready for the DocumentCloud API.
         '''
-
-        log.debug('translate_web_query_to_dc_query')
-
         query_builder = QueryBuilder()
         query_builder.add_text(data['search_input'])
         query_builder.add_term(
@@ -599,15 +540,14 @@ class Models(object):
 
         if len(data['officer']) > 0:
             officers = [data['officer']]
-            log.debug('\xF0\x9F\x9A\xAB  officers:')
-            log.debug(officers)
+            log.debug('\xF0\x9F\x9A\xAB  officers:', officers)
+
             vendor = self.translate_officer_to_vendor(officers[0])
             query_builder.add_term("vendor", vendor.upper())
 
         output = query_builder.get_query()
 
-        log.debug('\xF0\x9F\x9A\xAB  output:')
-        log.debug(output)
+        log.debug('\xF0\x9F\x9A\xAB  output:', output)
 
         return output
 
@@ -641,16 +581,13 @@ class QueryBuilder(object):
         self.text = text
 
     def get_query(self):
-        '''
-        Translate the dictionary into a DocumentCloud query.
-        '''
-
+        '''Translate the dictionary into a DocumentCloud query.'''
         output = ""
 
         for key in self.query.keys():
-            # TODO: Is trailing space for Lucene syntax?
+            # Trailing space for Lucene syntax
             output += '%s:"%s" ' % (key, self.query[key])
 
-        output = output + self.text
+        output += self.text
 
         return output.strip()

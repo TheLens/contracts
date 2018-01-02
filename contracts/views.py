@@ -29,25 +29,16 @@ class Views(object):
         :type data: dict
         :returns: HTML. Rendered and ready for display to the user.
         '''
-
-        vendors = data['vendors']
-        departments = data['departments']
-        officers = data['officers']
-        updated_date = data['updated_date']
-        documents = data['documents']
-        number_of_documents = data['number_of_documents']
-        results_language = data['results_language']
-
         response = make_response(
             render_template(
                 'index.html',
-                vendors=vendors,
-                departments=departments,
-                officers=officers,
-                documents=documents,
-                number_of_documents=number_of_documents,
-                results_language=results_language,
-                updated_date=updated_date,
+                vendors=data['vendors'],
+                departments=data['departments'],
+                officers=data['officers'],
+                documents=data['documents'],
+                number_of_documents=data['number_of_documents'],
+                results_language=data['results_language'],
+                updated_date=data['updated_date'],
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -69,33 +60,21 @@ class Views(object):
         :type parameter_data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-
-        log.debug('start of get_search_page')
-        log.debug('current_page: %d', data['current_page'])
-
-        vendors = data['vendors']
-        departments = data['departments']
-        number_of_documents = data['number_of_documents']
-        number_of_pages = data['number_of_pages']
-        current_page = data['current_page']
-        documents = data['documents']
-        officers = data['officers']
-        updated_date = data['updated_date']
-        results_language = data['results_language']
+        log.debug('Current page: %d', data['current_page'])
 
         response = make_response(
             render_template(
                 'search.html',
                 parameter_data=parameter_data,
-                vendors=vendors,
-                departments=departments,
-                number_of_documents=number_of_documents,
-                results_language=results_language,
-                number_of_pages=number_of_pages,
-                current_page=current_page,
-                documents=documents,
-                officers=officers,
-                updated_date=updated_date,
+                vendors=data['vendors'],
+                departments=data['departments'],
+                number_of_documents=data['number_of_documents'],
+                results_language=data['results_language'],
+                number_of_pages=data['number_of_pages'],
+                current_page=data['current_page'],
+                documents=data['documents'],
+                officers=data['officers'],
+                updated_date=data['updated_date'],
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -104,8 +83,6 @@ class Views(object):
                 search_js=SEARCH_JS
             )
         )
-
-        log.debug('end of get_search_page')
 
         return response
 
@@ -165,12 +142,10 @@ class Views(object):
         :returns: HTML. Rendered and ready for display.
         '''
 
-        doc_cloud_id = tags['doc_cloud_id']
-
         response = make_response(
             render_template(
                 'parserator.html',
-                doc_cloud_id=doc_cloud_id,
+                doc_cloud_id=tags['doc_cloud_id'],
                 tags=tags,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
