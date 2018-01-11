@@ -69,8 +69,6 @@ class Views(object):
         :type parameter_data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-
-        log.debug('start of get_search_page')
         log.debug('current_page: %d', data['current_page'])
 
         vendors = data['vendors']
@@ -104,8 +102,6 @@ class Views(object):
                 search_js=SEARCH_JS
             )
         )
-
-        log.debug('end of get_search_page')
 
         return response
 
