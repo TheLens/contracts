@@ -4,6 +4,6 @@ source `which virtualenvwrapper.sh`
 
 workon contracts
 
-python contracts/lib/check_city.py
+python $PYTHONPATH/contracts/lib/check_city.py
 
 deactivate

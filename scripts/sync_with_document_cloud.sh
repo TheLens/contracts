@@ -4,6 +4,6 @@ source `which virtualenvwrapper.sh`
 
 workon contracts
 
-python contracts/lib/sync_local_database_document_cloud.py
+python $PYTHONPATH/contracts/lib/sync_local_database_document_cloud.py
 
 deactivate

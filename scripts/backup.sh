@@ -6,6 +6,6 @@ workon contracts
 
 # TODO: okay?
 echo "Creating backups..."
-python contracts/lib/backup.py
+python $PYTHONPATH/contracts/lib/backup.py
 
 deactivate
