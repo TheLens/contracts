@@ -1,9 +1,5 @@
 */5 * * * * cd /home/ubuntu/contracts && git fetch origin master && git reset --hard FETCH_HEAD
-
-0 */2 * * * /home/ubuntu/contracts/scripts/main.sh  # Check for new contracts and ensure everything is in sync
-
-0 6 * * * /home/ubuntu/contracts/scripts/email.sh  # Find connections and send email
-
-0 4 * * * /home/ubuntu/contracts/scripts/backup.sh  # Creates local and remote backups
-
-*/5 * * * * /home/ubuntu/contracts/scripts/sync_with_document_cloud.sh # Syncs DocumentCloud project with local database
+0 */2 * * * /home/ubuntu/contracts/scripts/main.sh                        # Check for new contracts and ensure everything is in sync
+# 0 6 * * * /home/ubuntu/contracts/scripts/email.sh                       # Find connections and send email
+# 0 4 * * * /home/ubuntu/contracts/scripts/backup.sh                      # Creates local and remote backups
+# */5 * * * * /home/ubuntu/contracts/scripts/sync_with_document_cloud.sh  # Syncs DocumentCloud project with local database
