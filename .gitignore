@@ -1,6 +1,14 @@
 .idea/
 .sass_cache/
 .tox/
+backups/
+data/attachments/
+data/purchase-orders/
+data/vendors/
+
+.coverage
+.dockerignore
+Dockerfile
 
 *.crfsuite
 *.xml
