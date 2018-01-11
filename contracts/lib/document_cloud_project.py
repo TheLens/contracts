@@ -44,40 +44,13 @@ class DocumentCloudProject(object):
             "purchase order", purchase_order_number)
 
         if validity is False or contract_exists:
-            print (
-                '\xF0\x9F\x9A\xAB  ' +
-                'Not uploading to DocumentCloud. Purchase ' +
-                'order %s is invalid or already there.' % purchase_order_number
-            )
             log.debug(
-                '\xF0\x9F\x9A\xAB  ' +
                 'Not uploading to DocumentCloud. Purchase ' +
                 'order %s is invalid or already there.',
                 purchase_order_number)
             return False
         else:
             return True
-
-    # def _search_for_contract(self, key, value):
-    #     '''
-    #     Fetches the contract with the specified key and value from the
-    #     DocumentCloud project.
-
-    #     :param key: The key for searching through the DocumentCloud API.
-    #     :type key: string.
-    #     :param value: The key's value.
-    #     :type value: string.
-    #     :returns: A PythonDocumentCloud.Document class instance for the \
-    #     matching contract.
-    #     '''
-
-    #     # Ex. "'%s':'%s'" % ('purchase order', purchase_order_number)
-    #     # Ex. "'%s':'%s'" % ('contract number', k_number)
-
-    #     search_term = "'%s':'%s'" % (key, value)
-    #     document = self.api_connection.documents.search(search_term).pop()
-
-    #     return document
 
     def _check_if_document_cloud_has_contract(self, key, value):
         '''
@@ -114,7 +87,7 @@ class DocumentCloudProject(object):
         # Verify that there is at least one file to download.
         number_of_attachments = len(purchase_order_object.attachments)
 
-        log.debug('There are %d attachments to upload.', number_of_attachments)
+        log.debug('There are %d attachments to upload', number_of_attachments)
 
         if number_of_attachments > 0:
             for i, attachment in enumerate(purchase_order_object.attachments):
@@ -143,9 +116,6 @@ class DocumentCloudProject(object):
         :param purchase_order_number: A PurchaseOrder object instance.
         :returns: A modified PurchaseOrder object instance.
         '''
-
-        log.debug('Making modifications to contract data before uploading.')
-
         number_of_attachments = len(purchase_order_object.attachments)
 
         # If multiple attachments, add language like "page 1 of 2":
@@ -174,7 +144,7 @@ class DocumentCloudProject(object):
         :type title: string.
         '''
 
-        log.debug('Uploading purchase order %s to DocumentCloud.', filename)
+        log.debug('Uploading purchase order %s to DocumentCloud', filename)
 
         is_null = self._check_if_contract_number_is_null(purchase_order_object)
         if is_null:
@@ -186,12 +156,7 @@ class DocumentCloudProject(object):
         purchase_order_number = str(purchase_order_object.purchaseorder)
         title = str(purchase_order_object.title)
 
-        print (
-            '\xE2\x9C\x85  ' +
-            'Uploading purchase order %s ' % purchase_order_number +
-            '("%s") to DocumentCloud...' % title)
         log.debug(
-            '\xE2\x9C\x85  ' +
             'Uploading purchase order %s ("%s") to DocumentCloud...',
             purchase_order_number,
             title)
@@ -229,57 +194,3 @@ class DocumentCloudProject(object):
             return True  # Contract number is null. Do not upload.
         else:
             return False
-
-    # def _get_all_contracts(self):
-    #     '''
-    #     Runs a query for all of the contracts in our DocumentCloud project.
-
-    #     :returns: A list of all of the project's contracts, stored as \
-    #     PythonDocumentCloud instances.
-    #     '''
-
-    #     contracts = self.api_connection.documents.search(
-    #         'projectid:%s' % self.project_id)
-
-    #     return contracts
-
-    # def _get_metadata(self, document_cloud_id):
-    #     '''
-    #     Fetches the metadata associated with this contract on our
-    #     DocumentCloud project.
-
-    #     :param document_cloud_id: The contract's unique ID in DocumentCloud.
-    #     :type document_cloud_id: string
-    #     :returns: dict? The contract's metadata.
-    #     '''
-
-    #     contract = self.api_connection.documents.get(document_cloud_id)
-    #     metadata = contract.data
-
-    #     return metadata
-
-    # def _update_metadata(self, document_cloud_id, meta_key, meta_value):
-    #     '''
-    #     Updates the metadata associated with the contracts on DocumentCloud.
-
-    #     :param document_cloud_id: The contract's unique ID in DocumentCloud.
-    #     :type document_cloud_id: string
-    #     :param meta_key: The specific metadata field for this contract.
-    #     :type meta_key: string
-    #     :param meta_value: The new metadata value for this field.
-    #     :type meta_value: string
-    #     '''
-
-    #     # log.info(
-    #     #     '{} | {} | updating {} on DocumentCloud. ' +
-    #     #     'Changing {} to {}'.format(
-    #     #         run_id,
-    #     #         get_timestamp(),
-    #     #         doc_cloud_id,
-    #     #         meta_field,
-    #     #         new_meta_data_value
-    #     #     )
-    #     # )
-    #     contract = self.api_connection.documents.get(document_cloud_id)
-    #     contract.data[meta_key] = meta_value
-    #     contract.put()

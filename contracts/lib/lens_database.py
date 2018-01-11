@@ -39,12 +39,8 @@ class LensDatabase(object):
         SESSION.close()
 
         if query_count == 1:  # Database has the contract
-            print(
-                '\xF0\x9F\x9A\xAB  Database already has purchase ' +
-                'order %s in contracts table.' % purchase_order_number)
             log.debug(
-                '\xF0\x9F\x9A\xAB  ' +
-                'Database already has purchase order %s in contracts table.',
+                'Database already has purchase order %s in contracts table',
                 purchase_order_number)
             return True
         else:
@@ -60,13 +56,8 @@ class LensDatabase(object):
         :param purchase_order_object: The PurchaseOrder object instance.
         :type purchase_order_object: A PurchaseOrder object instance.
         """
-        print(
-            "\xE2\x9C\x85  " +
-            "Adding purchase order %s to database's contracts table..." % (
-                purchase_order_object.purchase_order_number))
         log.debug(
-            "\xE2\x9C\x85  " +
-            "Adding purchase order %s to database's contracts table.",
+            "Adding purchase order %s to contracts table",
             purchase_order_object.purchase_order_number)
 
         contract = Contract()
@@ -103,8 +94,6 @@ class LensDatabase(object):
 
         :returns: A list of dicts (?) for the daily contracts.
         """
-        log.debug('Getting a list of today\'s contracts for email.')
-
         contracts = SESSION.query(
             Contract.doc_cloud_id,
             Vendor.name
@@ -126,8 +115,6 @@ class LensDatabase(object):
 
         :returns: list. A list of all IDs in our DocumentCloud project.
         """
-        log.debug('Fetching a list of all contract IDs in database.')
-
         query = SESSION.query(
             Contract.doc_cloud_id
         ).order_by(
@@ -153,8 +140,6 @@ class LensDatabase(object):
         :type name: string
         :returns: list. The people who are associated with this vendor (how?).
         """
-        log.debug('Finding people associated with %s.', name)
-
         query_people = SESSION.query(
             Person.name
         ).filter(
@@ -168,6 +153,8 @@ class LensDatabase(object):
         SESSION.close()
 
         people = []
+
+        log.debug('%d people associated with %s', len(query_people), name)
 
         for row in query_people:
             people.append(str(row[0]))
@@ -196,10 +183,7 @@ class LensDatabase(object):
                 return True  # Scrape this page
             else:
                 log.debug(
-                    'Page %d has been scraped recently. Skipping.',
-                    page)
-                print(
-                    'Page %d has been scraped recently. Skipping.' % page)
+                    'Skipping page %d because it was scraped recently', page)
 
                 return False
         elif page > 10:
@@ -207,10 +191,7 @@ class LensDatabase(object):
                 return True  # Scrape this page
             else:
                 log.debug(
-                    'Page %d has been scraped recently. Skipping.',
-                    page)
-                print(
-                    'Page %d has been scraped recently. Skipping.' % page)
+                    'Skipping page %d because it was scraped recently', page)
 
                 return False
 
@@ -296,7 +277,7 @@ class LensDatabase(object):
         SESSION.close()
 
         if department_count == 0:
-            log.debug('Department %s is missing from database.', department)
+            log.debug('Department "%s" is missing from database', department)
             return False
         else:
             return True
@@ -308,7 +289,7 @@ class LensDatabase(object):
         :param meta_field: The department to add to local database.
         :type meta_field: string
         """
-        log.debug('Adding department "%s" to database.', department)
+        log.debug('Adding department "%s" to database', department)
 
         department = Department(department)
         SESSION.add(department)
@@ -347,7 +328,7 @@ class LensDatabase(object):
         SESSION.close()
 
         if vendor_count == 0:
-            log.debug('Vendor "%s" is missing from database.', vendor)
+            log.debug('Vendor "%s" is missing from database', vendor)
             return False
         else:
             return True
@@ -359,7 +340,7 @@ class LensDatabase(object):
         :param vendor: The vendor to add to our database.
         :type vendor: string
         """
-        log.debug('Adding vendor "%s" to database.', vendor)
+        log.debug('Adding vendor "%s" to database', vendor)
 
         vendor = Vendor(vendor, vendor_id_city)
 
@@ -374,7 +355,7 @@ class LensDatabase(object):
         :type department: string
         :returns: string. The database ID for the department name.
         """
-        log.debug('Finding ID for department "%s" in database.', department)
+        log.debug('Finding ID for department "%s" in database', department)
 
         department = SESSION.query(
             Department
@@ -396,7 +377,7 @@ class LensDatabase(object):
         :type vendor: string
         :returns: string. The database's vendor ID for this vendor.
         """
-        log.debug('Fetching database ID for vendor "%s".', vendor)
+        log.debug('Fetching database ID for vendor "%s"', vendor)
 
         vendor = SESSION.query(
             Vendor
@@ -523,7 +504,7 @@ class LensDatabase(object):
         :returns: dict. A dict (?) for the matching contract.
         """
         log.debug(
-            'Find contract in database that has DocumentCloud ID %s.',
+            'Find contract in database that has DocumentCloud ID %s',
             document_cloud_id
         )
 
@@ -552,8 +533,6 @@ class LensDatabase(object):
 
         :returns: SQLAlchemy query result.
         """
-        log.debug('_get_half_filled_contracts')
-
         query = SESSION.query(
             Contract
         ).filter(
