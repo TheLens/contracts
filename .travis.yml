@@ -9,7 +9,7 @@ before_script:
 - mkdir logs
 - touch logs/contracts.log
 script:
-- coverage run tests/test*.py
+- make test
 deploy:
   provider: s3
   access_key_id: AKIAIWQKYAETOQ2N7CBQ
