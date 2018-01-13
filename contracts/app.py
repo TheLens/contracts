@@ -43,7 +43,7 @@ def search_results():
     return view
 
 
-@app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
+@app.route('/contracts/contract/<string:document_cloud_id>', methods=['GET'])
 def contract_page(document_cloud_id):
     """Return a single contract.
 
