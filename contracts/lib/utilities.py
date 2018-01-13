@@ -1,10 +1,8 @@
+'''Utility functions for use by multiple classes.'''
 
-'''
-Utility functions for use by multiple classes.
-'''
-
-import re
 import csv
+import re
+
 from contracts import PROJECT_DIR
 
 

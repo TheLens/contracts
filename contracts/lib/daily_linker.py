@@ -1,11 +1,12 @@
+# pylint: skip-file
 
 """Finds links between vendors and campaign contributions (?)."""
 
-import re
 import csv
+import re
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
-# from address import AddressParser, Address
 
 from contracts.db import (
     Vendor,
@@ -42,40 +43,28 @@ class DailyLinker(object):
         self.last_names = self._get_last_names()
         self.first_names = self._get_first_names()
 
-        # ap = AddressParser()
-
         self.driver = webdriver.PhantomJS(
             executable_path='/usr/local/bin/phantomjs', port=65000)
-
-        # TODO:
-        # known_people = [t.strip("\n").replace(".", "") for t in tuple(
-        #     open("known_people.txt", "r"))]  # a list of known people
-        # known_companies = [t.strip("\n").replace(".", "") for t in tuple(
-        #     open("known_companies.txt", "r"))]
 
     def try_to_link(self, vendor_name):
         """TODO."""
         search_results = self.search_sos(vendor_name)
         total_hits = self.get_total_hits(search_results)
         if total_hits == 1:
-            print("perfect hit for {}".format(vendor_name))
+            log.info("Perfect match for %s", vendor_name)
             self.process_direct_hit(search_results, vendor_name)
 
     def get_daily_contracts(self, today_string=TODAY_DATE):
         """TODO."""
         # defaults to today
-        contracts = SESSION.query(
-            Contract.doc_cloud_id,
-            Vendor.name
-        ).filter(
-            Contract.dateadded == today_string
-        ).filter(
-            Contract.vendorid == Vendor.id
-        ).all()
+        query = (SESSION.query(Contract.doc_cloud_id, Vendor.name)
+                 .filter(Contract.dateadded == today_string)
+                 .filter(Contract.vendorid == Vendor.id)
+                 .all())
 
         SESSION.close()
 
-        return contracts
+        return query
 
     def _get_last_names(self):
         """TODO."""
@@ -222,18 +211,6 @@ class DailyLinker(object):
 
         return False
 
-    # def is_on_list_of_known_people(name):
-    #     if name in known_people:
-    #         return True
-
-    #     return False
-
-    # def is_on_list_of_known_companies(name):
-    #     if name in known_companies:
-    #         return True
-
-    #     return False
-
     def is_this_a_person(self, name_of_thing):
         """TODO."""
         if self._has_known_person_suffix(name_of_thing):
@@ -242,18 +219,12 @@ class DailyLinker(object):
         if self.is_common_first_and_last_name_and_has_initial(name_of_thing):
             return True
 
-        # if is_on_list_of_known_people(name_of_thing):
-        #     return True
-
         return False
 
     def _is_this_a_company(self, name_of_thing):
         """TODO."""
         if self.has_known_company_suffix(name_of_thing):
             return True
-
-        # if is_on_list_of_known_companies(name_of_thing):
-        #     return True
 
         return False
 
@@ -263,11 +234,12 @@ class DailyLinker(object):
         if self.is_this_a_person(name):
             # people with Jr ect at the end of the name are people
 
-            indb = SESSION.query(Person).filter(Person.name == name).count()
+            indb = (SESSION.query(Person)
+                    .filter(Person.name == name)
+                    .count())
 
             if indb == 0:
-                person = Person(name)
-                SESSION.add(person)
+                SESSION.add(Person(name))
                 SESSION.commit()
                 return
 
@@ -276,11 +248,12 @@ class DailyLinker(object):
                 return
 
         if self._is_this_a_company(name):
-            indb = SESSION.query(Company).filter(Company.name == name).count()
+            indb = (SESSION.query(Company)
+                    .filter(Company.name == name)
+                    .count())
 
             if indb == 0:
-                company = Company(name)
-                SESSION.add(company)
+                SESSION.add(Company(name))
                 SESSION.commit()
                 return
 
@@ -288,13 +261,15 @@ class DailyLinker(object):
                 SESSION.close()
                 return
 
-        print("Could not link {}".format(name))
+        log.info("Could not link %s", name)
 
         SESSION.close()
 
     def add_vendor(self, vendor_name):
         """TODO."""
-        indb = SESSION.query(Vendor).filter(Vendor.name == vendor_name).count()
+        indb = (SESSION.query(Vendor)
+                .filter(Vendor.name == vendor_name)
+                .count())
 
         if indb == 0:
             vendor = Vendor(vendor_name.replace(".", ""))
@@ -303,96 +278,44 @@ class DailyLinker(object):
         else:
             SESSION.close()
 
-    # def add_address(street, city, state, zipcode):  # , sourcefile):
-    #     # convert address from pyaddress to the address model from our db
-    #     indb = SESSION.query(
-    #         Address
-    #     ).filter(
-    #         Address.street == street,
-    #         Address.city == city,
-    #         Address.state == state,
-    #         Address.zipcode == zipcode
-    #     ).count()
-
-    #     if indb == 0:
-    #         address = Address(street, city, state, zipcode)  # , sourcefile)
-    #         SESSION.add(address)
-    #         SESSION.commit()
-    #     else:
-    #         SESSION.close()
-
-    # def add_addresses(o):
-    #     name, title, address1, citystatezip, country, extrafield = [
-    #         l.text for l in o.select("span")]
-    #     if len(re.findall('[0-9]{5}-[0-9]{4}', citystatezip)):
-    #         # parser fails on 9 digit zip codes
-
-    #         end = re.findall(
-    #             '[0-9]{5}-[0-9]{4}', citystatezip
-    #         ).pop().split("-")[1].encode("UTF-8")
-    #         citystatezip = citystatezip.replace("-", "").replace(end, "")
-    #     string = address1 + " " + citystatezip
-    #     address = ap.parse_address(string)
-    #     add_address(
-    #         address1,
-    #         citystatezip.split(",")[0],
-    #         address.state,
-    #         address.zip,
-    #         # directory + "/page.html"
-    #     )
-    #     # print "Address is: {0} {1} {2} {3} {4}".format(
-    #     #    address.house_number, address.street,
-    #     #    address.city, address.state, address.zip)
-
     def link(self, name, vendor):
         """Link the vendor to the company."""
         name = name.strip("\n").replace(".", "").strip()
 
         # get the vendor:
-        vendorindb = SESSION.query(
-            Vendor
-        ).filter(
-            Vendor.name == vendor
-        ).first()
+        vendorindb = (SESSION.query(Vendor)
+                      .filter(Vendor.name == vendor)
+                      .first())
 
         # get the person:
-        personindb = SESSION.query(
-            Person
-        ).filter(
-            Person.name == name
-        ).first()
+        personindb = (SESSION.query(Person)
+                      .filter(Person.name == name)
+                      .first())
 
-        co = SESSION.query(
-            Company
-        ).filter(
-            Company.name == name
-        )
+        co = (SESSION.query(Company)
+              .filter(Company.name == name))
+
         companyindb = co.first()  # get the company
         if personindb is not None and companyindb is None:
-            link = SESSION.query(
-                VendorOfficer
-            ).filter(
-                VendorOfficer.vendorid == vendorindb.id
-            ).filter(
-                VendorOfficer.personid == personindb.id
-            ).count()
+            link = (SESSION.query(VendorOfficer)
+                    .filter(VendorOfficer.vendorid == vendorindb.id)
+                    .filter(VendorOfficer.personid == personindb.id)
+                    .count())
+
             if vendorindb is not None and personindb is not None and link < 1:
-                print("Linking {0} to {1}".format(
-                    str(vendorindb.id), str(personindb.id)
-                ))
+                log.info("Linking {0} to {1}",
+                         str(vendorindb.id), str(personindb.id))
                 link = VendorOfficer(vendorindb.id, personindb.id)
                 SESSION.add(link)
                 SESSION.commit()
                 return
 
         if companyindb is not None and personindb is None:
-            link = SESSION.query(
-                VendorOfficerCompany
-            ).filter(
-                VendorOfficerCompany.vendorid == vendorindb.id
-            ).filter(
-                VendorOfficerCompany.companiesid == companyindb.id
-            ).count()
+            link = (SESSION.query(VendorOfficerCompany)
+                    .filter(VendorOfficerCompany.vendorid == vendorindb.id)
+                    .filter(VendorOfficerCompany.companiesid == companyindb.id)
+                    .count())
+
             if vendorindb is not None and companyindb is not None and link < 1:
                 print("Linking {0} to {1}".format(
                     str(vendorindb.id), str(companyindb.id)
@@ -479,86 +402,6 @@ class DailyLinker(object):
 
         return pages
 
-    # def pick_from_options(self, firm):
-    #     if "ctl00_cphContent_lblTotalResults" in self.driver.page_source:
-    #         # results listing page
-
-    #         text = self.driver.find_element_by_id(
-    #             "ctl00_cphContent_lblTotalResults").text
-    #         if str(text) == "0":  # no hits
-    #             self.driver.find_element_by_id(
-    #                 "ctl00_cphContent_btnNewSearch").click()
-    #             return "Zero results"
-    #         if int(text) > 0:  # more than one hits
-    #             potential_vendors = set([unicode(v.split("\t")[
-    #                 1].upper()) for v in vendors if v.split(
-    #                     "\t")[1] == firm])
-    #             options = self.get_options(
-    #                 BeautifulSoup(self.driver.page_source))
-    #             direct_hits = [
-    #                 o.name for o in options if \
-    #                 o.name.upper() == firm.upper()]
-    #             if len(direct_hits) == 1:
-    #                 # one of the rows matches perfectly so pick that one
-
-    #                 try:
-    #                     id = self.find_button_to_click(direct_hits.pop())
-    #                 except:
-    #                     return "Ambiguous results"
-    #                 self.driver.find_element_by_id(id).click()
-    #                 page = self.driver.page_source.encode('utf8')
-    #                 self.driver.find_element_by_id(
-    #                     "ctl00_cphContent_btnNewSearch").click()
-    #                 return page
-    #             ignore_periods_commas_hits = [o.name.replace(
-    #                 ".", "").replace(
-    #                 ",", "") for o in options if o.name.upper().replace(
-    #                 ".", "").replace(",", "") == firm.upper().replace(
-    #                 ".", "").replace(",", "")]
-    #             # one matches perfectly without
-    #               periods and commas so pick it:
-    #             if len(ignore_periods_commas_hits) == 1:
-    #                 try:
-    #                     id = self.find_button_to_click(
-    #                         ignore_periods_commas_hits.pop())
-    #                 except:
-    #                     return "Ambiguous results"
-    #                 self.driver.find_element_by_id(id).click()
-    #                 page = self.driver.page_source.encode('utf8')
-    #                 self.driver.find_element_by_id(
-    #                     "ctl00_cphContent_btnNewSearch").click()
-    #                 return page
-    #             if len(direct_hits) == 0:
-    #                 potential_vendors = list(set([
-    #                     (
-    #                         v.split("\t")[1],
-    #                         v.split("\t")[2],
-    #                         v.split("\t")[3],
-    #                         v.split("\t")[4],
-    #                         v.split("\t")[5]
-    #                     ) for v in vendors if v.split("\t")[1] == firm]))
-    #                 if len(potential_vendors) == 1:
-    #                     potential_vendors = potential_vendors.pop()
-    #                     potential_hits = self.get_rows_in_city(
-    #                         potential_vendors[3])
-    #                     pages = self.get_pages_for_potential_hits(
-    #                         potential_hits)
-    #                     if len(pages) == 1:
-    #                         pass  # check that it is correct
-    #                     else:
-    #                         self.driver.find_element_by_id(
-    #                             "ctl00_cphContent_btnNewSearch").click()
-    #                         return "Ambiguous results"
-    #                 else:
-    #                     self.driver.find_element_by_id(
-    #                         "ctl00_cphContent_btnNewSearch").click()
-    #                     return "Ambiguous results"
-    #             self.driver.find_element_by_id(
-    #                 "ctl00_cphContent_btnNewSearch").click()
-    #             return "Ambiguous results"
-    #     self.driver.find_element_by_id("btnNewSearch").click()
-    #     return "It's complicated"
-
     def search_sos(self, vendor):
         """Search for a vendor."""
         self.driver.get(
@@ -574,8 +417,7 @@ class DailyLinker(object):
         """TODO."""
         vendor_name = vendor_name.strip("\n").replace(".", "")
 
-        print("Adding {}".format(vendor_name))
-        log.debug("Adding %s", vendor_name)
+        log.debug("Adding vendor %s", vendor_name)
 
         self.add_vendor(vendor_name)
         soup = BeautifulSoup(raw_html)
@@ -616,42 +458,28 @@ class DailyLinker(object):
 
     def get_names_from_vendor(self, name):
         """TODO."""
-        names_query = SESSION.query(
-            Person.name
-        ).filter(
-            Vendor.id == VendorOfficer.vendorid
-        ).filter(
-            Person.id == VendorOfficer.personid
-        ).filter(
-            Vendor.name == name
-        ).all()
+        query = (SESSION.query(Person.name)
+                 .filter(Vendor.id == VendorOfficer.vendorid)
+                 .filter(Person.id == VendorOfficer.personid)
+                 .filter(Vendor.name == name)
+                 .all())
 
         SESSION.close()
 
-        names = []
-
-        for i in names_query:
-            names.append(str(i[0]))
-
-        return names
+        return [str(row[0]) for row in query]
 
     def get_state_contributions(self, name):
         """TODO."""
-        contributions = CAMPAIGN_SESSION.query(
-            EthicsRecord
-        ).filter(
-            EthicsRecord.contributorname == name
-        ).all()
+        query = (CAMPAIGN_SESSION.query(EthicsRecord)
+                 .filter(EthicsRecord.contributorname == name)
+                 .all())
 
         CAMPAIGN_SESSION.close()
 
         # TODO: Sort output by increasing donation size
         # contributions.sort(lambda x: dateutil.parser.parse(x.receiptdate))
 
-        output = []
-
-        for contribution in contributions:
-            output.append(contribution.__str__())  # __str__ has desired form
+        output = [row.__str__() for row in query]
 
         output.sort()
 

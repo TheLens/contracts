@@ -1,7 +1,4 @@
-
-'''
-Syncs the local database with our DocumentCloud project.
-'''
+'''Sync the local database with DocumentCloud.'''
 
 from pythondocumentcloud import DocumentCloud
 from contracts.lib.lens_database import LensDatabase
@@ -25,8 +22,8 @@ class SyncLocalDatabaseDocumentCloud(object):
             output = document.data[field]
             if len(output) == 0:
                 output = "unknown"
-        except Exception, error:
-            log.exception(error, exc_info=True)
+        except Exception as e:
+            log.error(e, exc_info=True)
             output = "unknown"
 
         return output
@@ -38,16 +35,13 @@ class SyncLocalDatabaseDocumentCloud(object):
         :params document: A Python-DocumentCloud object representing a contract
         :type document: Python-DocumentCloud object.
         '''
-
-        log.info('Syncing %s', document.id)
+        log.info('Syncing document %s', document.id)
 
         fields = {}
         fields['purchaseno'] = self._get_metadata(document, "purchase order")
         fields['contractno'] = self._get_metadata(document, "contract number")
-        fields['vendor'] = self._get_metadata(
-            document, "vendor").replace(".", "")
-        fields['department'] = self._get_metadata(
-            document, "vendor").replace(".", "")
+        fields['vendor'] = self._get_metadata(document, "vendor").replace(".", "")
+        fields['department'] = self._get_metadata(document, "vendor").replace(".", "")
         fields['dateadded'] = document.created_at
         fields['title'] = document.title
         fields['description'] = document.description
@@ -55,8 +49,7 @@ class SyncLocalDatabaseDocumentCloud(object):
         LensDatabase().add_department(fields['department'])
         LensDatabase().add_vendor(fields['vendor'])
 
-        fields['department'] = LensDatabase().get_department_id(
-            fields['department'])
+        fields['department'] = LensDatabase().get_department_id(fields['department'])
         fields['vendor'] = LensDatabase().get_lens_vendor_id(fields['vendor'])
 
         LensDatabase().update_contract_from_document_cloud(document.id, fields)
@@ -69,10 +62,8 @@ class SyncLocalDatabaseDocumentCloud(object):
         '''
 
         half_filled_contracts = LensDatabase().get_half_filled_contracts()
-        log.info(
-            '%d half-filled contracts need to be synced',
-            len(half_filled_contracts)
-        )
+        log.info('%d half-filled contracts need to be synced',
+                 len(half_filled_contracts))
 
         for half_filled_contract in half_filled_contracts:
             try:
@@ -80,8 +71,8 @@ class SyncLocalDatabaseDocumentCloud(object):
                     half_filled_contract.doc_cloud_id
                 )
                 self._match_contract(contract)
-            except Exception, error:
-                log.exception(error, exc_info=True)
+            except Exception as e:
+                log.error(e, exc_info=True)
 
 if __name__ == '__main__':
     SyncLocalDatabaseDocumentCloud().match_local_database_to_document_cloud()

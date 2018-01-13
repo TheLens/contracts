@@ -13,12 +13,16 @@ pages.
 import re
 import time
 import urllib2
+
 from random import shuffle
+
 from bs4 import BeautifulSoup
+
 from contracts.lib.lens_database import LensDatabase
 from contracts.lib.purchase_order import PurchaseOrder
 from contracts.lib.lens_repository import LensRepository
 from contracts.lib.document_cloud_project import DocumentCloudProject
+
 from contracts import log
 
 
@@ -26,7 +30,6 @@ class CheckCity(object):
 
     '''Methods for checking on the city's purchasing website.'''
 
-    # TODO: Refactor this, and probably break into smaller methods.
     def check_pages(self):
         '''
         Runs a scan for each of the 10 most recent pages on the city's
@@ -46,15 +49,7 @@ class CheckCity(object):
 
         new_counter = 0
         for new_page in new_pages:
-            log.debug('')
-            log.debug('========')
-            log.debug('Page %d', new_page)
-            log.debug('========')
-            print (
-                '\n' +
-                '\n========' +
-                '\nPage %s' % new_page +
-                '\n========')
+            log.debug('New page %d', new_page)
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(new_page)
 
@@ -70,19 +65,11 @@ class CheckCity(object):
             # 10 pages per day.
             if new_counter == 2:
                 break
-            time.sleep(60)
+            time.sleep(10)
 
         old_counter = 0
         for old_page in old_pages:
-            log.debug('')
-            log.debug('========')
-            log.debug('Page %d', new_page)
-            log.debug('========')
-            print (
-                '\n' +
-                '\n========' +
-                '\nPage %s' % old_page +
-                '\n========')
+            log.debug('Old page %s', old_page)
 
             need_to_scrape = LensDatabase().check_if_need_to_scrape(old_page)
 
@@ -98,7 +85,7 @@ class CheckCity(object):
             # pages in order to reach about 450 pages per week.
             if old_counter == 13:
                 break
-            time.sleep(60)
+            time.sleep(10)
 
     def _find_number_of_pages(self):
         '''
@@ -140,12 +127,8 @@ class CheckCity(object):
         number_of_pages = re.search(
             '[0-9]+', href).group()
 
-        print 'There were %s pages found on the city\'s purchasing portal.' % (
-            number_of_pages)
-        log.debug(
-            'There were %s pages found on the city\'s purchasing portal.',
-            number_of_pages
-        )
+        log.debug("There were %d pages found on the city's purchasing portal",
+                  number_of_pages)
 
         return int(number_of_pages)
 
@@ -161,20 +144,11 @@ class CheckCity(object):
         purchase_order_numbers = self._get_purchase_order_numbers(html)
 
         for i, purchase_order_number in enumerate(purchase_order_numbers):
-            print (
-                '\n-----------------------' +
-                '\nPurchase order %s' % purchase_order_number +
-                '\n-----------------------' +
-                '\n(%d of %d)' % (i + 1, len(purchase_order_numbers)))
-            log.debug('')
-            log.debug('-----------------------')
             log.debug('Purchase order %s', purchase_order_number)
-            log.debug('-----------------------')
-            log.debug(
-                '(%d of %d)' % (i + 1, len(purchase_order_numbers)))
+            log.debug('(%d of %d)', i + 1, len(purchase_order_numbers))
 
             self._check_if_need_to_download_contract(purchase_order_number)
-            time.sleep(10)
+            time.sleep(2)
 
     @staticmethod
     def _get_purchase_order_numbers(html):
@@ -195,25 +169,6 @@ class CheckCity(object):
 
         return output
 
-    # @staticmethod
-    # def _check_if_invalid(html):
-    #     '''
-    #     Sometimes invalid purchase orders are posted. Check if this is one of
-    #     those.
-
-    #     :param html: The individual contract page's HTML.
-    #     :type html: string
-    #     :returns: boolean. True if an invalid contract page, False if valid.
-    #     '''
-
-    #     no_vendor_string = "There are no vendor distributors found " + \
-    #                        "for this master blanket/contract"
-
-    #     if no_vendor_string in html:
-    #         return True
-    #     else:
-    #         return False
-
     @staticmethod
     def _check_if_need_to_download_contract(purchase_order_number):
         '''
@@ -224,75 +179,53 @@ class CheckCity(object):
         :type purchase_order_number: string
         '''
 
-        log.info(
-            'Checking purchase order %s.',
-            purchase_order_number)
+        log.info('Checking purchase order %s', purchase_order_number)
 
         # Check local file repository
         try:
-            print '\n*** LensRepository ***'
-            log.debug('')
-            log.debug('*** LensRepository ***')
+            log.debug('LensRepository')
 
             need_to_download = LensRepository(
                 purchase_order_number).check_if_need_to_download()
             if need_to_download:
                 LensRepository(purchase_order_number).download_purchase_order()
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.exception(
-                'Purchase order %s not posted publically',
-                purchase_order_number
-            )
-            print 'Purchase order not posted publically.'
+        except urllib2.HTTPError:
+            log.exception('Purchase order %s not posted publically',
+                          purchase_order_number)
 
         try:
-            print '\n*** PurchaseOrder ***'
-            log.debug('')
-            log.debug('*** PurchaseOrder ***')
+            log.debug('PurchaseOrder')
 
             purchase_order_object = PurchaseOrder(purchase_order_number)
             purchase_order_object.download_attachments()
-        except IndexError, error:
-            print 'IndexError'
-            log.exception(error, exc_info=True)
-            log.info('IndexError: %s.', purchase_order_number)
+        except IndexError:
+            log.exception(purchase_order_number)
             return
 
         # Check DocumentCloud project
         try:
-            print '\n*** DocumentCloudProject ***'
-            log.debug('')
-            log.debug('*** DocumentCloudProject ***')
+            log.debug('DocumentCloudProject')
 
             need_to_upload = DocumentCloudProject().check_if_need_to_upload(
                 purchase_order_number)
             if need_to_upload:
                 DocumentCloudProject().prepare_then_add_contract(
                     purchase_order_object)
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.exception(
-                'Purchase order %s not posted publically',
-                purchase_order_number
-            )
+        except urllib2.HTTPError:
+            log.exception('Purchase order %s not posted publically',
+                          purchase_order_number)
 
         # Check local database
         try:
-            print '\n*** LensDatabase ***'
-            log.debug('')
-            log.debug('*** LensDatabase ***')
+            log.debug('LensDatabase')
 
             contract_exist = LensDatabase().check_if_database_has_contract(
                 purchase_order_number)
             if contract_exist is False:
                 LensDatabase().add_to_database(purchase_order_object)
-        except urllib2.HTTPError, error:
-            log.exception(error, exc_info=True)
-            log.exception(
-                'Purchase order %s is not posted publically.',
-                purchase_order_number
-            )
+        except urllib2.HTTPError:
+            log.exception('Purchase order %s is not posted publically.',
+                          purchase_order_number)
 
     @staticmethod
     def _get_index_page(page_number):
@@ -429,7 +362,6 @@ class CheckCity(object):
         req.add_header('Connection', 'keep-alive')
         req.add_header('DNT', '1')
 
-        output = ""
         response = urllib2.urlopen(req)
         output = response.read()
         response.close()
@@ -437,5 +369,5 @@ class CheckCity(object):
         return output
 
 if __name__ == '__main__':
-    print "\nChecking the city's purchasing site for new contracts..."
+    log.info("Checking the city's purchasing site for new contracts")
     CheckCity().check_pages()

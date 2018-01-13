@@ -269,17 +269,13 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        offset = offset * self.pagelength
+        offset *= self.pagelength
 
-        contracts = SESSION.query(
-            Contract
-        ).order_by(
-            Contract.dateadded.desc()
-        ).offset(
-            offset
-        ).limit(
-            limit
-        ).all()
+        contracts = (SESSION.query(Contract)
+                     .order_by(Contract.dateadded.desc())
+                     .offset(offset)
+                     .limit(limit)
+                     .all())
 
         SESSION.close()
 
@@ -299,13 +295,12 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        total = SESSION.query(
-            Contract
-        ).count()
+        count = (SESSION.query(Contract)
+                 .count())
 
         SESSION.close()
 
-        return total
+        return count
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_vendors(self):
@@ -318,19 +313,14 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        vendors = SESSION.query(
-            Vendor.name
-        ).filter(
-            Vendor.id == Contract.vendorid
-        ).distinct().order_by(
-            Vendor.name
-        )
-
-        vendors = [vendor[0].strip() for vendor in vendors]
+        vendors = (SESSION.query(Vendor.name)
+                   .filter(Vendor.id == Contract.vendorid)
+                   .distinct()
+                   .order_by(Vendor.name))
 
         SESSION.close()
 
-        return vendors
+        return [vendor[0].strip() for vendor in vendors]
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_departments(self):
@@ -343,17 +333,14 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        departments = SESSION.query(
-            Department.name
-        ).distinct().order_by(
-            Department.name
-        ).all()
-
-        departments = [department[0].strip() for department in departments]
+        departments = (SESSION.query(Department.name)
+                       .distinct()
+                       .order_by(Department.name)
+                       .all())
 
         SESSION.close()
 
-        return departments
+        return [department[0].strip() for department in departments]
 
     # @cache.memoize(timeout=100000)  # cache good for a day or so
     def get_officers(self, vendor=None):
@@ -370,41 +357,24 @@ class Models(object):
         # session = sn()
 
         if vendor is None:
-            officers = SESSION.query(
-                VendorOfficer,
-                Person
-            ).filter(
-                VendorOfficer.personid == Person.id
-            ).order_by(
-                Person.name
-            )
-            SESSION.close()
-            officers = sorted(
-                list(
-                    set(
-                        [o[1].name for o in officers]
-                    )
-                )
-            )
+            officers = (SESSION.query(VendorOfficer, Person)
+                        .filter(VendorOfficer.personid == Person.id)
+                        .order_by(Person.name))
 
-            return officers
+            SESSION.close()
+
+            return sorted(list(set([o[1].name for o in officers])))
         else:
             vendor = vendor.replace("vendor:", "")
-            officers = SESSION.query(
-                VendorOfficer,
-                Person,
-                Vendor
-            ).filter(
-                VendorOfficer.personid == Person.id
-            ).filter(
-                VendorOfficer.vendorid == Vendor.id
-            ).filter(
-                Vendor.name == vendor
-            ).all()
-            SESSION.close()
-            officers = list(set([o[1].name for o in officers]))
+            officers = (SESSION.query(VendorOfficer, Person, Vendor)
+                        .filter(VendorOfficer.personid == Person.id)
+                        .filter(VendorOfficer.vendorid == Vendor.id)
+                        .filter(Vendor.name == vendor)
+                        .all())
 
-            return sorted(officers)
+            SESSION.close()
+
+            return sorted(list(set([o[1].name for o in officers])))
 
     # @cache.memoize(timeout=100000)
     def translate_officer_to_vendor(self, officer_term):
@@ -420,20 +390,13 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        officer_term = officer_term.replace(
-            '"', "").replace("officers:", "").strip()
+        officer_term = officer_term.replace('"', "").replace("officers:", "").strip()
 
-        results = SESSION.query(
-            Person,
-            VendorOfficer,
-            Vendor
-        ).filter(
-            Person.name == officer_term
-        ).filter(
-            Person.id == VendorOfficer.personid
-        ).filter(
-            VendorOfficer.vendorid == Vendor.id
-        ).all()  # todo fix to get .first() working
+        results = (SESSION.query(Person, VendorOfficer, Vendor)
+                   .filter(Person.name == officer_term)
+                   .filter(Person.id == VendorOfficer.personid)
+                   .filter(VendorOfficer.vendorid == Vendor.id)
+                   .all())  # todo fix to get .first() working
 
         output = results.pop()[2].name
         log.info("Translating %s to %s", officer_term, output)

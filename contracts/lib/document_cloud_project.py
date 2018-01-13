@@ -44,10 +44,9 @@ class DocumentCloudProject(object):
             "purchase order", purchase_order_number)
 
         if validity is False or contract_exists:
-            log.debug(
-                'Not uploading to DocumentCloud. Purchase ' +
-                'order %s is invalid or already there.',
-                purchase_order_number)
+            log.debug('Not uploading to DocumentCloud')
+            log.debug('Purchase order %s is invalid or already there',
+                      purchase_order_number)
             return False
         else:
             return True
@@ -156,10 +155,8 @@ class DocumentCloudProject(object):
         purchase_order_number = str(purchase_order_object.purchaseorder)
         title = str(purchase_order_object.title)
 
-        log.debug(
-            'Uploading purchase order %s ("%s") to DocumentCloud...',
-            purchase_order_number,
-            title)
+        log.debug('Uploading purchase order %s ("%s") to DocumentCloud...',
+                  purchase_order_number, title)
 
         self.api_connection.documents.upload(
             filename,
@@ -183,14 +180,12 @@ class DocumentCloudProject(object):
         :type purchase_order_object: A PurchaseOrder object.
         :returns: boolean. True if the contract number is null, False if not.
         '''
-
         if len(purchase_order_object.data['contract number']) < 1:
-            log.info(
-                'Not uploading purchase order %s to DocumentCloud. ' +
-                'Contract number %s is null',
-                purchase_order_object.data['purchase order'],
-                purchase_order_object.data['contract number']
-            )
-            return True  # Contract number is null. Do not upload.
+            log.info('Not uploading purchase order %s to DocumentCloud',
+                     purchase_order_object.data['purchase order'])
+            log.info('Contract number %s is null',
+                     purchase_order_object.data['contract number'])
+
+            return True
         else:
             return False

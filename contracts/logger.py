@@ -3,8 +3,8 @@
 import argparse
 import logging
 import os
-import random
-import string
+# import random
+# import string
 
 from datetime import datetime
 
@@ -30,7 +30,11 @@ if not os.path.exists(os.path.dirname(LOG_FILE)):
 if not os.path.isfile(LOG_FILE):
     open(LOG_FILE, "w").close()
 
-formatter = logging.Formatter('%(asctime)s | %(module)s.%(funcName)s | %(levelname)s | %(lineno)d | %(message)s')
+formatter = logging.Formatter('%(asctime)s | ' +
+                              '%(module)s.%(funcName)s | ' +
+                              '%(lineno)d | ' +
+                              '%(levelname)s | ' +
+                              '%(message)s')
 
 # handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=(5 * 1024 * 1024),  backupCount=5)
 handler = logging.FileHandler(LOG_FILE)

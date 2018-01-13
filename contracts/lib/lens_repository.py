@@ -48,13 +48,7 @@ class LensRepository(object):
         Download the contract matching this purchase order number, but first
         check if it is valid, not in the skip list and not already downloaded.
         '''
-
-        log.debug(
-            'Saving HTML for purchase order %s', self.purchase_order_number)
-
-        file_location = (
-            '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number)
-        )
+        file_location = '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchase_order_number)
 
         response = urllib2.urlopen(
             'http://www.purchasing.cityofno.com/bso/external/purchaseorder/' +
@@ -79,7 +73,7 @@ class LensRepository(object):
             os.makedirs(os.path.dirname(file_location))
 
         with open(file_location, 'w') as filename:
-            log.info(
-                'Saving HTML for purchase order %s',
-                self.purchase_order_number)
+            log.info('Saving HTML for purchase order %s',
+                     self.purchase_order_number)
+
             filename.write(html)

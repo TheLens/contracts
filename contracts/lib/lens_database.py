@@ -19,7 +19,7 @@ class LensDatabase(object):
     """Represent the local database that stores contracts information."""
 
     def __init__(self):
-        """TODO."""
+        """Initialize."""
         pass
 
     def check_if_database_has_contract(self, purchase_order_number):
@@ -30,20 +30,19 @@ class LensDatabase(object):
         :type purchase_order_number: string
         :returns: boolean. True if the contract is present, False if not.
         """
-        query_count = SESSION.query(
-            Contract
-        ).filter(
-            Contract.purchaseordernumber == purchase_order_number
-        ).count()
+        count = (SESSION.query(Contract)
+                 .filter(Contract.purchaseordernumber == purchase_order_number)
+                 .count())
 
         SESSION.close()
 
-        if query_count == 1:  # Database has the contract
-            log.debug(
-                'Database already has purchase order %s in contracts table',
-                purchase_order_number)
+        if count == 1:  # Database has the contract
+            log.info('DB already has purchase order %s in contracts table',
+                     purchase_order_number)
             return True
         else:
+            log.info('DB does not have purchase order %s in contracts table',
+                     purchase_order_number)
             return False
 
     def add_to_database(self, purchase_order_object):
@@ -56,9 +55,8 @@ class LensDatabase(object):
         :param purchase_order_object: The PurchaseOrder object instance.
         :type purchase_order_object: A PurchaseOrder object instance.
         """
-        log.debug(
-            "Adding purchase order %s to contracts table",
-            purchase_order_object.purchase_order_number)
+        log.debug("Adding purchase order %s to contracts table",
+                  purchase_order_object.purchase_order_number)
 
         contract = Contract()
 
@@ -94,18 +92,14 @@ class LensDatabase(object):
 
         :returns: A list of dicts (?) for the daily contracts.
         """
-        contracts = SESSION.query(
-            Contract.doc_cloud_id,
-            Vendor.name
-        ).filter(
-            Contract.dateadded == TODAY_DATE
-        ).filter(
-            Contract.vendorid == Vendor.id
-        ).all()
+        query = (SESSION.query(Contract.doc_cloud_id, Vendor.name)
+                 .filter(Contract.dateadded == TODAY_DATE)
+                 .filter(Contract.vendorid == Vendor.id)
+                 .all())
 
         SESSION.close()
 
-        return contracts
+        return query
 
     def get_all_contract_ids(self):
         """
@@ -115,20 +109,13 @@ class LensDatabase(object):
 
         :returns: list. A list of all IDs in our DocumentCloud project.
         """
-        query = SESSION.query(
-            Contract.doc_cloud_id
-        ).order_by(
-            desc(Contract.dateadded)
-        ).all()
+        query = (SESSION.query(Contract.doc_cloud_id)
+                 .order_by(desc(Contract.dateadded))
+                 .all())
 
         SESSION.close()
 
-        document_ids = []
-
-        for row in query:
-            document_ids.append(row[0])
-
-        return document_ids
+        return [row[0] for row in query]
 
     def get_people_associated_with_vendor(self, name):
         """
@@ -140,26 +127,17 @@ class LensDatabase(object):
         :type name: string
         :returns: list. The people who are associated with this vendor (how?).
         """
-        query_people = SESSION.query(
-            Person.name
-        ).filter(
-            Vendor.id == VendorOfficer.vendorid
-        ).filter(
-            Person.id == VendorOfficer.personid
-        ).filter(
-            Vendor.name == name
-        ).all()
+        query = (SESSION.query(Person.name)
+                 .filter(Vendor.id == VendorOfficer.vendorid)
+                 .filter(Person.id == VendorOfficer.personid)
+                 .filter(Vendor.name == name)
+                 .all())
 
         SESSION.close()
 
-        people = []
+        log.info('%d people associated with %s', len(query), name)
 
-        log.debug('%d people associated with %s', len(query_people), name)
-
-        for row in query_people:
-            people.append(str(row[0]))
-
-        return people
+        return [str(row[0]) for row in query]
 
     def check_if_need_to_scrape(self, page):
         """
@@ -182,16 +160,14 @@ class LensDatabase(object):
             if date_last_scraped < today_date:
                 return True  # Scrape this page
             else:
-                log.debug(
-                    'Skipping page %d because it was scraped recently', page)
+                log.info('Skipping page %d. It was scraped recently', page)
 
                 return False
         elif page > 10:
             if date_last_scraped < week_ago_date:
                 return True  # Scrape this page
             else:
-                log.debug(
-                    'Skipping page %d because it was scraped recently', page)
+                log.info('Skipping page %d. It was scraped recently', page)
 
                 return False
 
@@ -203,11 +179,9 @@ class LensDatabase(object):
         :type page: int.
         :returns: date. When this page was last scraped. None if never.
         """
-        query = SESSION.query(
-            ScrapeLog
-        ).filter(
-            ScrapeLog.page == page
-        ).all()
+        query = (SESSION.query(ScrapeLog)
+                 .filter(ScrapeLog.page == page)
+                 .all())
 
         if len(query) == 0:  # No row yet for this page (total number varies)
             return None
@@ -217,19 +191,16 @@ class LensDatabase(object):
         # for row in query:
         date_last_scraped = query.pop().last_scraped
 
-        log.debug(
-            'This page was last scraped %s',
-            date_last_scraped.strftime('%Y-%m-%d'))
+        log.debug('This page was last scraped %s',
+                  date_last_scraped.strftime('%Y-%m-%d'))
 
         return date_last_scraped
 
     def update_scrape_log(self, page):
         """TODO."""
-        query = SESSION.query(
-            ScrapeLog
-        ).filter(
-            ScrapeLog.page == page
-        ).all()
+        query = (SESSION.query(ScrapeLog)
+                 .filter(ScrapeLog.page == page)
+                 .all())
 
         if len(query) == 0:  # No row yet for this page (total number varies)
             # Add this page to database
@@ -238,11 +209,9 @@ class LensDatabase(object):
             SESSION.commit()
         else:
             # Update this page in the database
-            update_query = SESSION.query(
-                ScrapeLog
-            ).filter(
-                ScrapeLog.page == page
-            ).one()
+            update_query = (SESSION.query(ScrapeLog)
+                            .filter(ScrapeLog.page == page)
+                            .one())
 
             update_query.last_scraped = TODAY_DATE
             SESSION.commit()
@@ -268,15 +237,13 @@ class LensDatabase(object):
         :type department: ???
         :returns: boolean. True if it exists in the database, False if not.
         """
-        department_count = SESSION.query(
-            Department
-        ).filter(
-            Department.name == department
-        ).count()
+        count = (SESSION.query(Department)
+                 .filter(Department.name == department)
+                 .count())
 
         SESSION.close()
 
-        if department_count == 0:
+        if count == 0:
             log.debug('Department "%s" is missing from database', department)
             return False
         else:
@@ -291,8 +258,7 @@ class LensDatabase(object):
         """
         log.debug('Adding department "%s" to database', department)
 
-        department = Department(department)
-        SESSION.add(department)
+        SESSION.add(Department(department))
         SESSION.commit()
 
     def _add_vendor_if_missing(self, vendor, vendor_id_city=None):
@@ -319,15 +285,13 @@ class LensDatabase(object):
         :type vendor: string?
         :returns: boolean. True if vendor exists in database, False if not.
         """
-        vendor_count = SESSION.query(
-            Vendor
-        ).filter(
-            Vendor.name == vendor
-        ).count()
+        count = (SESSION.query(Vendor)
+                 .filter(Vendor.name == vendor)
+                 .count())
 
         SESSION.close()
 
-        if vendor_count == 0:
+        if count == 0:
             log.debug('Vendor "%s" is missing from database', vendor)
             return False
         else:
@@ -357,17 +321,13 @@ class LensDatabase(object):
         """
         log.debug('Finding ID for department "%s" in database', department)
 
-        department = SESSION.query(
-            Department
-        ).filter(
-            Department.name == department
-        ).first()
-
-        department_id = department.id
+        department = (SESSION.query(Department)
+                      .filter(Department.name == department)
+                      .first())
 
         SESSION.close()
 
-        return department_id
+        return department.id
 
     def _get_database_vendor_id(self, vendor):
         """
@@ -379,17 +339,13 @@ class LensDatabase(object):
         """
         log.debug('Fetching database ID for vendor "%s"', vendor)
 
-        vendor = SESSION.query(
-            Vendor
-        ).filter(
-            Vendor.name == vendor
-        ).first()
-
-        vendor_id = vendor.id
+        vendor = (SESSION.query(Vendor)
+                  .filter(Vendor.name == vendor)
+                  .first())
 
         SESSION.close()
 
-        return vendor_id
+        return vendor.id
 
     def _add_contract_to_local_database(self, contract):
         """
@@ -398,23 +354,6 @@ class LensDatabase(object):
         :param contract: The contract to add to our database.
         :type contract: A ___ class instance.
         """
-        # # TODO: Extract piece of info rather than add entire object
-        # log.debug(
-        #     'Adding contract (knumber %s, purchase order %s) to database',
-        #     contract.contractnumber,
-        #     contract.purchaseordernumber
-        # )
-
-        # contract_count = session.query(
-        #     Contract
-        # ).filter(
-        #     Contract.doc_cloud_id == contract.doc_cloud_id
-        # ).count()
-
-        # # Checking for the absence of this contract, meaning this contract is
-        # # not in our DB.
-        # if contract_count == 0:
-
         SESSION.add(contract)
         SESSION.commit()
 
@@ -427,17 +366,13 @@ class LensDatabase(object):
         """
         # TODO: Test that this works correctly before using.
 
-        officers_query = SESSION.query(
-            Person.name
-        ).all()
-        # TODO: need to sort (alphabetically)?
+        query = (SESSION.query(Person.name)
+                 .all())
 
         SESSION.close()
 
-        officers = []
-
-        for row in officers_query:
-            officers.append(row.name)
+        # TODO
+        officers = [row.name for row in query]
 
         # return officers  # TODO: Uncomment once tested and working.
 
@@ -453,16 +388,12 @@ class LensDatabase(object):
         :param fields: The metadata fields to add along with the contract?
         :type fields: dict
         """
-        log.debug(
-            'Updating contract in database that has DocumentCloud ID %s',
-            document_cloud_id
-        )
+        log.debug('Updating contract in database that has DocumentCloud ID %s',
+                  document_cloud_id)
 
-        contract = SESSION.query(
-            Contract
-        ).filter(
-            Contract.doc_cloud_id == document_cloud_id
-        ).first()
+        contract = (SESSION.query(Contract)
+                    .filter(Contract.doc_cloud_id == document_cloud_id)
+                    .first())
 
         contract.contractnumber = fields['contractno']
         contract.vendorid = fields['vendor']
@@ -484,11 +415,9 @@ class LensDatabase(object):
         :type purchase_order_no: string
         :returns: dict. A dict (?) for the matching contract.
         """
-        query = SESSION.query(
-            Contract
-        ).filter(
-            Contract.purchaseordernumber == purchase_order_number
-        ).first()
+        query = (SESSION.query(Contract)
+                 .filter(Contract.purchaseordernumber == purchase_order_number)
+                 .first())
 
         SESSION.close()
 
@@ -503,16 +432,12 @@ class LensDatabase(object):
         :type document_cloud_id: string
         :returns: dict. A dict (?) for the matching contract.
         """
-        log.debug(
-            'Find contract in database that has DocumentCloud ID %s',
-            document_cloud_id
-        )
+        log.debug('Find contract in database that has DocumentCloud ID %s',
+                  document_cloud_id)
 
-        query = SESSION.query(
-            Contract
-        ).filter(
-            Contract.doc_cloud_id == document_cloud_id
-        ).first()
+        query = (SESSION.query(Contract)
+                 .filter(Contract.doc_cloud_id == document_cloud_id)
+                 .first())
 
         SESSION.close()
 
@@ -533,11 +458,9 @@ class LensDatabase(object):
 
         :returns: SQLAlchemy query result.
         """
-        query = SESSION.query(
-            Contract
-        ).filter(
-            Contract.departmentid is None
-        ).all()
+        query = (SESSION.query(Contract)
+                 .filter(Contract.departmentid is None)
+                 .all())
 
         SESSION.close()
 

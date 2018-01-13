@@ -6,9 +6,10 @@ This is different from local_backup.sh, which then copies this local
 file repository to a remote file repository (ex. server to local).
 '''
 
-import os
-import json
 import argparse
+import json
+import os
+
 from pythondocumentcloud import DocumentCloud
 from pythondocumentcloud.toolbox import DoesNotExistError
 from contracts.lib.lens_database import LensDatabase
@@ -44,10 +45,7 @@ class Backup(object):
                 log.exception("DoesNotExistError: %s", document_cloud_id)
 
     def _backup(self, document_cloud_id):
-        '''
-        Backup a contract.
-        '''
-
+        '''Backup a contract.'''
         needs_backup = self._needs_to_be_backed_up(document_cloud_id)
 
         if needs_backup or self.force:
@@ -79,10 +77,7 @@ class Backup(object):
 
     @staticmethod
     def _get_path(document_cloud_id, extension):
-        '''
-        Return the appropriate path for a file with a certain extension.
-        '''
-
+        '''Return the appropriate path for a file with a certain extension.'''
         path = "%s/%s%s" % (
             DOCUMENT_CLOUD_DIR,
             document_cloud_id.replace("/", ""),
@@ -93,10 +88,7 @@ class Backup(object):
 
     @staticmethod
     def _get_meta_data(document):
-        '''
-        Return the metadata associated with a DocumentCloud contract.
-        '''
-
+        '''Return the metadata associated with a DocumentCloud contract.'''
         metadata = {}
 
         try:
