@@ -10,8 +10,6 @@ before_script:
 - touch logs/contracts.log
 script:
 - coverage run tests/test*.py
-after_success:
-- coveralls
 deploy:
   provider: s3
   access_key_id: AKIAIWQKYAETOQ2N7CBQ
