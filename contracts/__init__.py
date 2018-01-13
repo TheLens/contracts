@@ -6,14 +6,15 @@ All private information is stored in environment variables and should never
 be written into files in this repo.
 '''
 
-import os
-from datetime import date
-import logging
-import logging.handlers
 import getpass
+import os
+
+from datetime import date
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from logger import logger as log
 
 # Project directory paths
 PROJECT_DIR = os.path.abspath(
@@ -93,32 +94,3 @@ SESSION = sn()  # Import this to any files that need database
 engine = create_engine(CAMPAIGN_CONNECTION_STRING)
 campaign_sn = sessionmaker(bind=engine)
 CAMPAIGN_SESSION = campaign_sn()
-
-# Logging
-LOG_PATH = '%s/logs/contracts.log' % PROJECT_DIR
-
-if not os.path.exists(os.path.dirname(LOG_PATH)):
-    os.makedirs(os.path.dirname(LOG_PATH))
-
-if not os.path.isfile(LOG_PATH):
-    open(LOG_PATH, "w").close()
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-
-# Create file handler which logs debug messages or higher
-filehandler = logging.handlers.RotatingFileHandler(
-    LOG_PATH,
-    maxBytes=(5 * 1024 * 1024),  # 5 MB
-    backupCount=5
-)
-filehandler.setLevel(logging.DEBUG)
-
-# Create formatter and add it to the handlers
-formatter = logging.Formatter(
-    '%(asctime)s | %(module)s.%(funcName)s | ' +
-    '%(levelname)s | %(lineno)d | %(message)s')
-filehandler.setFormatter(formatter)
-
-# Add the handlers to the logger
-log.addHandler(filehandler)

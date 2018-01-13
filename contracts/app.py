@@ -1,5 +1,4 @@
-"""
-The web app that runs at http://vault.thelensnola.org/contracts.
+"""The web app that runs at http://vault.thelensnola.org/contracts.
 
 It allows the public to search City of New Orleans contracts that are posted
 to the city's purchasing portal. It's a Flask application, and it follows the
@@ -9,24 +8,20 @@ It uses SQLAlchemy to connect to a PostgreSQL database.
 
 from flask import Flask, request
 # from flask.ext.cache import Cache
+
 from contracts.models import Models
-# from parserator.data_prep_utils import appendListToXMLfile
 from contracts.views import Views
-from contracts import (
-    log,
-    RELOADER,
-    DEBUG)
+from contracts import RELOADER, DEBUG
 
 app = Flask(__name__)
-# cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+# cache = Cache(app, config={'CACHE_TYPE': 'simple'})  # TODO
 
 
 @app.route('/contracts/', methods=['GET'])
-def intro():
-    """
-    Intro page for the web app.
+def home_page():
+    """Return the homepage.
 
-    :returns: HTML. The homepage (/contracts/).
+    :returns: `flask.wrappers.Response`
     """
     data = Models().get_home()
     view = Views().get_home(data)
@@ -35,34 +30,31 @@ def intro():
 
 
 @app.route('/contracts/search/', methods=['GET'])
-def query_docs():
-    """
-    The main contract search page. Search parameters are specified in URL query
-    string.
+def search_results():
+    """Return search results.
 
-    :returns: HTML. The search page (/contracts/search/).
+    Search parameters are specified in the URL query string.
+
+    :returns: `flask.wrappers.Response`
     """
-    data, parameter_data = Models().get_search_page(request)
-    view = Views().get_search_page(data, parameter_data)
+    data, parameters = Models().get_search_page(request)
+    view = Views().get_search_page(data, parameters)
 
     return view
 
 
 @app.route('/contracts/contract/<string:doc_cloud_id>', methods=['GET'])
-def contract(doc_cloud_id):
-    """
-    The single contract page. The contract ID is specified in the URL.
+def contract_page(document_cloud_id):
+    """Return a single contract.
 
-    :returns: HTML. The single contract page \
-    (/contracts/contract/<doc_cloud_id>).
+    The contract ID is specified in the URL.
+
+    :returns: `flask.wrappers.Response`
     """
-    data = Models().get_contracts_page(doc_cloud_id)
+    data = Models().get_contracts_page(document_cloud_id)
     view = Views().get_contract(data)
 
     return view
 
 if __name__ == '__main__':
-    app.run(
-        use_reloader=RELOADER,
-        debug=DEBUG
-    )
+    app.run(use_reloader=RELOADER, debug=DEBUG)

@@ -1,22 +1,16 @@
-
-'''
-These classes that map to tables in the underlying database.
-'''
+'''Database tables.'''
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
+
 from contracts import CAMPAIGN_CONNECTION_STRING, CONNECTION_STRING
 
-Base = declarative_base()
+BASE = declarative_base()
 
 
-class ScrapeLog(Base):
-    '''
-    Keeps a record of the last time we checked each index page
-    on the city's purchasing site.
-    '''
-
+class ScrapeLog(BASE):
+    '''Track when each index page on the city's purchasing site was scraped.'''
     __tablename__ = 'scrape_log'
 
     pid = Column(Integer, primary_key=True)
@@ -27,14 +21,15 @@ class ScrapeLog(Base):
         self.page = page
         self.last_scraped = last_scraped
 
+    def __str__(self):
+        return '{0} -- {1.page!s} -- {1.last_scraped!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<ScrapeLog (Page='%s', Last scraped=%s>" % (
-            self.page, self.last_scraped)
+        return '{0}({1.page!r}, {1.last_scraped!r})'.format(self.__class__.__name__, self)
 
 
-class Vendor(Base):
-    '''
-    A vendor is a company that sells goods or services to the city.
+class Vendor(BASE):
+    '''A company that sells goods or services to the city.
 
     :param id: The table's primary key, which is also our internal vendor ID.
     :type id: int
@@ -43,10 +38,9 @@ class Vendor(Base):
     :param vendor_id_city: The city purchasing site's vendor ID.
     :type vendor_id_city: string
     '''
-
     __tablename__ = 'vendors'
 
-    id = Column(Integer, primary_key=True)  # Our internal unique ID
+    id = Column(Integer, primary_key=True)
     name = Column(String)
     vendor_id_city = Column(String)
 
@@ -54,14 +48,15 @@ class Vendor(Base):
         self.name = name
         self.vendor_id_city = vendor_id_city
 
+    def __str__(self):
+        return '{0} -- {1.name!s} -- {1.vendor_id_city!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<Vendor(Name='%s', City vendor ID=%s>" % (
-            self.name, self.vendor_id_city)
+        return '{0}({1.name!r}, {1.vendor_id_city!r})'.format(self.__class__.__name__, self)
 
 
-class Department(Base):
-    '''
-    A department is a part of city government. Ex: Blight, sanitation.
+class Department(BASE):
+    '''A city government department. Ex: Blight, sanitation, etc.
 
     :param id: The table's primary key.
     :type id: int
@@ -77,11 +72,14 @@ class Department(Base):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '{0} -- {1.name!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<Department(Name='%s')>" % self.name
+        return '{0}({1.name!r})'.format(self.__class__.__name__, self)
 
 
-class Person(Base):
+class Person(BASE):
     '''
     A person is a human officer of a company in the Secretary of State's
     business database. Some of those businesses list a business as their
@@ -101,14 +99,16 @@ class Person(Base):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '{0} -- {1.name!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<Person(Name='%s')>" % self.name
+        return '{0}({1.name!r})'.format(self.__class__.__name__, self)
 
 
-class Company(Base):
+class Company(BASE):
     '''
-
-    A "company" in this table is a businnes that is the officer of a business
+    A business that is the officer of a business
     that listed in the Secretary of State's business system. Most businesses in
     the Secretary of State's business system have human officers (`people`
     table).
@@ -127,11 +127,14 @@ class Company(Base):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '{0} -- {1.name!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<Company(Name='%s')>" % self.name
+        return '{0}({1.name!r})'.format(self.__class__.__name__, self)
 
 
-class Address(Base):
+class Address(BASE):
     '''
     The addresses for companies or people.
 
@@ -165,13 +168,18 @@ class Address(Base):
         self.zipcode = zipcode
         self.sourcefile = sourcefile
 
+    def __str__(self):
+        return '{0} -- {1.street!s} -- {1.city!s} -- {1.sourcefile!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return (
-            "<Address(street='%s', city='%s', state='%s', zipcode='%s')>" % (
-                self.street, self.city, self.state, self.zipcode))
+        return '{0}({1.street!r}, ' \
+               '{1.city!r}, ' \
+               '{1.state!r}, ' \
+               '{1.zipcode!r}, ' \
+               '{1.sourcefile!r})'.format(self.__class__.__name__, self)
 
 
-class Contract(Base):
+class Contract(BASE):
     '''
     The city uses two ID numbers to track contracts: K numbers and purchase
     order numbers.
@@ -212,24 +220,16 @@ class Contract(Base):
 
     id = Column(Integer, primary_key=True)
     departmentid = Column(Integer, ForeignKey("departments.id"))
-    # Our database's internal vendor ID:
-    vendorid = Column(Integer, ForeignKey("vendors.id"))
+    vendorid = Column(Integer, ForeignKey("vendors.id"))  # DB vendor ID
     contractnumber = Column(String)
     purchaseordernumber = Column(String)
-    # DocumentCloud project's vendor ID:
-    doc_cloud_id = Column(String, nullable=False)
+    doc_cloud_id = Column(String, nullable=False)  # DocumentCloud's vendor ID
     description = Column(String)
     title = Column(String)
     dateadded = Column(Date)
 
-    def __init__(self,
-                 ponumber=None,
-                 contractnumber=None,
-                 vendor_id=None,
-                 department_id=None,
-                 dcid=None,
-                 descript=None,
-                 name=None,
+    def __init__(self, ponumber=None, contractnumber=None, vendor_id=None,
+                 department_id=None, dcid=None, descript=None, name=None,
                  added=None):
         self.purchaseordernumber = ponumber
         self.contractnumber = contractnumber
@@ -240,19 +240,28 @@ class Contract(Base):
         self.title = name
         self.dateadded = added
 
+    def __str__(self):
+        return '{0} -- {1.purchaseordernumber!s} -- ' \
+               '{1.contractnumber!s} -- ' \
+               '{1.vendorid!s} -- ' \
+               '{1.departmentid!s} -- ' \
+               '{1.doc_cloud_id!s} -- ' \
+               '{1.description!s} -- ' \
+               '{1.title!s} -- ' \
+               '{1.dateadded!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return (
-            "<Contract: contractnumber {0} purchaseordernumber {1} " +
-            "vendorid {2} departmentid {3}>"
-        ).format(
-            self.contractnumber,
-            self.purchaseordernumber,
-            self.vendorid,
-            self.departmentid
-        )
+        return '{0}(ponumber={1.purchaseordernumber!r}, ' \
+               'contractnumber={1.contractnumber!r}, ' \
+               'vendor_id={1.vendorid!r}, ' \
+               'department_id={1.departmentid!r}, ' \
+               'dcid={1.doc_cloud_id!r}, ' \
+               'descript={1.description!r}, ' \
+               'name={1.title!r}, ' \
+               'added={1.dateadded!r})'.format(self.__class__.__name__, self)
 
 
-class CompanyAddress(Base):
+class CompanyAddress(BASE):
     '''
     A link table between addresses and companies.
 
@@ -276,16 +285,14 @@ class CompanyAddress(Base):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '{0} -- {1.name!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return (
-            "<CompanyAddress(personID={0}, companyID={1}," +
-            "primaryaddress={2})>"
-        ).format(
-            self.personID, self.companyID, self.primaryaddress
-        )
+        return '{0}({1.name!r})'.format(self.__class__.__name__, self)
 
 
-class PersonAddress(Base):
+class PersonAddress(BASE):
     '''
     A link table between people to addresses.
 
@@ -309,11 +316,14 @@ class PersonAddress(Base):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '{0} -- {1.name!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<PersonAddress>"
+        return '{0}({1.name!r})'.format(self.__class__.__name__, self)
 
 
-class VendorOfficer(Base):
+class VendorOfficer(BASE):
     '''
     A link table between vendors and their officers.
 
@@ -335,11 +345,14 @@ class VendorOfficer(Base):
         self.vendorid = vendorid
         self.personid = personid
 
+    def __str__(self):
+        return '{0} -- {1.vendorid!s} -- {1.personid!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<VendorOfficer(vendorid='%s')>" % (self.vendorid)
+        return '{0}({1.vendorid!r}, {1.personid!r})'.format(self.__class__.__name__, self)
 
 
-class VendorOfficerCompany(Base):
+class VendorOfficerCompany(BASE):
     '''
     A link table between vendors (from the city's system) and companies.
 
@@ -364,11 +377,14 @@ class VendorOfficerCompany(Base):
         self.vendorid = vendor_id
         self.companiesid = company_id
 
+    def __str__(self):
+        return '{0} -- {1.vendorid!s} -- {1.companiesid!s}'.format(self.__class__.__name__, self)
+
     def __repr__(self):
-        return "<VendorOfficerCompany(vendorid='%s')>" % (self.vendorid)
+        return '{0}({1.vendorid!r}, {1.companiesid!r})'.format(self.__class__.__name__, self)
 
 
-class EthicsRecord(Base):
+class EthicsRecord(BASE):
     '''
     A table with 1,856,193 rows of campaign contributions.
 
@@ -458,25 +474,48 @@ class EthicsRecord(Base):
         self.description = description
 
     def __str__(self):
-        return "${} to {} {} on {}".format(
-            self.receiptamount, self.first, self.last, self.receiptdate)
+        return '{0} -- ' \
+               '{1.last!s} -- ' \
+               '{1.first!s} -- ' \
+               '{1.reportno!s} -- ' \
+               '{1.form!s} -- ' \
+               '{1.schedule!s} -- ' \
+               '{1.contributiontype!s} -- ' \
+               '{1.contributorname!s} -- ' \
+               '{1.address1!s} -- ' \
+               '{1.address2!s} -- ' \
+               '{1.city!s} -- ' \
+               '{1.state!s} -- ' \
+               '{1.zipcode!s} -- ' \
+               '{1.receiptdate!s} -- ' \
+               '{1.receiptamount!s} -- ' \
+               '{1.description!s}'.format(self.__class__.__name__, self)
 
     def __repr__(self):
-        return "${} to {} {} on {}".format(
-            self.receiptamount, self.first, self.last, self.receiptdate)
+        return '{0}({1.last!r}, ' \
+               '{1.first!r}, ' \
+               '{1.reportno!r}, ' \
+               '{1.form!r}, ' \
+               '{1.schedule!r}, ' \
+               '{1.contributiontype!r}, ' \
+               '{1.contributorname!r}, ' \
+               '{1.address1!r}, ' \
+               '{1.address2!r}, ' \
+               '{1.city!r}, ' \
+               '{1.state!r}, ' \
+               '{1.zipcode!r}, ' \
+               '{1.receiptdate!r}, ' \
+               '{1.receiptamount!r}, ' \
+               '{1.description!r})'.format(self.__class__.__name__, self)
 
 
 def remake_db():
-    '''
-    Creates the database via SQLAlchemy.
-    '''
-
+    '''Create the database.'''
     engine = create_engine(CONNECTION_STRING)
-    Base.metadata.create_all(engine)
+    BASE.metadata.create_all(engine)
 
-    # TODO: Will this work?
     campaign_engine = create_engine(CAMPAIGN_CONNECTION_STRING)
-    Base.metadata.create_all(campaign_engine)
+    BASE.metadata.create_all(campaign_engine)
 
 if __name__ == "__main__":
     remake_db()

@@ -1,6 +1,7 @@
 .idea/
 .sass_cache/
 .tox/
+.vscode/
 backups/
 data/attachments/
 data/purchase-orders/

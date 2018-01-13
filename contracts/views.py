@@ -5,7 +5,6 @@ The web app that runs at vault.thelensnola.org/contracts.
 
 from flask import render_template, make_response
 from contracts import (
-    log,
     LENS_CSS,
     BANNER_CSS,
     CONTRACTS_CSS,
@@ -69,8 +68,6 @@ class Views(object):
         :type parameter_data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-        log.debug('current_page: %d', data['current_page'])
-
         vendors = data['vendors']
         departments = data['departments']
         number_of_documents = data['number_of_documents']
@@ -123,29 +120,6 @@ class Views(object):
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
                 lens_js=LENS_JS
-            )
-        )
-
-        return response
-
-    @staticmethod
-    def get_admin_home(data):
-        '''
-        Renders the admin home page (/contracts/admin/).
-
-        :param data: Data for the page.
-        :type data: dict
-        :returns: HTML. Rendered and ready for display.
-        '''
-
-        response = make_response(
-            render_template(
-                'admin.html',
-                lens_css=LENS_CSS,
-                banner_css=BANNER_CSS,
-                contracts_css=CONTRACTS_CSS,
-                lens_js=LENS_JS,
-                parserator_js=PARSERATOR_JS
             )
         )
 
