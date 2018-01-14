@@ -58,7 +58,7 @@ class LensDatabase(object):
         :type purchase_order_object: A PurchaseOrder object instance.
         """
         log.debug("Adding purchase order %s to contracts table",
-                  purchase_order_object.purchase_order_number)
+                  purchase_order_object.purchaseorder)
 
         contract = Contract()
 

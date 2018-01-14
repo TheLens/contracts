@@ -42,7 +42,7 @@ class PurchaseOrder(object):
             log.debug('Purchase order %s is invalid', self.purchaseorder)
             return
 
-        html = self._get_html(self.purchaseorder)
+        html = self._get_html()
         self.vendor_id_city = self._get_city_vendor_id(html)
         self._download_vendor_profile(self.vendor_id_city)
 
@@ -71,22 +71,17 @@ class PurchaseOrder(object):
     def __repr__(self):
         return '{0}({1.purchaseorder!r})'.format(self.__class__.__name__, self)
 
-    @staticmethod
-    def _get_html(purchase_order_number):
-        '''
-        Reads the HTML contents of this purchase order file.
+    def _get_html(self):
+        '''Read the HTML contents of this purchase order file.
 
-        :param purchase_order_number: The contract's unique ID on \
-                                      DocumentCloud.
-        :type purchase_order_number: string
         :returns: string. The HTML contains for this purchase order file.
         '''
-        file_location = '%s/%s.html' % (PURCHASE_ORDER_DIR, purchase_order_number)
+        file_location = '%s/%s.html' % (PURCHASE_ORDER_DIR, self.purchaseorder)
 
         # Purchase order HTML saved in PurchaseOrder class
         with open(file_location, 'r') as html_file:
             log.info('Reading HTML for purchase order %s',
-                     purchase_order_number)
+                     self.purchaseorder)
 
             return html_file.read()
 
@@ -379,7 +374,7 @@ class PurchaseOrder(object):
             'http://www.purchasing.cityofno.com/bso/external/document/' +
             'attachments/attachmentFileDetail.sdo?' +
             'fileNbr=%s' % city_attachment_id +
-            '&docId=%s' % self.purchase_order_number +
+            '&docId=%s' % self.purchaseorder +
             '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
             'poSummary.sdo&external=true'
         )
@@ -451,7 +446,7 @@ class PurchaseOrder(object):
                 '-H',
                 'Referer: http://www.purchasing.cityofno.com/bso/external/' +
                 'document/attachments/attachmentFileDetail.sdo?fileNbr=' +
-                '%s&docId=%s' % (attachment_id, self.purchase_order_number) +
+                '%s&docId=%s' % (attachment_id, self.purchaseorder) +
                 '&docType=P&releaseNbr=0&parentUrl=/external/purchaseorder/' +
                 'poSummary.sdo&external=true',
                 '-H',
@@ -473,7 +468,7 @@ class PurchaseOrder(object):
                 'Disposition: form-data; name="workingDir"\r\n\r\n\r\n------' +
                 'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
                 'form-data; name="docId"\r\n\r\n' +
-                '%s' % self.purchase_order_number +
+                '%s' % self.purchaseorder +
                 '\r\n------WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-' +
                 'Disposition: form-data; name="docType"\r\n\r\nP\r\n------' +
                 'WebKitFormBoundaryGAY56ngXMDvs6qDP\r\nContent-Disposition: ' +
