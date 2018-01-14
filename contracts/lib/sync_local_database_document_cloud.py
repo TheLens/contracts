@@ -2,7 +2,7 @@
 
 from pythondocumentcloud import DocumentCloud
 from contracts.lib.lens_database import LensDatabase
-from contracts import log
+from contracts import scrape_log as log
 
 
 class SyncLocalDatabaseDocumentCloud(object):

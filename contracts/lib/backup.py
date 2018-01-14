@@ -13,7 +13,7 @@ import os
 from pythondocumentcloud import DocumentCloud
 from pythondocumentcloud.toolbox import DoesNotExistError
 from contracts.lib.lens_database import LensDatabase
-from contracts import DOCUMENT_CLOUD_DIR, log
+from contracts import DOCUMENT_CLOUD_DIR, scrape_log as log
 
 
 class Backup(object):

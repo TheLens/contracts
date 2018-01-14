@@ -18,7 +18,7 @@ from contracts.db import (
     EthicsRecord
 )
 from contracts import (
-    log,
+    scrape_log as log,
     SESSION,
     CAMPAIGN_SESSION,
     PROJECT_DIR,

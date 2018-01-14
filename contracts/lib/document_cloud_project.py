@@ -12,7 +12,7 @@ from contracts import (
     DOC_CLOUD_PASSWORD,
     DOCUMENTS_DIR,
     PROJECT_URL,
-    log
+    scrape_log as log
 )
 
 

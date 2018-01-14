@@ -6,13 +6,16 @@ be written into files in this repo.
 
 from constants import *  # TODO: Fix by updating all files to use constants.* imports
 
-from logger import logger as log
+from logger import (
+    # logger as log,
+    app_logger as app_log,
+    scrape_logger as scrape_log)
 
-# Initialize new session
-log.info("***** New session *****")
-
-log.info("Attachments output directory: %s", ATTACHMENTS_DIR)
-log.info("Documents output directory: %s", DOCUMENTS_DIR)
-log.info("DocumentCloud output directory: %s", DOCUMENT_CLOUD_DIR)
-log.info("Purchase orders output directory: %s", PURCHASE_ORDER_DIR)
-log.info("Vendors output directory: %s", VENDORS_DIR)
+# Initialize new sessions
+for l in [app_log, scrape_log]:
+    l.info("***** New session *****")
+    l.info("Attachments output directory: %s", ATTACHMENTS_DIR)
+    l.info("Documents output directory: %s", DOCUMENTS_DIR)
+    l.info("DocumentCloud output directory: %s", DOCUMENT_CLOUD_DIR)
+    l.info("Purchase orders output directory: %s", PURCHASE_ORDER_DIR)
+    l.info("Vendors output directory: %s", VENDORS_DIR)

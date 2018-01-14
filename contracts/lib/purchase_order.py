@@ -18,7 +18,7 @@ from contracts import (
     DOCUMENTS_DIR,
     PURCHASE_ORDER_DIR,
     VENDORS_DIR,
-    log
+    scrape_log as log
 )
 
 

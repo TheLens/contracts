@@ -12,7 +12,7 @@ from contracts.db import (
     Person,
     VendorOfficer
 )
-from contracts import log, SESSION
+from contracts import app_log as log, SESSION
 from pythondocumentcloud import DocumentCloud
 
 # cache = Cache(app, config={'CACHE_TYPE': 'simple'})

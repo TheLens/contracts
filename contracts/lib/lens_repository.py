@@ -7,7 +7,7 @@ Keeping the local contracts collection in sync with our DocumentCloud project.
 import os
 import urllib2
 from contracts.lib.utilities import Utilities
-from contracts import PURCHASE_ORDER_DIR, log
+from contracts import PURCHASE_ORDER_DIR, scrape_log as log
 
 
 class LensRepository(object):

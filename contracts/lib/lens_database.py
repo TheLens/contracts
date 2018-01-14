@@ -12,7 +12,7 @@ from contracts.db import (
     VendorOfficer,
     ScrapeLog
 )
-from contracts import SESSION, TODAY_DATE, log
+from contracts import SESSION, TODAY_DATE, scrape_log as log
 
 
 class LensDatabase(object):

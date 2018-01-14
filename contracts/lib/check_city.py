@@ -23,7 +23,7 @@ from contracts.lib.purchase_order import PurchaseOrder
 from contracts.lib.lens_repository import LensRepository
 from contracts.lib.document_cloud_project import DocumentCloudProject
 
-from contracts import log
+from contracts import scrape_log as log
 
 
 class CheckCity(object):
