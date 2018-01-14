@@ -1,13 +1,7 @@
+'''The web app that runs at vault.thelensnola.org/contracts.'''
 
-'''
-The web app that runs at vault.thelensnola.org/contracts.
-'''
-
-# import httplib
 import time
 
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker
 # from flask.ext.cache import Cache
 
 from contracts.lib.results_language import ResultsLanguage
@@ -34,23 +28,20 @@ class Models(object):
         self.dc_query = 'projectid:1542-city-of-new-orleans-contracts'
         self.document_cloud_client = DocumentCloud()
 
+        log.debug('%d documents', self.pagelength)
+
+    def __str__(self):
+        return '{}'.format(self.__class__.__name__)
+
+    def __repr__(self):
+        return '{}()'.format(self.__class__.__name__)
+
     def get_home(self):
         '''
         Gather data necessary for the homepage (/contracts/).
 
         :returns: dict. A dict with data for dropdowns and dates.
         '''
-        data = {}
-
-        # Get a list of vendors for dropdown
-        data['vendors'] = self.get_vendors()
-
-        # Get a list of departments for dropdown
-        data['departments'] = self.get_departments()
-
-        # Get a list of officers for dropdown
-        data['officers'] = self.get_officers()
-
         # Find the last updated date for footer
         updated_date = time.strftime("%b. %-d, %Y")
 
@@ -61,24 +52,15 @@ class Models(object):
         updated_date = updated_date.replace('Jun.', 'June')
         updated_date = updated_date.replace('Jul.', 'July')
 
-        data['updated_date'] = updated_date
-
-        '''
-        Getting 10 most recent contracts
-        '''
-
-        # Get a list of contracts by querying our project on DocCloud:
-        documents = self.query_document_cloud(self.dc_query, page=1)
-
-        number_of_documents = self.pagelength
-        log.debug('%d documents', number_of_documents)
-
-        data['number_of_documents'] = number_of_documents
-        data['results_language'] = (
-            "Showing %d most recent contracts." % number_of_documents)
-
-        # print documents
-        data['documents'] = documents
+        data = {
+            'departments':         self.get_departments(),  # Get a list of departments for dropdown
+            'documents':           self.query_document_cloud(self.dc_query, page=1),
+            'number_of_documents': self.pagelength,
+            'officers':            self.get_officers(),        # Get a list of officers for dropdown
+            'results_language':    "Showing {} most recent contracts.".format(self.pagelength),
+            'updated_date':        updated_date,
+            'vendors':             self.get_vendors()           # Get a list of vendors for dropdown
+        }
 
         return data
 
@@ -94,23 +76,22 @@ class Models(object):
         # Extract search parameters (text input and dropdown selections)
         data = self.parse_query_string(request)
 
-        log.debug('Query parameters: %s', data)
-
-        incoming_data = data
+        log.debug('User search parameters: %s', data)
 
         # Transform query parameters into string for DocumentCloud API.
         search_term = self.translate_web_query_to_dc_query(data)
 
-        log.debug('Searching for: %s', search_term)
-
         # Get a list of contracts by querying our project on DocCloud:
-        documents = self.query_document_cloud(
-            search_term, page=data['current_page'])
+        documents = self.query_document_cloud(search_term, page=data['current_page'])
 
+        # TODO: A second search?
         number_of_documents = self.find_number_of_documents(search_term)
+        log.debug('%d documents', number_of_documents)
+        log.debug('%d documents', len(documents))
+
         number_of_pages = (number_of_documents / self.pagelength) + 1  # Zero-indexing
 
-        log.debug('Found %d documents across %d pages', number_of_documents, number_of_pages)
+        log.debug('Found {:,} documents across {:,} pages'.format(number_of_documents, number_of_pages))
 
         updated_date = time.strftime("%b. %-d, %Y")
 
@@ -121,25 +102,20 @@ class Models(object):
         updated_date = updated_date.replace('Jun.', 'June')
         updated_date = updated_date.replace('Jul.', 'July')
 
-        vendors = self.get_vendors()
-        officers = self.get_officers()
-        departments = self.get_departments()
+        output_data = {
+            'current_page':        data['current_page'],
+            'departments':         self.get_departments(),
+            'documents':           documents,
+            'number_of_documents': number_of_documents,
+            'number_of_pages':     number_of_pages,
+            'officers':            self.get_officers(),
+            'results_language':    ResultsLanguage(data, number_of_documents).main(),
+            'search_input':        data['search_input'],
+            'updated_date':        updated_date,
+            'vendors':             self.get_vendors()
+        }
 
-        output_data = {}
-
-        output_data['search_input'] = data['search_input']
-        output_data['vendors'] = vendors
-        output_data['departments'] = departments
-        output_data['officers'] = officers
-        output_data['number_of_documents'] = number_of_documents
-        output_data['results_language'] = ResultsLanguage(
-            data, number_of_documents).main()
-        output_data['number_of_pages'] = number_of_pages
-        output_data['current_page'] = data['current_page']
-        output_data['documents'] = documents
-        output_data['updated_date'] = updated_date
-
-        return output_data, incoming_data  # TODO: consolidate this
+        return output_data, data
 
     def get_contracts_page(self, doc_cloud_id):
         '''
@@ -150,9 +126,6 @@ class Models(object):
         :type doc_cloud_id: string
         :returns: dict. A dict with the updated date.
         '''
-
-        data = {}
-
         updated_date = time.strftime("%b. %-d, %Y")
 
         # Correct for AP Style
@@ -162,11 +135,13 @@ class Models(object):
         updated_date = updated_date.replace('Jun.', 'June')
         updated_date = updated_date.replace('Jul.', 'July')
 
-        data['doc_cloud_id'] = doc_cloud_id
-        data['updated_date'] = updated_date
+        documents = self.query_document_cloud('document:"%s"' % doc_cloud_id)
 
-        docs = self.query_document_cloud('document:"%s"' % doc_cloud_id)
-        data['pdf_url'] = docs[0].resources.pdf
+        data = {
+            'doc_cloud_id': doc_cloud_id,
+            'pdf_url':      documents[0].resources.pdf,
+            'updated_date': updated_date
+        }
 
         return data
 
@@ -179,19 +154,17 @@ class Models(object):
         :type request: dict?
         :returns: dict. The query string parameters entered by the user.
         '''
-        data = {}
-        data['search_input'] = request.args.get('query')
-        data['vendor'] = request.args.get('vendor')
-        data['department'] = request.args.get('department')
-        data['officer'] = request.args.get('officer')
-        data['current_page'] = request.args.get('page')
+        current_page = request.args.get('page')
+        if current_page is None or current_page == '':
+            current_page = 1
 
-        if data['current_page'] is None or data['current_page'] == '':
-            data['current_page'] = 1
-        else:
-            data['current_page'] = int(data['current_page'])
-
-        log.debug('Current page: %d', data['current_page'])
+        data = {
+            'search_input': request.args.get('query'),
+            'vendor':       request.args.get('vendor'),
+            'department':   request.args.get('department'),
+            'officer':      request.args.get('officer'),
+            'current_page': int(current_page)
+        }
 
         # Change any missing parameters to 0-length string
         for key in data:
@@ -215,7 +188,7 @@ class Models(object):
         :returns: dict. (?) The output that matches the query.
         '''
 
-        log.debug('Searching "%s"', search_term)
+        log.debug('DocumentCloud search: %s', search_term)
         log.debug('Showing %d results per page, page %d', self.pagelength, page)
 
         output = self.document_cloud_client.documents.search(
@@ -295,8 +268,7 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
-        count = (SESSION.query(Contract)
-                 .count())
+        count = SESSION.query(Contract).count()
 
         SESSION.close()
 
@@ -356,14 +328,12 @@ class Models(object):
         # sn = sessionmaker(bind=self.engine)
         # session = sn()
 
+        officers = []
+
         if vendor is None:
             officers = (SESSION.query(VendorOfficer, Person)
                         .filter(VendorOfficer.personid == Person.id)
                         .order_by(Person.name))
-
-            SESSION.close()
-
-            return sorted(list(set([o[1].name for o in officers])))
         else:
             vendor = vendor.replace("vendor:", "")
             officers = (SESSION.query(VendorOfficer, Person, Vendor)
@@ -372,9 +342,9 @@ class Models(object):
                         .filter(Vendor.name == vendor)
                         .all())
 
-            SESSION.close()
+        SESSION.close()
 
-            return sorted(list(set([o[1].name for o in officers])))
+        return sorted(list(set([o[1].name for o in officers])))
 
     # @cache.memoize(timeout=100000)
     def translate_officer_to_vendor(self, officer_term):
@@ -455,11 +425,7 @@ class Models(object):
             vendor = self.translate_officer_to_vendor(officers[0])
             query_builder.add_term("vendor", vendor.upper())
 
-        output = query_builder.get_query()
-
-        log.debug('Output: %s', output)
-
-        return output
+        return query_builder.get_query()
 
 
 class QueryBuilder(object):
@@ -468,10 +434,7 @@ class QueryBuilder(object):
     '''
 
     def __init__(self):
-        '''
-        Initialized as blank. Terms are stored in a dictionary.
-        '''
-
+        '''Initialized as blank. Terms are stored in a dictionary.'''
         self.query = {}
         self.text = ""
 
@@ -480,21 +443,18 @@ class QueryBuilder(object):
         Add a term to the dictionary. If term is updated it will just
         re-write the dictionary value.
         '''
-
         self.query[term] = value
 
     def add_text(self, text):
         '''
         Add a freetext component to the query (ex. 'playground').
         '''
-
         self.text = text
 
     def get_query(self):
         '''
         Translate the dictionary into a DocumentCloud query.
         '''
-
         output = ""
 
         for key in self.query.keys():

@@ -16,6 +16,12 @@ class ResultsLanguage(object):
         self.data = data
         self.number_of_documents = number_of_documents
 
+    def __str__(self):
+        return '{0} -- {1.data!s} -- {1.number_of_documents!s}'.format(self.__class__.__name__, self)
+
+    def __repr__(self):
+        return '{0}({1.data!r}, {1.number_of_documents!r})'.format(self.__class__.__name__, self)
+
     def plural_or_not(self):
         '''Checks if more than one result.'''
 

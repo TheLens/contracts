@@ -7,8 +7,11 @@ Represents a purchase order object.
 import os
 import re
 import urllib2
+
 from subprocess import call
+
 from bs4 import BeautifulSoup
+
 from contracts.lib.utilities import Utilities
 from contracts import (
     ATTACHMENTS_DIR,
@@ -31,15 +34,15 @@ class PurchaseOrder(object):
     '''
 
     def __init__(self, purchase_order_number):
+        self.purchaseorder = purchase_order_number
+
         validity = Utilities().check_if_valid_purchase_order_format(
-            purchase_order_number)
+            self.purchaseorder)
         if validity is False:
-            log.debug('Purchase order %s is invalid', purchase_order_number)
+            log.debug('Purchase order %s is invalid', self.purchaseorder)
             return
 
-        self.purchase_order_number = purchase_order_number
-
-        html = self._get_html(purchase_order_number)
+        html = self._get_html(self.purchaseorder)
         self.vendor_id_city = self._get_city_vendor_id(html)
         self._download_vendor_profile(self.vendor_id_city)
 
@@ -54,17 +57,19 @@ class PurchaseOrder(object):
             self.vendor_name = "unknown"
 
             log.info('No vendor info for purchase order %s',
-                     self.purchase_order_number)
+                     self.purchaseorder)
 
         self.department = self._get_department(soup)
         self.k_number = self._get_knumber(soup)
-        self.purchaseorder = self.purchase_order_number
         self.attachments = self._get_attachments(soup)
         self.data = self._get_data()
         self.title = "%s : %s" % (self.vendor_name, self.description)
 
     def __str__(self):
-        return "<PurchaseOrder %s>" % self.purchaseorder
+        return '{0} -- {1.purchaseorder!s}'.format(self.__class__.__name__, self)
+
+    def __repr__(self):
+        return '{0}({1.purchaseorder!r})'.format(self.__class__.__name__, self)
 
     @staticmethod
     def _get_html(purchase_order_number):
@@ -76,15 +81,14 @@ class PurchaseOrder(object):
         :type purchase_order_number: string
         :returns: string. The HTML contains for this purchase order file.
         '''
-
         file_location = '%s/%s.html' % (PURCHASE_ORDER_DIR, purchase_order_number)
 
         # Purchase order HTML saved in PurchaseOrder class
         with open(file_location, 'r') as html_file:
-            log.info('Saving HTML for purchase order %s',
+            log.info('Reading HTML for purchase order %s',
                      purchase_order_number)
-            html = html_file.read()
-            return html
+
+            return html_file.read()
 
     @staticmethod
     def _get_city_vendor_id(html):
@@ -122,30 +126,27 @@ class PurchaseOrder(object):
         :param city_vendor_id: The vendor ID on the city's purchasing site.
         :type city_vendor_id: string.
         '''
-
-        vendor_file_location = '%s/%s.html' % (
-            VENDORS_DIR, city_vendor_id)
+        vendor_file_location = '%s/%s.html' % (VENDORS_DIR, city_vendor_id)
 
         if os.path.isfile(vendor_file_location):
             log.info('Already have HTML for vendor %s', city_vendor_id)
         else:
             try:
                 response = urllib2.urlopen(
-                    'http://www.purchasing.cityofno.com/bso/external/vendor/' +
-                    'vendorProfileOrgInfo.sdo?external=true&vendorId=' +
-                    city_vendor_id
-                )
+                    'http://www.purchasing.cityofno.com/' +
+                    'bso/external/vendor/vendorProfileOrgInfo.sdo?' +
+                    'external=true&vendorId={}'.format(city_vendor_id))
+
                 html = response.read()
 
                 if not os.path.exists(os.path.dirname(vendor_file_location)):
                     os.makedirs(os.path.dirname(vendor_file_location))
 
                 with open(vendor_file_location, 'w') as filename:
+                    log.info('Saving HTML for vendor %s', city_vendor_id)
                     filename.write(html)
-
-                log.info('Saved HTML for vendor %s', city_vendor_id)
             except urllib2.HTTPError:
-                log.info('Could not save HTML for vendor "%s"', city_vendor_id)
+                log.info('Could not save HTML for vendor %s', city_vendor_id)
 
     @staticmethod
     def _get_description(soup):
@@ -159,19 +160,15 @@ class PurchaseOrder(object):
 
         try:
             main_table = soup.select('.table-01').pop()
-            metadata_row = main_table.findChildren(
-                ['tr']
-            )[2].findChildren(  # Why not [1]?
-                ['td']
-            )[0].findChildren(
-                ['table']
-            )[0].findChildren(
-                ['tr']
-            )
+            metadata_row = (main_table
+                            .findChildren(['tr'])[2]
+                            .findChildren(['td'])[0]
+                            .findChildren(['table'])[0]
+                            .findChildren(['tr']))
 
-            description = metadata_row[1].findChildren(
-                ['td']
-            )[5].contents.pop().strip()  # pop() pulls out from list
+            description = (metadata_row[1]
+                           .findChildren(['td'])[5]
+                           .contents.pop().strip())
 
             return str(description)
         except Exception as e:
@@ -186,21 +183,20 @@ class PurchaseOrder(object):
         :type soup: BeautifulSoup object.
         :returns: string. The contract vendor's name.
         '''
-        vendor_file_location = (
-            '%s/%s.html' % (VENDORS_DIR, self.vendor_id_city)
-        )
+        vendor_file_location = '%s/%s.html' % (VENDORS_DIR, self.vendor_id_city)
 
         # Downloaded this file in _download_vendor_profile()
         with open(vendor_file_location, 'r') as myfile:
+            log.info('Reading HTML for vendor %s', self.vendor_id_city)
             html = myfile.read()
 
         soup = BeautifulSoup(html)
 
         vendor_row = soup(text='Company Name:')[0].parent.parent
 
-        vendor_name = vendor_row.findChildren(
-            ['td']
-        )[5].contents.pop().strip()  # pop() pulls out from list
+        vendor_name = (vendor_row
+                       .findChildren(['td'])[5]
+                       .contents.pop().strip())
 
         # Convert to uppercase for DocumentCloud project metadata.
         # Search queries are also converted to uppercase.
@@ -220,17 +216,15 @@ class PurchaseOrder(object):
 
         main_table = soup.select('.table-01').pop()
 
-        metadata_row = main_table.findChildren(
-            ['tr']
-        )[2].findChildren(  # Why not [1]?
-            ['td']
-        )[0].findChildren(
-            ['table']
-        )[0].findChildren(['tr'])
+        metadata_row = (main_table
+                        .findChildren(['tr'])[2]
+                        .findChildren(['td'])[0]
+                        .findChildren(['table'])[0]
+                        .findChildren(['tr']))
 
-        department = metadata_row[5].findChildren(
-            ['td']
-        )[1].contents.pop().strip()  # pop() pulls out from list
+        department = (metadata_row[5]
+                      .findChildren(['td'])[1]
+                      .contents.pop().strip())
 
         # Convert to uppercase for DocumentCloud. Search queries are also
         # converted to uppercase so we can find matches.
@@ -250,24 +244,20 @@ class PurchaseOrder(object):
 
         main_table = soup.select('.table-01').pop()
 
-        metadata_row = main_table.findChildren(
-            ['tr']
-        )[2].findChildren(  # Why not [1]?
-            ['td']
-        )[0].findChildren(
-            ['table']
-        )[0].findChildren(
-            ['tr']
-        )
+        metadata_row = (main_table
+                        .findChildren(['tr'])[2]
+                        .findChildren(['td'])[0]
+                        .findChildren(['table'])[0]
+                        .findChildren(['tr']))
 
         try:
-            knumber = metadata_row[6].findChildren(
-                ['td']
-            )[1].contents.pop()
+            knumber = (metadata_row[6]
+                       .findChildren(['td'])[1]
+                       .contents.pop())
 
             # Remove extra characters:
-            knumber = knumber.replace('k', '').replace('K', '').replace(
-                'm', '').replace('M', '').strip()
+            knumber = (knumber.replace('k', '').replace('K', '')
+                       .replace('m', '').replace('M', '').strip())
         except Exception as e:
             log.error(e, exc_info=True)
             knumber = "unknown"
@@ -286,20 +276,15 @@ class PurchaseOrder(object):
         :type soup: BeautifulSoup object.
         :returns: string. The contract's purchase order number.
         '''
-
         main_table = soup.select('.table-01').pop()
 
-        purchase_order = main_table.findChildren(
-            ['tr']
-        )[2].findChildren(  # Why not [1]?
-            ['td']
-        )[0].findChildren(
-            ['table']
-        )[0].findChildren(
-            ['tr']
-        )[1].findChildren(
-            ['td']
-        )[1].contents.pop().strip()  # pop() pulls out from list
+        purchase_order = (main_table
+                          .findChildren(['tr'])[2]
+                          .findChildren(['td'])[0]
+                          .findChildren(['table'])[0]
+                          .findChildren(['tr'])[1]
+                          .findChildren(['td'])[1]
+                          .contents.pop().strip())
 
         return purchase_order
 
@@ -316,23 +301,17 @@ class PurchaseOrder(object):
         try:
             main_table = soup.select('.table-01').pop()
 
-            metadatarow = main_table.findChildren(
-                ['tr']
-            )[2].findChildren(  # Why not [1]?
-                ['td']
-            )[0].findChildren(
-                ['table']
-            )[0].findChildren(
-                ['tr']
-            )
+            metadatarow = (main_table
+                           .findChildren(['tr'])[2]
+                           .findChildren(['td'])[0]
+                           .findChildren(['table'])[0]
+                           .findChildren(['tr']))
 
-            attachment_filenames_list = metadatarow[16].findChildren(
-                ['td']
-            )[1].findChildren(
-                ['a']
-            )
+            attachment_filenames = (metadatarow[16]
+                                    .findChildren(['td'])[1]
+                                    .findChildren(['a']))
 
-            return attachment_filenames_list
+            return attachment_filenames
         except IndexError:
             log.info('No attachments found')
 
@@ -346,13 +325,13 @@ class PurchaseOrder(object):
         :returns: dict. The metadata for this contract, such as title, date \
                         added, description, attachments, purchase order number.
         '''
-
-        output = {}
-        output['vendor_id'] = self.vendor_id_city
-        output['purchase order'] = self.purchaseorder
-        output['contract number'] = self.k_number
-        output['department'] = self.department
-        output['vendor'] = self.vendor_name
+        output = {
+            'contract number': self.k_number,
+            'department':      self.department,
+            'purchase order':  self.purchaseorder,
+            'vendor':          self.vendor_name,
+            'vendor_id':       self.vendor_id_city
+        }
 
         return output
 
@@ -382,19 +361,16 @@ class PurchaseOrder(object):
             '[0-9]+', attachment.get('href')).group()
         log.debug('Gathering data for attachment %s', city_attachment_id)
 
-        document_path = '%s/%s.pdf' % (
-            DOCUMENTS_DIR, city_attachment_id)
+        document_path = '%s/%s.pdf' % (DOCUMENTS_DIR, city_attachment_id)
 
         display_name = self._get_attachment_display_name(city_attachment_id)
 
         if os.path.isfile(document_path):  # Have already downloaded
             log.info('Already have PDF for attachment %s', city_attachment_id)
         else:
-            self._download_attachment_file(
-                city_attachment_id,
-                display_name,
-                document_path
-            )
+            self._download_attachment_file(city_attachment_id,
+                                           display_name,
+                                           document_path)
 
     def _get_attachment_display_name(self, city_attachment_id):
         '''docstring'''
@@ -415,8 +391,7 @@ class PurchaseOrder(object):
             os.makedirs(os.path.dirname(file_location))
 
         with open(file_location, 'w') as filename:
-            log.info('Saving HTML for attachment %s',
-                     city_attachment_id)
+            log.info('Saving HTML for attachment %s', city_attachment_id)
             filename.write(html)
 
         soup = BeautifulSoup(html)

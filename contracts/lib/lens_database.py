@@ -18,9 +18,11 @@ from contracts import SESSION, TODAY_DATE, log
 class LensDatabase(object):
     """Represent the local database that stores contracts information."""
 
-    def __init__(self):
-        """Initialize."""
-        pass
+    def __str__(self):
+        return '{}'.format(self.__class__.__name__)
+
+    def __repr__(self):
+        return '{}()'.format(self.__class__.__name__)
 
     def check_if_database_has_contract(self, purchase_order_number):
         """
@@ -37,11 +39,11 @@ class LensDatabase(object):
         SESSION.close()
 
         if count == 1:  # Database has the contract
-            log.info('DB already has purchase order %s in contracts table',
+            log.info('DB contracts table already has purchase order %s',
                      purchase_order_number)
             return True
         else:
-            log.info('DB does not have purchase order %s in contracts table',
+            log.info('DB contracts table does not have purchase order %s',
                      purchase_order_number)
             return False
 

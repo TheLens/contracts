@@ -20,6 +20,12 @@ class LensRepository(object):
     def __init__(self, purchase_order_number):
         self.purchase_order_number = purchase_order_number
 
+    def __str__(self):
+        return '{0} -- {1.purchase_order_number!s}'.format(self.__class__.__name__, self)
+
+    def __repr__(self):
+        return '{0}({1.purchase_order_number!r})'.format(self.__class__.__name__, self)
+
     def check_if_need_to_download(self):
         '''
         Checks local directory to determine whether a local copy is needed.

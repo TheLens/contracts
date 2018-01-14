@@ -172,11 +172,11 @@ class Address(BASE):
         return '{0} -- {1.street!s} -- {1.city!s} -- {1.sourcefile!s}'.format(self.__class__.__name__, self)
 
     def __repr__(self):
-        return '{0}({1.street!r}, ' \
-               '{1.city!r}, ' \
-               '{1.state!r}, ' \
-               '{1.zipcode!r}, ' \
-               '{1.sourcefile!r})'.format(self.__class__.__name__, self)
+        return ('{0}({1.street!r}, '
+                '{1.city!r}, '
+                '{1.state!r}, '
+                '{1.zipcode!r}, '
+                '{1.sourcefile!r})'.format(self.__class__.__name__, self))
 
 
 class Contract(BASE):
@@ -241,24 +241,24 @@ class Contract(BASE):
         self.dateadded = added
 
     def __str__(self):
-        return '{0} -- {1.purchaseordernumber!s} -- ' \
-               '{1.contractnumber!s} -- ' \
-               '{1.vendorid!s} -- ' \
-               '{1.departmentid!s} -- ' \
-               '{1.doc_cloud_id!s} -- ' \
-               '{1.description!s} -- ' \
-               '{1.title!s} -- ' \
-               '{1.dateadded!s}'.format(self.__class__.__name__, self)
+        return ('{0} -- {1.purchaseordernumber!s} -- '
+                '{1.contractnumber!s} -- '
+                '{1.vendorid!s} -- '
+                '{1.departmentid!s} -- '
+                '{1.doc_cloud_id!s} -- '
+                '{1.description!s} -- '
+                '{1.title!s} -- '
+                '{1.dateadded!s}'.format(self.__class__.__name__, self))
 
     def __repr__(self):
-        return '{0}(ponumber={1.purchaseordernumber!r}, ' \
-               'contractnumber={1.contractnumber!r}, ' \
-               'vendor_id={1.vendorid!r}, ' \
-               'department_id={1.departmentid!r}, ' \
-               'dcid={1.doc_cloud_id!r}, ' \
-               'descript={1.description!r}, ' \
-               'name={1.title!r}, ' \
-               'added={1.dateadded!r})'.format(self.__class__.__name__, self)
+        return ('{0}(ponumber={1.purchaseordernumber!r}, '
+                'contractnumber={1.contractnumber!r}, '
+                'vendor_id={1.vendorid!r}, '
+                'department_id={1.departmentid!r}, '
+                'dcid={1.doc_cloud_id!r}, '
+                'descript={1.description!r}, '
+                'name={1.title!r}, '
+                'added={1.dateadded!r})'.format(self.__class__.__name__, self))
 
 
 class CompanyAddress(BASE):
@@ -474,39 +474,39 @@ class EthicsRecord(BASE):
         self.description = description
 
     def __str__(self):
-        return '{0} -- ' \
-               '{1.last!s} -- ' \
-               '{1.first!s} -- ' \
-               '{1.reportno!s} -- ' \
-               '{1.form!s} -- ' \
-               '{1.schedule!s} -- ' \
-               '{1.contributiontype!s} -- ' \
-               '{1.contributorname!s} -- ' \
-               '{1.address1!s} -- ' \
-               '{1.address2!s} -- ' \
-               '{1.city!s} -- ' \
-               '{1.state!s} -- ' \
-               '{1.zipcode!s} -- ' \
-               '{1.receiptdate!s} -- ' \
-               '{1.receiptamount!s} -- ' \
-               '{1.description!s}'.format(self.__class__.__name__, self)
+        return ('{0} -- '
+                '{1.last!s} -- '
+                '{1.first!s} -- '
+                '{1.reportno!s} -- '
+                '{1.form!s} -- '
+                '{1.schedule!s} -- '
+                '{1.contributiontype!s} -- '
+                '{1.contributorname!s} -- '
+                '{1.address1!s} -- '
+                '{1.address2!s} -- '
+                '{1.city!s} -- '
+                '{1.state!s} -- '
+                '{1.zipcode!s} -- '
+                '{1.receiptdate!s} -- '
+                '{1.receiptamount!s} -- '
+                '{1.description!s}'.format(self.__class__.__name__, self))
 
     def __repr__(self):
-        return '{0}({1.last!r}, ' \
-               '{1.first!r}, ' \
-               '{1.reportno!r}, ' \
-               '{1.form!r}, ' \
-               '{1.schedule!r}, ' \
-               '{1.contributiontype!r}, ' \
-               '{1.contributorname!r}, ' \
-               '{1.address1!r}, ' \
-               '{1.address2!r}, ' \
-               '{1.city!r}, ' \
-               '{1.state!r}, ' \
-               '{1.zipcode!r}, ' \
-               '{1.receiptdate!r}, ' \
-               '{1.receiptamount!r}, ' \
-               '{1.description!r})'.format(self.__class__.__name__, self)
+        return ('{0}({1.last!r}, '
+                '{1.first!r}, '
+                '{1.reportno!r}, '
+                '{1.form!r}, '
+                '{1.schedule!r}, '
+                '{1.contributiontype!r}, '
+                '{1.contributorname!r}, '
+                '{1.address1!r}, '
+                '{1.address2!r}, '
+                '{1.city!r}, '
+                '{1.state!r}, '
+                '{1.zipcode!r}, '
+                '{1.receiptdate!r}, '
+                '{1.receiptamount!r}, '
+                '{1.description!r})'.format(self.__class__.__name__, self))
 
 
 def remake_db():

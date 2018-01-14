@@ -44,6 +44,12 @@ class Backup(object):
             except DoesNotExistError:
                 log.exception("DoesNotExistError: %s", document_cloud_id)
 
+    def __str__(self):
+        return '{}'.format(self.__class__.__name__)
+
+    def __repr__(self):
+        return '{}()'.format(self.__class__.__name__)
+
     def _backup(self, document_cloud_id):
         '''Backup a contract.'''
         needs_backup = self._needs_to_be_backed_up(document_cloud_id)

@@ -27,6 +27,12 @@ class DocumentCloudProject(object):
         self.api_connection = DocumentCloud(
             DOC_CLOUD_USERNAME, DOC_CLOUD_PASSWORD)
 
+    def __str__(self):
+        return '{}'.format(self.__class__.__name__)
+
+    def __repr__(self):
+        return '{}()'.format(self.__class__.__name__)
+
     def check_if_need_to_upload(self, purchase_order_number):
         '''
         Checks DocumentCloud project to determine whether this contract needs

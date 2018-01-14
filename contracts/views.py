@@ -1,9 +1,7 @@
-
-"""
-The web app that runs at vault.thelensnola.org/contracts.
-"""
+"""The web app that runs at vault.thelensnola.org/contracts."""
 
 from flask import render_template, make_response
+
 from contracts import (
     LENS_CSS,
     BANNER_CSS,
@@ -21,32 +19,22 @@ class Views(object):
 
     @staticmethod
     def get_home(data):
-        '''
-        Renders the homepage (/contracts/).
+        '''Render the homepage (/contracts/).
 
         :param data: Data for the homepage.
         :type data: dict
         :returns: HTML. Rendered and ready for display to the user.
         '''
-
-        vendors = data['vendors']
-        departments = data['departments']
-        officers = data['officers']
-        updated_date = data['updated_date']
-        documents = data['documents']
-        number_of_documents = data['number_of_documents']
-        results_language = data['results_language']
-
         response = make_response(
             render_template(
                 'index.html',
-                vendors=vendors,
-                departments=departments,
-                officers=officers,
-                documents=documents,
-                number_of_documents=number_of_documents,
-                results_language=results_language,
-                updated_date=updated_date,
+                vendors=data['vendors'],
+                departments=data['departments'],
+                officers=data['officers'],
+                documents=data['documents'],
+                number_of_documents=data['number_of_documents'],
+                results_language=data['results_language'],
+                updated_date=data['updated_date'],
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -59,8 +47,7 @@ class Views(object):
 
     @staticmethod
     def get_search_page(data, parameter_data):
-        '''
-        Renders the search results page (/contracts/search/).
+        '''Render the search results page (/contracts/search/).
 
         :param data: Data in response to the search request.
         :type data: dict
@@ -68,29 +55,19 @@ class Views(object):
         :type parameter_data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-        vendors = data['vendors']
-        departments = data['departments']
-        number_of_documents = data['number_of_documents']
-        number_of_pages = data['number_of_pages']
-        current_page = data['current_page']
-        documents = data['documents']
-        officers = data['officers']
-        updated_date = data['updated_date']
-        results_language = data['results_language']
-
         response = make_response(
             render_template(
                 'search.html',
                 parameter_data=parameter_data,
-                vendors=vendors,
-                departments=departments,
-                number_of_documents=number_of_documents,
-                results_language=results_language,
-                number_of_pages=number_of_pages,
-                current_page=current_page,
-                documents=documents,
-                officers=officers,
-                updated_date=updated_date,
+                vendors=data['vendors'],
+                departments=data['departments'],
+                number_of_documents=data['number_of_documents'],
+                results_language=data['results_language'],
+                number_of_pages=data['number_of_pages'],
+                current_page=data['current_page'],
+                documents=data['documents'],
+                officers=data['officers'],
+                updated_date=data['updated_date'],
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
                 contracts_css=CONTRACTS_CSS,
@@ -104,14 +81,12 @@ class Views(object):
 
     @staticmethod
     def get_contract(data):
-        '''
-        Renders the single contract page (/contracts/contract/).
+        '''Render the single contract page (/contracts/contract/).
 
         :param data: Data for the page.
         :type data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-
         response = make_response(
             render_template(
                 'contract.html',
@@ -127,20 +102,16 @@ class Views(object):
 
     @staticmethod
     def get_parserator(tags=None):
-        '''
-        Renders the parserator page (/contracts/admin/).
+        '''Render the parserator page (/contracts/admin/).
 
         :param data: Data for the page.
         :type data: dict
         :returns: HTML. Rendered and ready for display.
         '''
-
-        doc_cloud_id = tags['doc_cloud_id']
-
         response = make_response(
             render_template(
                 'parserator.html',
-                doc_cloud_id=doc_cloud_id,
+                doc_cloud_id=tags['doc_cloud_id'],
                 tags=tags,
                 lens_css=LENS_CSS,
                 banner_css=BANNER_CSS,
