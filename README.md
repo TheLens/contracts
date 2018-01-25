@@ -2,41 +2,59 @@
 
 [https://vault.thelensnola.org/contracts](https://vault.thelensnola.org/contracts)
 
-A permanent collection of the City of New Orleans contracts that is fully searchable and updated daily. You can search by keyword, contractor, city department or company officer, and can download PDF copies of the contracts. Unlike the city's contract portal, our collection is ongoing and includes both present and past contracts.
+[![Build Status](https://travis-ci.org/TheLens/contracts.svg?branch=master)](https://travis-ci.org/TheLens/contracts)
 
-Not sure how to read a government contract? Our city hall reporter wrote a detailed guide [here](http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/). You can read more about this project [here](http://thelensnola.org/search-new-orleans-government-contracts/) and [here](http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/).
-
-[![Build Status](https://travis-ci.org/TheLens/contracts.svg?branch=master)](https://travis-ci.org/TheLens/contracts) [![Coverage Status](https://coveralls.io/repos/TheLens/contracts/badge.svg)](https://coveralls.io/r/TheLens/contracts)
-
-- Issues, suggestions and feature requests: https://github.com/TheLens/contracts/issues
+- Issues: https://github.com/TheLens/contracts/issues
 - Tests: https://travis-ci.org/TheLens/contracts
-- Testing coverage: https://coveralls.io/r/TheLens/contracts
 
-### Setup
+A permanent collection of the City of New Orleans contracts that is fully searchable and updated daily. You can search by keyword, contractor, city department or company officer and can download PDF copies of the contracts. Unlike the city's contract portal, our collection is ongoing and includes both present and past contracts.
 
-Make a new virtual environment (`mkvirtualenv`).
+Not sure how to read a government contract? Our city hall reporter wrote a [detailed guide](http://thelensnola.org/2014/05/29/how-to-read-a-government-contract/). Read more about this project:
+
+- [http://thelensnola.org/search-new-orleans-government-contracts/](http://thelensnola.org/search-new-orleans-government-contracts/)
+- [http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/](http://thelensnola.org/2014/06/12/the-lens-launches-the-vault-to-bring-greater-openness-to-government-contracting/).
+
+## Setup
+
+Requirements
+
+- Python 2.7
+- DocumentCloud account
+
+Make a virtual environment.
+
+```bash
+mkvirtualenv contracts
+```
 
 Pull down this repo.
 
-Install pip dependencies in `requirements.txt`.
+```bash
+git clone git@github.com:TheLens/contracts.git
+```
 
-Add your environment variables.
+Install dependencies.
 
-Set up cron jobs.
+```bash
+pip install -r requirements.txt
+```
 
-Symlink `confs/contracts.conf` to `/etc/init` say that Upstart automatically runs app.
-
-### Environment variables
-
-Add these as part of your virtual environment (`~/.virtualenvs/contracts/bin/postactivate`). Ex. export ENVVAR=myvar
+Set environment variables.
 
 ```bash
 export DOCUMENT_CLOUD_USERNAME=username
 export DOCUMENT_CLOUD_PASSWORD=password
-DOCUMENT_CLOUD_USERNAME=username
-DOCUMENT_CLOUD_PASSWORD=password
 ```
 
-### Credit
+Set up the cron job in [`crontab`](crontab).
 
-Abe Handler built The Vault and continues to contribute to the project. Thomas Thoren is now the main developer, and can be reached at tthoren@thelensnola.org.
+On the host server, symlink [`confs/contracts.conf`](confs/contracts.conf) to `/etc/init` so Upstart automatically runs the application on startup.
+
+```bash
+ln -s confs/contracts.conf /etc/initcontracts.conf
+```
+
+## Credit
+
+- Abe Handler
+- Thomas Thoren (tthoren@thelensnola.org)
